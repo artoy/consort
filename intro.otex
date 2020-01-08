@@ -208,7 +208,7 @@ q := get(q) + 1;$\label{line:get2}$
 assert(*p = 4);
 assert(*q = 6);
   \end{lstlisting}
-  \caption{Context-sensitivity example}
+  \caption{Example of context-sensitivity}
   \label{fig:running-example}
 \end{wrapfigure}
 of \Cref{fig:strong-update-example}

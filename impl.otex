@@ -10,7 +10,7 @@ Our tool first runs a standard, simple type inference
 algorithm to generate type templates for every function parameter
 type, return type, and for every live variable at each program point.
 For a variable $x$ of simple type $[[ST]] ::= [[int]] \mid [[ST ref]]$
-at program point $p$ \name generates a type template $[[ [ST](x,0,pp) ]]$
+at program point $p$, \name generates a type template $[[ [ST](x,0,pp) ]]$
 as follows:
 \begin{align*}
   [[ [int](x,nn,pp) ]] = [[{nu:int|ph(x,nn,pp)[nu;FV pp]}]] && [[ [ST ref](x,nn,pp) ]] = [[ [ST](x,nn+1,pp) ref r[x,nn,pp] ]]
@@ -24,10 +24,10 @@ for the beginning and end of the function respectively.
 At both points, \name generates type template for each argument, where $[[FV f st]]$
 and $[[FV f end]]$ are the names of integer typed parameters.
 At $[[f end]]$, \name also generates a type template for the return
-value using a synthetic variable name.
+value.
 We write $[[ G@pp ]]$ to indicate the type environment at point $[[pp]]$,
-where every variable is mapped to the appropriate type template.
-Then $[[ [G@pp] ]]$ is equivalent to
+where every variable is mapped to its corresponding type template.
+$[[ [G@pp] ]]$ is thus equivalent to
 $[[ /\ { x in FV pp } ph(x,0,pp)[x;FV pp] ]]$.
 
 When generating these type templates, our implementation
@@ -49,10 +49,9 @@ $[[pp]]$, \name generates the constraint $[[r[x,0,pp] = 1]]$.
 
 \name emits subtyping constraints between the relation symbols
 at related program points according to the rules of the type system.
-For example, consider the let binding $[[ let x = y in e ]]$
-at program point $[[pp]]$, where $[[e]]$ is at program point $[[pp']]$, and $[[x]]$ has simple type
-$[[int ref]]$.
-\name generates the following subtyping constraint:
+For example, for the term $[[ let x = y in e ]]$
+at program point $[[pp]]$ (where $[[e]]$ is at program point $[[pp']]$, and $[[x]]$ has simple type
+$[[int ref]]$) \name generates the following subtyping constraint:
 \[
   [[ [G@pp] /\ ph(y,1,pp)[nu;FV pp] ==> ph(y,1,pp')[nu;FV pp'] /\ ph(x,1,pp')[nu;FV pp'] ]]
 \]
@@ -63,7 +62,7 @@ constraint of the form: $[[ [G@pp] ==> ph ]]$
 which requires the refinements on integer typed variables
 in scope are sufficient to prove $[[ph]]$.
 
-\subsubsection{Encoding Context Sensitivity}
+\paragraph{Encoding Context Sensitivity}
 To make inference tractable, we require the user to fix \emph{a
   priori} the maximum length of prefix queries to a constant $k$ (this
 choice is easily controlled with a command line parameter to our tool). We
@@ -91,22 +90,20 @@ propagates this value of $[[c0]]$ to $[[c1]]$ within $[[g]]$ and so on.
 The solver may then instantiate relation symbols with predicates
 that are conditional over the values of $[[ci]]$.
 
-\subsubsection{Solving Constraints}
+\paragraph{Solving Constraints}
 The results of the above process are two systems of constraints;
 real arithmetic constraints over
 ownership variables and constrained Horn clauses (CHC) over the refinement relations.
-The inference process generates subtyping constraints for every variable at
-each program point so the number of constraints, relations, and ownership variables
-is quadratic in the size of the program in the worst case.\footnote{In practice we can
-simplify away many ``intermediate'' relations to improve performance.}
+Under certain assumptions about the simple types in a program, the size of the ownership
+and subtyping constraints will be polynomial to the size of the program.
 These systems are not independent; the relation constraints may mention the value
 of ownership variables due to the well-formedness constraints described above.
 The ownership constraints are first solved with Z3 \cite{de2008z3}. These constraints
 are non-linear but Z3 appears
 particularly well-engineered to quickly find solutions for the instances generated
 by \name.
-We also constrain Z3 to maximize the number of non-zero ownership
-variables; this ensures as few refinements as possible are constrained to be $[[Top]]$ due to ownership well-formedness.
+We constrain Z3 to maximize the number of non-zero ownership
+variables to ensure as few refinements as possible are constrained to be $[[Top]]$ by ownership well-formedness.
 
 The values of ownership variables inferred by Z3 are then substituted into the
 constrained Horn clauses, and the resulting system is checked
@@ -119,11 +116,9 @@ HoICE \cite{champion2018hoice}, and Eldarica \cite{rummer2013disjunctive}
 (adding a new backend requires only a handful of lines of glue code).
 We found that different solvers are better tuned to different problems;
 we also implemented \emph{parallel mode} which runs all supported solvers
-in parallel and uses the result of the first solver to complete. 
+in parallel, using the first available result.
 
 \subsection{Extensions}
-We now sketch some language extensions supported by
-our implementation.
 
 \paragraph{Primitive Operations}
 As defined in \Cref{sec:prelim}, our language can compare integers to zero and load
@@ -163,8 +158,8 @@ and the environment in subtyping constraints is likewise extended.
 \paragraph{Recursive Types}
 Our language also supports some unbounded heap structures via recursive
 reference types. To keep inference tractable, we forbid nested
-recursive types, multiple occurrences of a type variable bound by the
-$\mu$ binder and additionally fix the shape of refinements that occur within a
+recursive types, multiple occurrences of the recursive type variable,
+and additionally fix the shape of refinements that occur within a
 recursive type. For recursive refinements that fit the
 above restriction, our approach for refinements
 is broadly similar to that in \cite{kawaguchi2009type}, and we use
@@ -176,19 +171,19 @@ fold/unfold annotations into the source program. As in
 the refinements within an unfolding of a recursive type may refer to
 dependent tuple names bound by the enclosing type. These recursive
 types can express the invariant of a mutable,
-sorted list. Adapting the approach in \cite{suenaga2009fractional},
-all recursive types are unfolded once before assigning ownership variables.
-Further unfoldings copy existing ownership variables.
+sorted list. As in \cite{suenaga2009fractional},
+recursive types are unfolded once before assigning ownership variables;
+further unfoldings copy existing ownership variables.\looseness=-1
 
 As in Java or C++, our language does not support sum types,
-and thus any instantiation of a recursive type must use a null pointer.
-Our implementation therefore supports an \lstinline{ifnull} construct
-and a distinguished null constant. Our implementation allows any refinement
+and any instantiation of a recursive type must use a null pointer.
+Our implementation supports an \lstinline{ifnull} construct
+in addition to a distinguished \lstinline{null} constant. Our implementation allows any refinement
 to hold for the null constant, including $\bot$. Currently, our implementation
-currently does \emph{not} detect null pointer dereferences, and all soundness
+does \emph{not} detect null pointer dereferences, and all soundness
 guarantees are made modulo freedom of null dereferences. As $[[ [G] ]]$
-omits the refinements on reference types, null pointer refinements do not affect
-the verification of programs free of null pointer dereferences.
+omits refinements under reference types, null pointer refinements do not affect
+the verification of programs without null pointer dereferences.
 
 \paragraph{Arrays}
 Our implementation supports arrays of integers. Each array is given
@@ -198,11 +193,11 @@ and the second refines the entire array contents.
 The content refinement may refer to a symbolic index variable
 for precise, per-index refinements. At reads and writes to the
 array, \name instantiates the refinement's symbolic index variable with
-the concrete variable used at the read/write.
+the concrete index used at the read/write.
 
 As in \cite{suenaga2009fractional}, our restriction to arrays of integers
-stems from the difficulty of ownership inference. Sound handling
-of pointer arrays requires index-wise tracking of ownerships which
+stems from the difficulty of ownership inference. Soundly handling
+pointer arrays requires index-wise tracking of ownerships which
 significantly complicates automated inference. We leave supporting
 arrays of pointers to future work.
 
