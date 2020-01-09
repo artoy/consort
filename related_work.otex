@@ -79,7 +79,7 @@ systems to reason in contexts with aliased mutable references
 \cite{fahndrich2002adoption,deline2001enforcing,smith2000alias}, and
 in particular with the goal of supporting strong updates
 \cite{ahmed20073}. A closely related approach is RustHorn by
-Matsushita et al. \cite{matsushita2019rusthorn}. Much like
+Matsushita et al. \cite{matsushita2020rusthorn}. Much like
 \name, RustHorn uses CHC and linear aliasing information for
 the sound and---unlike \name---complete verification of
 programs with aliasing and mutability. However, their approach depends on Rust's
@@ -89,6 +89,27 @@ mutate memory in the same lexical region. In contrast, \name supports
 fine-grained, per-statement changes in mutability and even further
 control with \imp{alias} annotations, which allows it to verify larger
 classes of programs.
+
+The ownerships of \name also have
+a connection to separation logic \cite{reynolds2002separation};
+the separating conjunction isolates write effects to local subheaps,
+while \name’s ownership system isolates effects to local updates of pointer types.
+Other researchers have used separation logic to precisely
+support strong updates of abstract state.
+For example, work by Kloos et al. \cite{kloos2015asynchronous}
+resources are associated with static, abstract names; each
+resource (represented by its static name) may be owned (and thus,
+mutated) by exactly one thread. Unlike \name, their ownership
+system forbids even temporary immutable,
+shared ownership, or transferring ownerships at arbitrary program points.
+An approach proposed by Bakst and Jhala \cite{bakst2016predicate}
+uses a similar technique,
+combining separation logic with refinement types. Their approach gives
+allocated memory cells abstract names, and associates these names with
+refinements in an abstract heap. Like the approach of Kloos et al.
+and \name’s ownership 1 pointers, they
+ensure these abstract locations are distinct
+in all concrete heaps, enabling sound, strong updates.
 
 The idea of using a rational number to express permissions to access a
 reference dates back to the type system of \emph{fractional
@@ -101,11 +122,11 @@ inequalities over rational numbers.  Boyland's idea also inspired a
 variant of separation logic for a concurrent programming
 language~\cite{DBLP:conf/popl/BornatCOP05} to express sharing of read
 permissions among several threads.  Our previous
-work~\cite{suenaga2009fractional,suenaga2012type}, inspired by
-Boyland's work and Terauchi's work, proposed methods for type-based
+work~\cite{suenaga2009fractional,suenaga2012type}, inspired by that
+in \cite{terauchi2008checking,DBLP:conf/popl/BornatCOP05} proposed methods for type-based
 verification of resource-leak freedom, in which a rational number
 expresses an \emph{obligation} to deallocate certain resource, not
-just a permission.
+just a permission.\looseness=-1
 
 The issue of context-sensitivity (sometimes called \emph{polyvariance})
 is well-studied in the field of abstract interpretation

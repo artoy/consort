@@ -75,7 +75,7 @@ programs do not encounter assertion failures.
                                & & \mid & [[ pfun(pval1,..,pvaln) ]] \\
                                & & \mid & [[ pval1 = pval2 ]] \\
                                  & & \mid & \mathcal{CP} \\
-      \text{\scriptsize Refinement Values} & [[ pval ]] & ::= & [[ x ]] \mid [[ v ]] \mid [[ nu ]] \\
+      \text{\scriptsize Refinement Values} & [[ pval ]] & ::= & [[ x ]] \mid [[ nn ]] \mid [[ nu ]] \\
 %      \text{\scriptsize Type Env.} & [[G]] & \in & \mathbf{Var} \ra_{\textrm{fin}} \mathbf{Types}
     \end{array}
   \]
@@ -166,7 +166,7 @@ an execution context where the most recent, active function call occurred
 at call site $[[ l ]]$ which itself was executed in a context abstracted
 by $[[ ll ]]$; $[[.]]$ is the context under which program execution begins. \emph{Context variables},
 drawn from a finite domain $\CVar$ and ranged over by $[[A1]], [[A2]], \ldots$,
-represent an arbitrary, unknown context.
+represent arbitrary, unknown contexts.\looseness=-1
 
 A function type takes the form
 $[[ A <x1 : T1 ,, xn : Tn> -> <x1: T1' ,, xn : Tn' | T> ]]$.

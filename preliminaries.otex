@@ -48,7 +48,7 @@ we discuss these formulas later in \Cref{sec:types}.
 Variables are introduced by function parameters or let bindings.
 Like ML, the variable bindings introduced by let expressions and parameters
 are immutable.
-A mutable variable declaration like \texttt{int x = 1;} in C is achieved in our language with:\looseness=-1
+Mutable variable declarations such as \texttt{int x = 1;} in C are achieved in our language with:\looseness=-1
 \[
   [[ let y = 1 in (let x = mkref y in etc) ]]
 \]
