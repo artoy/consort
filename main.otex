@@ -113,10 +113,11 @@
 \input{experiments}
 \input{related_work}
 \input{conclusion}
-\paragraph{Acknowledgments}
-The authors would like to the reviewers for their thoughtful
+\paragraph{\footnotesize Acknowledgments}
+{\footnotesize The authors would like to the reviewers for their thoughtful
 feedback and suggestions, and Yosuke Fukuda for his feedback on early drafts.
-This work was supported in part by JSPS KAKENHI, grant number JP15H05706.\looseness=-1
+This work was supported in part by JSPS KAKENHI, grant numbers JP15H05706 and JP19H04084,
+and in part by the JST ERATO MMSD Project.\looseness=-1}
 
 \ifdraftComments
 \section{TODO}

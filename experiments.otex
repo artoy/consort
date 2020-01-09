@@ -65,8 +65,6 @@ annotations; the most for any individual test was \jhmaxalias.
 The number of annotations required for our benchmark suite are shown in column
 \textbf{Ann.} of \Cref{tab:jh-results}.
 
-
-\subsubsection{Experimental Setup}
 We first ran \name on each program in our benchmark suite and ran version 0.7 of
 JayHorn on the corresponding Java version. We recorded the final verification
 result for both our tool and JayHorn. We also collected the
@@ -80,8 +78,7 @@ is a comparison of tool precision, not performance.
 All tests were run on a machine with 16 GB RAM and 4 CPUs at 2GHz
 and with a timeout of 60 seconds (the same timeout
 was used in \cite{kahsai2017quantified}). We used \name's parallel backend (\Cref{sec:infr})
-with Z3 version 4.8.4, HoICE version 1.8.1, and Eldarica version 2.0.1 and JayHorn's Eldarica backend.\footnote{We also tried the Spacer backend
-  included with JayHorn, but it required an extremely old version of Z3 (4.3.2) and crashed the JVM on several of our tests.}
+with Z3 version 4.8.4, HoICE version 1.8.1, and Eldarica version 2.0.1 and JayHorn's Eldarica backend.
 
 \begin{table}[t]
   \caption{Comparison of \name to JayHorn on the benchmark set of \cite{kahsai2017quantified} (top) and our custom benchmark suite (bottom). \emph{T/O}

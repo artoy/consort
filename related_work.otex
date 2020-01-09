@@ -37,6 +37,15 @@ is quite strict and does not admit references to $b$ outside of the owning objec
 % (i.e., class invariant) must be eventually brought back in sync with the
 % fixed invariant.
 
+Viper \cite{heule2013verification,mueller2016viper}
+(and its related projects \cite{heule2013abstract,leino2010deadlock}) use 
+access annotations (expressed as permission predicates) to explicitly transfer access/mutation
+permissions for references between static program names. Like \name,
+permissions may be fractionally transferred, allowing temporary shared, immutable
+access to a mutable memory cell. However,
+while \name automatically infers many ownership transfers, Viper requires extensive
+annotations for each transfer.
+
 F*, a dependently typed dialect of ML, includes an update/select
 theory of heaps and requires explicit annotations summarizing the heap
 effects of a method
@@ -93,10 +102,10 @@ classes of programs.
 The ownerships of \name also have
 a connection to separation logic \cite{reynolds2002separation};
 the separating conjunction isolates write effects to local subheaps,
-while \name’s ownership system isolates effects to local updates of pointer types.
+while \name's ownership system isolates effects to local updates of pointer types.
 Other researchers have used separation logic to precisely
 support strong updates of abstract state.
-For example, work by Kloos et al. \cite{kloos2015asynchronous}
+For example, in work by Kloos et al. \cite{kloos2015asynchronous}
 resources are associated with static, abstract names; each
 resource (represented by its static name) may be owned (and thus,
 mutated) by exactly one thread. Unlike \name, their ownership
@@ -107,7 +116,7 @@ uses a similar technique,
 combining separation logic with refinement types. Their approach gives
 allocated memory cells abstract names, and associates these names with
 refinements in an abstract heap. Like the approach of Kloos et al.
-and \name’s ownership 1 pointers, they
+and \name's ownership 1 pointers, they
 ensure these abstract locations are distinct
 in all concrete heaps, enabling sound, strong updates.
 
