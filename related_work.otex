@@ -92,9 +92,9 @@ Matsushita et al. \cite{matsushita2020rusthorn}. Much like
 \name, RustHorn uses CHC and linear aliasing information for
 the sound and---unlike \name---complete verification of
 programs with aliasing and mutability. However, their approach depends on Rust's
-strict \emph{borrowing discipline}. In particular, it cannot handle programs
-where multiple aliased references are used to
-mutate memory in the same lexical region. In contrast, \name supports
+strict \emph{borrowing discipline}, and cannot handle programs
+where multiple aliased references are used 
+in the same lexical region. In contrast, \name supports
 fine-grained, per-statement changes in mutability and even further
 control with \imp{alias} annotations, which allows it to verify larger
 classes of programs.

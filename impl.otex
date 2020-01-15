@@ -83,8 +83,8 @@ $[[ph(yi,nn,pp)[nu,c1,,ck;FV pp] ]]$ which occurs in the type template of $[[yi]
 \end{align*}
 Effectively, we have encoded $[[ l1 ,, lk <= A ]]$ as $\land_{0<i\leq k} c_i = [[ li ]]$.
 In the above, the shift from $[[ c0,,ck]]$ to $[[ l,c0,,ck-1]]$ plays the role of
-$[[ csub ]]$ in the \rn{T-Call} rule. The above constraint effectively
-determines the value of $[[c0]]$ within the body of the function $[[f]]$.
+$[[ csub ]]$ in the \rn{T-Call} rule. The above constraint serves to
+determine the value of $[[c0]]$ within the body of the function $[[f]]$.
 If $[[f]]$ calls another function $[[g]]$, the above rule
 propagates this value of $[[c0]]$ to $[[c1]]$ within $[[g]]$ and so on.
 The solver may then instantiate relation symbols with predicates
@@ -170,7 +170,7 @@ fold/unfold annotations into the source program. As in
 \cite{kawaguchi2009type},
 the refinements within an unfolding of a recursive type may refer to
 dependent tuple names bound by the enclosing type. These recursive
-types can express the invariant of a mutable,
+types can express, e.g., the invariants of a mutable,
 sorted list. As in \cite{suenaga2009fractional},
 recursive types are unfolded once before assigning ownership variables;
 further unfoldings copy existing ownership variables.\looseness=-1

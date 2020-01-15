@@ -78,7 +78,7 @@ by strongly updating \imp{p}'s type to $[[ {nu:int|nu = 4}]] \TREF$.
 
 Unfortunately, the precise application of this technique is confounded
 by the existence of unrestricted aliasing.
-In general, updating the type of just the mutated reference
+In general, updating just the type of the mutated reference
 is insufficient: due to aliasing, other variables may point to the mutated
 memory and their refinements must be updated as well. However,
 in the presence of conditional, \emph{may} aliasing, it is
@@ -112,13 +112,13 @@ memory location, but only in different invocations of \imp{loop};
 this pattern may confound even sophisticated symbolic alias analyses.
 Additionally, \imp{a} and \imp{b} share an allocation site on \cref{line:alloc1},
 so an approach based on the simple alias analysis described above will also fail on
-this example. This obligation \emph{can} be discharged with existing
+this example. This must-not alias proof obligation  \emph{can} be discharged with existing
 techniques \cite{spath2016boomerang,spath2019context}, but requires an expensive, on-demand,
 interprocedural, flow-sensitive alias analysis. 
 
 This paper presents \name (CONtext Sensitive Ownership Refinement Types),
 a type system for the automated verification
-of program safety for imperative languages with mutability and aliasing.
+of program safety in imperative languages with mutability and aliasing.
 \name is built upon the novel combination of refinement types and
 fractional ownership types \cite{suenaga2009fractional,suenaga2012type}.
 Fractional ownership types extend pointer types with a rational number in
@@ -135,7 +135,7 @@ ownerships encode precise aliasing information in the form of
 To understand the benefit of this approach, let us return to
 \Cref{fig:strong-update-example}. As \imp{mk} returns a freshly allocated
 reference with no aliases, its type indicates it returns a
-reference with ownership 1. Thus our type system can initially
+reference with ownership 1. Thus, our type system can initially
 give \imp{p} and \imp{q} types $[[ { nu:int|nu = 3} ref 1 ]]$ and $[[ {nu:int|nu = 5} ref 1]]$ respectively. The ownership $[[1]]$ on the reference type constructor $\TREF$ indicates both
 pointers hold ``exclusive'' ownership of the pointed to reference cell;
 from the invariant of fractional ownership types \imp{p} and \imp{q}
