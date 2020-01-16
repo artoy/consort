@@ -156,7 +156,7 @@ environment and relax well-formedness to ignore variable binding order.
 
 \paragraph{Function Types, Contexts, and Context Polymorphism}
 Our type system achieves context sensitivity
-by allowing function types to depend on where and how a function
+by allowing function types to depend on where a function
 is called, i.e., the \emph{execution context} of the function invocation.
 Our system represents a \emph{concrete} execution contexts with
 strings of call site labels (or just ``call strings''),
@@ -247,7 +247,7 @@ The ownership well-formedness condition ensures that aliases introduced via
 heap writes do not violate the invariant of ownership types \emph{and} that refinements
 are consistent with updates performed through mutable aliases. Recall our ownership type invariant
 ensures all aliases of a mutable reference have 0 ownership.
-Any mutations through that alias will therefore be consistent with the
+Any mutations through that mutable alias will therefore be consistent with the
 ``no information'' $[[ Top ]]$ refinement required by this
 well-formedness condition.
 
