@@ -30,6 +30,11 @@
 \input{local}
 % generate nice pdf index when compiling in draft mode
 \draftCommentsfalse
+\newif\iffullversion
+
+\fullversionfalse
+
+\def\appref#1#2{\iffullversion #1\else#2\fi}
 
 \ifdraftComments\else\linepenalty=1000\fi
 
@@ -152,7 +157,7 @@ the former is unsound.
 \bibliographystyle{plain}
 \bibliography{main.bib}
 \newpage
-\input{appendix}
+\iffullversion\input{appendix}\fi
 
 \end{document}
 

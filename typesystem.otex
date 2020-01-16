@@ -272,7 +272,7 @@ is well-formed (written $[[ |- Th ]]$) if, for every $[[FT]]$ in $[[Th]]$,
 the argument, result, and output types are well-formed with respect
 to each other and the context variable quantified over in $[[FT]]$.
 As the formal definition of refinement well-formedness is fairly standard, we
-omit it for space reasons (the full definition may be found in \Cref{sec:aux-defn-lem}).
+omit it for space reasons (the full definition may be found in \appref{\Cref{sec:aux-defn-lem}}{the full version \cite{toman2020consort}}).
 
 \begin{figure}[t]
 %  \leavevmode
@@ -815,7 +815,7 @@ We formalize this claim with the following soundness theorem.
 \begin{proof}[Sketch]
   By standard progress and preservation lemmas; 
   the full proof has been omitted for space reasons and can be found
-  in the accompanying appendix.\looseness=-1
+  in the \appref{accompanying appendix}{full version \cite{toman2020consort}}.\looseness=-1
 
   % We define a typing relation for runtime configurations; well-typed
   % configurations satisfy the following invariants:
