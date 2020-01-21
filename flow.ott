@@ -1,0 +1,552 @@
+metavar termvar, x, y, z ::=
+  {{ tex \mathit{[[termvar]]} }} {{ com  term variable  }}
+
+metavar c ::=
+  {{ tex \mathit{[[c]]} }} {{ com context var }}
+
+metavar funvar, f, g ::=
+  {{ tex \mathit{[[funvar]]} }} {{ com  function name }}
+
+indexvar index, i, j, n, p, q, k ::=   {{ com index }}
+
+metavar a ::= {{ com addresses }}
+
+metavar pfun ::= {{ com predicate symbol }} {{ tex \phi }}
+
+grammar
+
+  e :: 'e_' ::=                                         {{ com exp }}
+    | x                   ::   :: Var                     {{ com variable }}
+    | let x = rhs in e      ::   :: Let {{ tex \LET [[x]] = [[rhs]] \IN [[e]] }}
+    | ifz x then e1 else e2 ::   :: Ifz {{ tex \IFZERO [[x]] \THEN [[e1]] \ELSE [[e2]] }}
+    | x := y ; e          ::   :: Assign {{ tex [[x]] \WRITE [[y]] \SEQ [[e]] }}
+    | alias ( x = y ) ; e ::   :: Alias  {{ tex \ALIAS([[x]] = [[y]]) \SEQ [[e]] }}
+	| alias ( x = * y ) ; e :: :: AliasPtr {{ tex \ALIAS([[x]] = * [[y]]) \SEQ [[e]] }}
+    | assert ( ph ) ; e  ::   :: Assert {{ tex \ASSERT([[ph]]) \SEQ [[e]] }}
+    | e ; e'              ::   :: Seq    {{ tex [[e]] \SEQ [[e']] }}
+    | vsub e :: :: subst_mult {{ tex [[vsub]] [[e]] }}
+    | ( e )               :: S :: paren
+    | CE [ x ]  :: M:: ret
+    | E [ e ] :: M:: ctxt
+    | e1 = e2 :: :: eq
+	| etc :: :: etc {{ tex \ldots }}
+
+  return_hole :: 'RH_' ::=
+    | [] l :: :: LabeledHole {{ tex \HOLE^[[l]] }}
+
+  rhs :: 'rhs_' ::= 
+    | mkref y :: :: MkRef {{ tex \MKREF [[y]] }}
+	| * y :: :: Deref {{ tex * [[y]] }}
+	| x :: :: Var {{ com variable }}
+	| v :: :: Val {{ com value }}
+	| return_hole :: :: Return
+	| f l ( arg_list ) :: :: Call {{ com function call }} {{ tex [[f]]^[[l]]([[arg_list]]) }}
+
+  arg_list :: 'alist_' ::=
+    | y1 ,, yn :: :: Abbrv {{ tex [[y1]],\ldots,[[yn]] }}
+	| y1 , ... , yn :: :: Explicit
+  
+  A {{ tex \lambda }} :: 'A_' ::=
+
+  v :: 'v_' ::=                                         {{ com  value }}
+    | nn                   ::   :: Nat     {{ com  natural number }}
+	| 0 :: :: Zero {{ com zero }}
+	| 1 :: :: One {{ com one }}
+	| a :: :: address
+
+  fun_body :: FB_ ::=
+    | ( x1 , ... , xi ) e :: :: f_body
+
+  d :: d_ ::=
+    | f |-> fun_body  ::  :: def
+
+  D :: D_ ::=
+    | { d1 , ... , di }     ::   :: set
+
+  P :: P_ ::=                              {{ com programs }}
+    | < D , e >            ::   :: prog    {{ tex \tuple{[[D]], [[e]]} }}
+
+  r {{ tex r }} :: 'O_' ::= {{ com ownership }}
+    | q :: :: const_owner {{ tex [0,1] \in \mathbb{Q} }}
+	| r1 + r2 :: :: add_owner
+	| r1 - r2 :: :: sub_owner
+	| 0 :: :: dead_owner
+	| 1 :: :: excl_owner
+	| O ( a ) :: :: omap_lkp
+	| float :: :: float
+	| r [ x , nn , pp ] :: :: gen_var {{ tex [[r]]_{[[x]],[[nn]],[[pp]]} }}
+        | ( r ) :: :: paren
+
+
+  top {{ tex \top }} :: t ::=
+    | Top :: :: top
+
+  float :: 'F_' ::=
+    | 0 . DL :: :: zero_point
+
+  DL :: 'DL_' ::=
+    | digit :: :: end
+	| digit DL :: :: seq
+
+  nn {{ tex n }} :: I_ ::=
+    | DL :: :: I
+	| nn1 + nn2 :: :: plus
+	| nn1 - nn2 :: :: minus
+	| '|' T '|' :: :: type_size {{ tex |[[T]]| }}
+	| '|' ll '|' :: :: lstring_size {{ tex |[[ll]]| }}
+	| '|' Es '|' :: :: stack_size {{ tex |[[Es]]| }}
+   
+  l {{ tex \ell}} :: 'L' ::= {{ com location label }}
+    | DL :: :: conr
+
+  digit :: 'D_' ::=
+    | 0 :: :: zero
+	| 1 :: :: one
+	| 2 :: :: two
+	| 3 :: :: three
+	| 4 :: :: four
+	| 5 :: :: five
+	| 6 :: :: six
+	| 7 :: :: seven
+	| 8 :: :: eight
+	| 9 :: :: nine
+
+  C {{ tex \mathbf{C} }} :: C_ ::=    {{ com configuration }}
+    | < H , R , Es , e >         ::   :: Quad {{ tex \tuple{[[H]], [[R]], [[Es]], [[e]]} }}
+    | AssertFail                ::   :: AFail {{ tex \mathbf{AssertFail} }}
+	| AliasFail :: :: AliasFail {{ tex \mathbf{AliasFail} }}
+
+  R :: R_ ::= {{ com env or register file }}
+    | empty :: :: em {{ tex \emptyset }}
+	| R { x |-> Rv } :: :: fresh
+    | R1 = R2 :: :: tyenvDef
+
+  H :: H_ ::= {{ com heap }}
+    | empty :: :: em {{ tex \emptyset }}
+	| H { a |-> Rv } :: :: update
+	| H { a <- Rv } :: :: destrUpdate
+	| H1 = H2 :: :: inlineDef
+
+  Rv {{ tex v }} :: Rv_ ::= {{ com runtime value forms }}
+    | a :: :: addr
+	| R ( x ) :: :: var
+	| H ( Rv ) :: :: lkp
+	| v :: :: const
+	| nn :: :: z
+
+  E :: E_ ::=    {{ com evaluation context }}
+    | []                ::   :: hole
+    | E ; e :: :: seq {{ tex [[E]]\SEQ[[e]] }}
+    | ( E ) :: :: paren
+    | E = E' :: :: eq
+
+  CE {{ tex F }} :: E_ ::= {{ com return contexts }}
+    | E [ let x = return_hole in e ] :: :: stack {{ tex [[E]][\LET [[x]] = [[return_hole]] \IN [[ e ]] ]}}
+
+  Es {{ tex \oldvec{F} }} :: Es_ ::=                  {{ com  stack }}
+    | .                  ::   :: empty {{ tex \cdot }}
+    | CE : Es            ::   :: cons
+    | Fn-1 : Es          ::   :: cons_new
+
+  ineq :: 'IE_' ::=
+    | = :: :: eq {{ tex \subseteq }}
+	| != :: :: ineq {{ tex \not\subseteq }}
+	| ?= :: :: unk_eq {{ tex \overset{?}{\subseteq} }}
+
+  plhs {{ tex \mathcal{C} }} :: 'PLhs_' ::=
+    | B :: :: ty_con
+	| l : plhs :: :: param_pref {{ tex [[l]] : [[plhs]] }}
+	| ll : A :: :: abbrv_concat
+
+  prhs :: 'PRhs_' ::=
+    | ll :: :: prefix {{ tex [[ll]] }}
+
+  prefix_op :: 'Pop_' ::= {{ com prefix operator }}
+    | <= :: :: subset {{ tex \subseteq }}
+	| </= :: :: not_subseteq {{ tex \not\subseteq }}
+
+  CQP {{ tex \mathcal{CP} }}:: 'PQ_' ::= {{ com prefix query }}
+    | prhs prefix_op plhs :: :: query {{ tex [[prhs]] [[prefix_op]] [[plhs]] }}
+
+  ll {{ tex \oldvec{\ell} }} :: 'LL_' ::= {{ com concrete contexts }}
+    | . :: :: empty {{ tex \epsilon }}
+	| l :: :: singleton
+	| l : ll :: :: cons
+	| l1 ,, l2 :: :: abbrv {{ tex [[l1]]\ldots[[l2]] }}
+	| l1 ... ln :: :: inline
+
+  B {{ tex \mathcal{L} }} :: B_ ::= {{ com type contexts }}
+    | . :: :: empty {{ tex \epsilon }}
+	| l : B :: :: l_cons
+	| l1 : ... : ln : B :: :: multi_cons
+	| ll :: :: concrete
+	| A :: :: svar
+	| Trace ( Es ) :: :: trace_fun
+	| csub B :: :: string_sub
+
+  ca :: 'CAe_' ::= {{ com predicate context argument single }}
+    | c :: :: var
+	| l :: :: concr
+
+  context_args :: 'CA_' ::= {{ com predicate context arguments }}
+    | ca1 , context_args :: :: list
+	| ca1 ,, can :: :: list_abbrv {{ tex [[ca1]],\ldots,[[can]] }}
+
+  ph {{ tex \varphi }} :: 'P_' ::= {{ com refinement predicates }}
+    | pfun ( pval1 , .. , pvaln ) :: :: pred_sym {{ com predicate in underlying logic }}
+	| ph1 /\ ph2 :: :: pred_conj {{ tex [[ph1]] \wedge [[ph2]] }} {{ com conjunction }}
+	| pval1 rel_op pval2 :: :: pred_const {{ com equality }}
+	| Top :: :: pred_top {{ tex \top }}
+	| ph1 ==> ph2 :: :: entail
+	| [ pval / pvar ] ph :: :: subst_var
+	| vsub ph :: :: sub_v
+	| csub ph :: :: subst_ctxt
+	| CQP :: :: prefix_query
+	| ( ph ) :: :: paren
+	| x = T y :: :: typed_eq {{ tex [[x]] =_{[[T]]} [[y]] }}
+	| Bot :: :: bot {{ tex \bot }}
+	| ph ( x , nn , pp1 ) :: :: template {{ tex [[ph]]_{[[x]],[[nn]],[[pp1]]} }}
+	| ph [ pval ; FVF ] :: :: with_fv {{ tex [[ph]]([[pval]]; [[FVF]]) }}
+	| ph [ pval , context_args ; FVF ] :: :: with_fv_cont {{ tex [[ph]]([[pval]],[[context_args]];[[FVF]]) }}
+	| ! ph :: :: not_ph {{ tex \neg [[ph]] }}
+	| ph1 \/ ph2 :: :: or
+	| ( = nn ) :: :: num_eq {{ tex \varphi_{=[[nn]]} }}
+
+  pvar :: 'PV_' ::=
+	| nu :: :: nu
+	| AP :: :: ap_rule
+
+  AP {{ tex \pi }} :: 'AP_' ::=
+	| x AP_seq :: :: deref
+	| AP AP_step :: :: cons
+	| x :: :: var
+
+  AP_seq {{ tex \oldvec{\star} }} :: 'APseq_' ::=
+    | AP_step1 ,, AP_step2 :: :: list {{tex [[AP_step1]] \cdots [[AP_step2]] }}
+	| AP_seq AP_step :: :: consr
+	| AP_step AP_seq :: :: consl
+	| . :: :: empty {{ tex \epsilon }}
+
+  AP_step :: 'APs_' ::=
+    | ->* :: :: deref {{ tex \star }}
+
+  pval {{ tex \widehat{v} }} :: 'LV_' ::= 
+  	| pvar :: :: var
+    | Rv :: :: concr_value
+	| pval1 + pval2 :: :: addition
+
+  csub {{ tex \sigma_{\alpha} }} :: 'C_' ::= {{ com context sub }}
+  	| [ B / A ] :: M :: subst_ctxt
+	| csub1 csub2 :: M :: subst_concat
+
+  vsub {{ tex \sigma_{x} }} :: 'VS_' ::=
+    | vsub1 ,, vsub2 :: :: vsub_seq {{ tex [[vsub1]]\cdots[[vsub2]] }}
+	| [ x1 / x2 ] :: :: sub {{ tex [ [[x1]] / [[x2]] ] }}
+	| [ x1 / nu ] :: :: nusub
+	| [ nu / x1 ] :: :: nusub2
+	| [ R ] :: :: env_sub
+	| [ c1 / c2 ] :: :: context_sub
+	| [ l / c ] :: :: concrete_sub
+	| vsub1 vsub2 :: :: concat
+	| [ AP / nu ] :: :: apsub {{ tex [ [[AP]] / [[nu]] ] }}
+	
+
+  T {{ tex \tau }} :: T_ ::=                              {{ com type }}
+    | { nu : int | ph }    ::   :: refint                  {{ com refined integer type }}
+                                        {{ tex \set{ [[nu]] \COL \TINT \mid [[ph]]} }}
+        | { nu : int | _ }    ::   :: refintdummy          {{ com refined integer type with dontcare refinement }}
+                                        {{ tex \set{ [[nu]] \COL \TINT \mid \_ } }}
+
+    | T ref r             ::   :: reference               {{ com reference type }}
+                                        {{ tex [[T]] \TREF^{[[r]]} }}
+    | ( T )               :: S :: paren
+    | T1 + T2             :: M :: sum
+    | G ( x )             :: M :: lookup
+	| csub T :: :: subst_context
+	| vsub T :: M :: subst_var
+	| T1 /\ x ph :: :: strength {{ tex [[T1]] \wedge_{[[x]]} [[ph]] }}
+	| T1 /\ nu = AP :: :: strength_ap
+	| T1 = T2 :: :: eq
+    | Tn+1 :: ::tn1 {{ tex \tau_{n+1} }}
+	| top :: :: top_type
+	| [ ST ] ( x , nn , pp ) :: :: denote_simple {{ tex \sem{[[ST]]}_{[[x]],[[nn]],[[pp]]} }}
+	| ( tuple_bind1 ,, tuple_bind2 ) :: :: dependent_tuple {{ tex ([[tuple_bind1]],\ldots,[[tuple_bind2]]) }}
+	| ( tuple_bind1 , ... , tuple_bind2 ) :: :: concr_dep_tup
+	| ( M alpha . T ) :: :: rec_type {{ tex \mu[[alpha]].[[T]] }}
+
+  tuple_bind :: 'TB_' ::=
+    | x : T :: :: named {{ tex [[x]]\COL[[T]] }}
+	| T :: :: no_bind 
+
+  ST {{ tex \tau_{S} }} :: 'ST_' ::= {{ com simple type }}
+    | int :: :: simple_int {{ tex \TINT }}
+	| ST ref :: :: simple_ref {{ tex [[ST]] \TREF }}
+	| [S T ] :: :: lift_type {{ tex \llparenthesis [[T]]\rrparenthesis }}
+	| Gst ( x ) :: :: st_lkp
+	| ( M alpha . ST ) :: :: rec_st {{ tex \mu[[alpha]].[[ST]] }}
+	| ST [ alpha ] :: :: over_type
+	| [ ST1 / alpha ] ST2 :: :: subst_ty_var
+	| ( ST1 , ... , ST2 ) :: :: simple_tuple
+	| alpha :: :: ty_var
+
+  Gst {{ tex \Gamma_{S} }} :: 'STG_' ::= {{ com simple type env }}
+    | empty :: :: em {{ tex \bullet }}
+	| Gst , x : ST :: :: append
+	| ST ( G ) :: :: lift_G {{ tex \llparenthesis [[G]] \rrparenthesis }}
+	| Gst , nu : ST :: :: nu_append
+
+  tyarg_list :: 'AL_' ::=
+    | x1 : T1 , .. , xn : Tn :: :: list
+
+  FT {{ tex \sigma }} :: FT_ ::=                          {{ com function type }}
+    | A < x1 : T1 ,, xn : Tn > -> < y1 : T1' ,, yi : Ti' | T >  :: :: sig
+          {{ tex \forall [[A]].\tuple{[[x1]]\COL[[T1]],\dots,[[xn]]\COL[[Tn]]}\ra\tuple{[[y1]]\COL[[T1']],\dots,[[yi]]\COL[[Ti']] \mid [[T]]} }}
+     | A < tyarg_list1 > -> < tyarg_list2 | T > :: :: concr_sig {{ tex \forall [[A]].\tuple{[[tyarg_list1]]}\ra\tuple{[[tyarg_list2]]\mid[[T]]} }}
+     | Th ( f ) :: :: fenvLkp
+	 | A < x1 : T1 ,, xn : Tn > \\ & & & -> < y1 : T1' ,, yi : Ti' | T > :: :: sig_ts
+           {{ tex \forall [[A]].\tuple{[[x1]]\COL[[T1]],\dots,[[xn]]\COL[[Tn]]} \\ & & & \ra\tuple{[[y1]]\COL[[T1']],\dots,[[yi]]\COL[[Ti']] \mid [[T]]} }}
+	 
+
+  Th {{ tex \Theta }} :: Th_ ::=
+    | empty :: :: em {{ tex \bullet }}
+	| f |-> FT , Th :: :: vn
+
+  G {{ tex \Gamma }} :: G_ ::=  {{ com type environment }}
+    | empty               ::   :: em   {{ tex \bullet }}
+    | G , x : T           ::   :: vn
+	| G \ x :: :: sub {{ tex [[G]] \setminus [[x]] }}
+	| G , x1 : T1 ,, xn : Tn :: :: append {{ tex [[G]],[[x1]]\COL[[T1]],\ldots,[[xn]]\COL[[Tn]] }}
+	| x1 : T1 ,, xn : Tn :: :: mk {{ tex [[x1]]\COL[[T1]],\ldots,[[xn]]\COL[[Tn]] }}
+	| x : T :: :: singleton {{ tex [[x]]\COL[[T]] }}
+	| G [ x : T ] :: :: type_in
+	| G [ x1 <- T1 ] :: :: type_update
+	| G [ x1 <- T1 ] ,, [ x2 <- T2 ] :: :: ty_update_2 {{ tex [[G]] \left[ [[x1]][[<-]][[T1]] \right]\cdots[ [[x2]][[<-]][[T2]]] }}
+	| [ B / A ] G :: :: cxtSubst
+	| ( G ) :: :: paren
+	| G1 = G2 :: :: tyenvDef
+	| vsub G :: :: subst_var 
+    | Gn+1 :: ::gn1 {{ tex \tenv_{n+1} }}
+	| G @ pp :: :: env_at_point {{ tex [[G]]^[[pp]] }}
+	| G1 + G2 :: :: env_comb {{ tex [[G1]] \uplus [[G2]] }}
+
+  rel_op :: Rel ::=
+    | <= :: :: le
+	| < :: :: lt
+	| = :: :: eq
+	| != :: :: neq
+	| >= :: :: geq
+    | > :: :: gt
+
+  pp {{ tex p }} :: PP_ ::=
+    | f st :: :: f_start {{ tex {[[f]]^{b} } }}
+	| f end :: :: f_end {{ tex {[[f]]^{e} } }}
+
+  terminals :: 'terminals_' ::=
+    | ;                   ::   :: seq        {{ tex \SEQ }}
+    | -->                 ::   :: red        {{ tex \longrightarrow }}
+	| -->*                ::   :: trans_red {{ tex \longrightarrow^* }}
+    |  ->                 ::   :: arrow      {{ tex \rightarrow }}
+    | |-                  ::   :: turnstile  {{ tex \vdash }}
+    | |-e                  ::   :: e_turnstile  {{ tex \vdash_{\mathit{ectx} } }}
+    | |-D                  ::   :: D_turnstile {{ tex \vdash_{\mathit{conf} }^D }}
+    | |=                  ::   :: models     {{ tex \models }}
+    | in                  ::   :: in         {{ tex \in }}
+    | <:                  ::   :: sub        {{ tex \leq }}
+    | ==>                 ::   :: impl       {{ tex \implies }}
+	| <=>                 ::   :: bimpl      {{ tex \iff }}
+    | =>                  ::   :: darrow     {{ tex \produces }}
+    | |->                 ::   :: mapsto     {{ tex \mapsto }}
+    | []                  ::   :: hole       {{ tex \HOLE }}
+	| '|'                 ::   :: bar {{ tex \mid }}
+	| INT                 ::   :: int {{ tex \mathbb{Z} }}
+	| ifz                 ::   :: ifz
+	| SAT                 ::   :: sat_pred
+	| SATv                ::   :: satv_pred
+	| own                 ::   :: own_fn
+	| Own                 ::   :: ownHRG_fn
+	| Cons                ::   :: cons_pred
+	| FPCV :: :: fpcv {{ tex \mathbf{FCV} }}
+	| <- :: :: destrUp {{ tex \hookleftarrow }}
+	| !|= :: :: notModel {{ tex \not\models }}
+	| forall :: :: forall {{ tex \forall }}
+	| /\ :: :: and {{ tex \wedge }}
+	| \/ :: :: or {{ tex \vee }}
+	| '|<' :: :: sum {{ tex \Sigma }}
+	| <= :: :: leq {{ tex \le }}
+	| >= :: :: geq {{ tex \ge }}
+	| != :: :: neq {{ tex \neq }}
+	| = :: :: eq
+	| < :: :: lt
+	| > :: :: gt
+	| Top :: :: top {{ tex \top }}
+	| ~ :: :: squiggle {{ tex \approx }}
+	| nu :: :: nu {{ tex \nu }}
+	| exists :: :: exists {{ tex \exists }}
+	| CC :: :: ctxt_set {{ tex \mathcal{C} }}
+	| alpha :: :: alpha {{ tex \alpha }}
+
+  reduction :: '' ::=
+    | --> :: :: step
+	| -->* :: :: step_tr
+	| ! reduction :: :: cant_step {{ tex \not[[reduction]] }}
+
+  logical_frag :: '' ::=
+    | ph :: :: phi
+    | [ T ] AP :: :: denote_type {{ tex \sem{[[T]]}_{[[AP]]} }}
+	| [ G ] :: :: sem_tyenv  {{ tex \sem{[[G]]} }}
+	| vsub logical_frag :: :: subst
+	| [ pval / pvar ] logical_frag :: :: val_subst
+	| csub logical_frag :: :: csubst
+	| logical_frag1 /\ logical_frag2 :: :: conj
+	| ! logical_frag :: :: not {{ tex \neg [[logical_frag]]}}
+	| ( logical_frag ) :: :: paren
+	| logical_frag1 \/ logical_frag2 :: :: disj
+	| logical_frag1 ==> logical_frag2 :: :: logical_entailment
+	| logical_frag1 <=> logical_frag2 :: :: logical_equiv
+	| /\ { bind in VS } logical_frag :: :: forall_wedge {{ tex \bigwedge_{ [[bind]] \in [[VS]] } [[logical_frag ]] }}
+
+  logic_judgment :: '' ::=
+	| |= logical_frag :: :: models
+	| !|= logical_frag :: :: not_models
+	| G |= logical_frag :: :: tyenv_model
+
+  FVF :: 'FV_' ::= {{ com free variable generators }}
+  	| FPV ( T ) :: :: fpv_t
+	| FPV ( ph ) :: :: fpv_p
+	| FPCV ( ph ) :: :: fpcv_p
+	| FPCV ( plhs ) :: :: fpcv_plhs
+	| FPCV ( T ) :: :: fpcv_tx
+    | FV ( e ) :: :: fv
+	| FV pp :: :: fv_at_point {{ tex [[FV]]_{[[pp]]} }}
+	| CC k :: :: context_fv {{ tex [[CC]]^[[k]] }}
+	| FVF1 U FVF2 :: :: union_fv {{ tex [[FVF1]] \cup [[FVF2]] }}
+	| { x1 , .. , x2 } :: :: set
+
+  functions :: 'F_' ::=
+	| CV ( B ) :: :: cv
+	| Cons ( H , R , G ) :: :: Cons
+	| SAT ( H , R , G ) :: :: SAT
+	| SATv ( H , R , Rv , T ) :: :: satv {{ tex [[SATv]]([[H]],[[R]],[[Rv]],[[T]]) }}
+	| O :: :: omap
+
+   O :: 'OM_' ::= {{ com ownership map }}
+    | { a |-> r } :: :: omap
+	| O1 + O2 :: :: omap_add
+	| own ( H , Rv , T ) :: :: own_fn
+	| Own ( H , R , G ) :: :: ownHRG_fn
+	| empty :: :: empty {{ tex \emptyset }}
+	| ( O ) :: :: paren
+	| |< { x in VS } O :: :: sum {{ tex [[|<]]_{[[x]]\in[[VS]]}\,[[O]] }}
+
+  step_relation :: 'sr_' ::= {{ com step relation }}
+    | reduction D :: :: red {{ tex [[reduction]]_{[[D]]} }}
+
+  judgment :: 'j_' ::=
+    | G |- T1 <: T2       ::   :: sub
+	| R |- T :: :: valid_sub {{ tex [[R]][[|-]]_{vs} [[T]] }}
+	| B |- T => G :: :: wftenv {{ tex [[B]] [[|-]]_{\wf} [[T]] [[=>]] [[G]] }}
+    | G1 <: G2            ::   :: subG
+	| G1 , T1 <: G2 , T2 :: :: subRes
+    | Th | G1 | B |- e : T => G2   ::   :: exp {{ tex [[Th]] [[|]] [[B]] [[|]] [[G1]] [[|-]] [[e]] : [[T]] [[=>]] [[G2]] }}
+    | C1 step_relation C2         ::   :: red        {{ tex [[C1]] [[step_relation]] [[C2]] }}
+    | C1 \\ step_relation C2      ::   :: red_newline {{ tex \begin{array}{l}[[C1]] \\ \quad [[step_relation]] [[C2]]\end{array} }}
+    | C1 step_relation \\ C2      ::   :: red_newline2 {{ tex \begin{array}{r}[[C1]] [[step_relation]] \\ [[C2]]\end{array} }}
+	
+	| B |- G :: :: tyenvwf {{ tex [[B]] [[|-]]_{\wf} [[ G ]] }}
+	| G | B |- T :: :: twf {{ tex [[B]] [[|]] [[G]] [[|-]]_{\wf} [[T]] }}
+	| G | B |- ph :: :: phwf {{ tex [[B]] [[|]] [[G]] [[|-]]_{\wf} [[ph]] }}
+	| T1 = T2 :: :: teq
+	| ST1 = ST2 :: :: steq
+	| Th |- d :: :: fun_typ
+	| |- P :: :: prog_typ
+	| Th |- D :: :: f_typing
+	| |- D C :: :: ctxt_type {{ tex \vdash_{\mathit{conf} }^D [[ C ]] }}
+	| Th | [] : T => G | B |-e E : T' => G' :: :: ctxt_typing
+	| Th | [] : T => G | B |-e CE : T' => G' :: :: ectxt_typing
+	| |- Th :: :: funenvWf {{ tex [[|-]]_{\wf} [[Th]] }}
+	| |- FT :: :: ftWf {{ tex [[|-]]_{\wf} [[FT]] }}
+	| H |- Rv ~> nn :: :: shape_move {{ tex [[H]][[|-]] [[Rv]] \Downarrow [[nn]] }}
+	| G |- ph :: :: typecheck_pred
+	| G |- pval :: :: typecheck_pval
+	| AP_seq ~> T :: :: cons_seq {{ tex [[AP_seq]] \Downarrow [[ T ]] }}
+
+  bind :: 'Bin_' ::= {{ com mapping function domains }}
+    | x :: :: pvar
+	| A :: :: cvar
+	| a  :: :: addr
+	| f :: :: fname
+	| v :: :: value
+	| nu :: :: nu
+
+  MF :: 'MF_' ::= {{ com mapping function }}
+    | G :: :: tyenv
+	| R :: :: env
+	| Gst :: :: stTenv
+	| H :: :: heap
+	| Th :: :: funenv
+	| O :: :: ownership_map
+	| D :: :: fun_impl
+
+  VS :: 'VS_' ::= {{ com sets }}
+    | VS1 U VS2 :: :: union {{ tex [[VS1]] \cup [[VS2]] }}
+	| VS1 /\ VS2 :: :: inter {{ tex [[VS1]] \cap [[VS2]] }}
+	| { bind } :: :: singleton {{ tex \set{[[bind]]} }}
+	| { bind1 ,, bindn } :: :: count {{ tex \set{[[bind1]],\ldots,[[bindn]]} }}
+	| { bind1 , ... , bindn } :: :: concr
+	| FVF :: :: free_var_fun
+	| dom MF :: :: dom_mf {{ tex \DOM([[MF]]) }}
+	| VS1 '\' VS2 :: :: minus {{ tex [[VS1]] \setminus [[VS2]] }}
+	| null :: :: eset {{ tex \emptyset }}
+	| Addr :: :: addresses {{ tex \textbf{Addr} }}
+
+  EqT :: 'EqT_' ::= {{ com equatable terms }}
+    | e :: :: expt
+	| Gst :: :: simple_g
+	| G :: :: gamma
+	| B :: :: ctxt_string
+	| Rv :: :: runtime_value
+	| VS :: :: value_set
+	| functions :: :: func
+	| csub  :: :: context_sub
+	| vsub :: :: value_sub
+	| C :: :: config
+	| termvar :: :: var
+	| H :: :: heap
+	| E :: :: ctxt
+	| r :: :: own
+	| Es :: :: context_stacks
+	| D :: :: function_sets
+
+  formula :: formula_ ::=
+    | logical_frag1 = logical_frag2 :: :: eq_form
+    | logical_frag :: :: frag
+    | judgment :: :: judge
+	| functions :: :: func
+	| logic_judgment :: :: lj
+    | r1 rel_op r2 :: :: own_ge {{ tex [[r1]] [[rel_op]] [[r2]] }}
+    | r1 & rel_op r2 :: :: own_align {{ tex [[r1]] & [[rel_op]] [[r2]] }}
+	| formula1 <=> formula2 :: :: meta_biimpl
+	| formula1 ==> formula2 :: :: meta_entail
+	| formula ( x in dom ( G ) ) :: :: quantified {{ tex [[formula]]\,\,(x \in \DOM([[G]])) }}
+	| Th ( f ) = FT :: :: fun_typ_lkp
+	| bind fresh in MF :: :: notinEnv {{ tex [[bind]] \not\in \DOM([[MF]]) }}
+	| bind in MF :: :: inMap {{ tex [[bind]] \in \DOM([[MF]]) }}
+	| bind not in MF :: :: notInMap {{ tex [[bind]] \not\in \DOM([[MF]]) }}
+	| bind in VS :: :: inFv {{ tex [[bind]] \in [[VS]] }}
+	| bind not in VS :: :: notInFv {{ tex [[bind]] \not\in [[VS]] }}
+	| VS1 <= VS2 :: :: subset {{ tex [[VS1]] \subseteq [[VS2]] }}
+	| Rv is INT :: :: in_int {{ tex [[Rv]] \in [[INT]] }}
+	| d in D :: :: funDef {{ tex [[d]] \in [[D]] }}
+	| formula1 ... formulan :: :: dots
+	| EqT1 = ... = EqT2 :: :: equate
+	| EqT1 & = EqT2 :: :: eq_align {{ tex [[EqT1]] & = [[EqT2]] }}
+	| r1 <= ... <= r2 :: :: rel_list
+	| r1 = ... = r2 rel_op r3 :: :: own_rel_list
+	| EqT1 != EqT2 :: :: ineq {{ tex [[EqT1]] \neq [[EqT2]] }}
+	| formula1 /\ formula2 :: :: meta_conj
+	| forall formula1 . formula2 :: :: uq
+	| exists Rv . formula :: :: eq
+	| ( formula ) :: :: parenF
+	| T1 ~ T2 :: :: tEqual
+	| H1 ~ a H2 :: :: h_mod_equiv {{ tex [[H1]] [[~]]_[[a]] [[H2]] }}
+	| R1 < R2 :: :: reg_weak {{ tex [[R1]] \sqsubseteq [[R2]] }}

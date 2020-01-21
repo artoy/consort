@@ -1,0 +1,192 @@
+\let\oldvec\vec
+\documentclass[runningheads]{llncs}
+\usepackage{bcprules}\typicallabel{T-Hoge}
+\usepackage{graphicx,xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{parcolumns}
+\usepackage{cases}
+\usepackage{listings}% http://ctan.org/pkg/listings
+\usepackage{etoolbox}
+\usepackage{microtype}
+\usepackage{wrapfig}
+\usepackage{paralist}
+\usepackage[numbers,sectionbib,sort]{natbib}
+\input{local}
+\input{flow-lang}
+\begin{document}
+Types and refinements:
+\[
+  \begin{array}{rrcl}
+      \text{\scriptsize Types} & [[ T ]] % & \in & \mathbf{Types} \\
+                                         &::=& [[ {nu:int|ph} ]] \mid [[ T ref r ]] \\
+      \text{\scriptsize Ownership} & [[ r ]] & \in & [0,1] \\
+      \text{\scriptsize Refinements} & [[ph]] & ::= & [[ ph1 \/ ph2 ]] \mid [[ !ph ]] \mid [[Top]] \\
+                               & & \mid & [[ pfun(pval1,..,pvaln) ]] \\
+                               & & \mid & [[ pval1 = pval2 ]] \\
+                                 & & \mid & \mathcal{CP} \\
+    \text{\scriptsize Refinement Values} & [[ pval ]] & ::= & [[ AP ]] \mid [[ nn ]] \mid [[ nu ]] \\
+    \text{\scriptsize Access Paths} & [[ AP ]] & ::= & [[ x AP_seq ]] \\
+    \text{\scriptsize Function Types} & [[FT]] & ::= & [[ A <x1 : T1 ,, xn : Tn> \\ & & & -> <x1: T1' ,, xn : Tn' | T> ]] \\
+    \text{\scriptsize Context Variables} & [[A]] & \in & \CVar \\
+    \text{\scriptsize Concrete Context} & [[ ll ]] & ::= & [[ l : ll ]] \mid [[ . ]] \\
+    \text{\scriptsize Pred. Context} & [[ plhs ]] & ::= & [[ l : plhs ]] \mid [[ A ]] \mid [[ . ]] \\
+    \text{\scriptsize Context Query} & [[CQP]] & ::= & [[ ll <= plhs ]] \\
+    \text{\scriptsize Typing Context} & [[ B ]] & ::= & [[ A ]] \mid [[ ll ]] \\
+  \end{array}
+\]
+
+An access path denotes a path through memory by a root variable and a potentially empty sequence of references $[[ AP_seq ]]$.
+The empty sequence is denoted $[[ . ]]$. We abbreviate $[[ x . ]]$ as $[[ x ]]$.
+
+Well-formedness:
+\infrule[WF-Env]{
+  [[ forall x in G. G | B |- G(x) ]]
+}{
+  [[B |- G]]
+}
+\infrule[WF-Int]{
+  [[G | B |- ph]]
+}{
+  [[G | B |- { nu:int|ph} ]] 
+}
+\infrule[WF-Ref]{
+  [[G | B |- T]]
+}{
+  [[G | B |- T ref r ]]
+}
+\infrule[WF-Phi]{
+  [[ G |- ph ]] \\
+  [[FPCV(ph)]] \subseteq [[CV(B)]]
+}{
+  [[G | B |- ph]]
+}
+\infrule[WF-Result]{
+  [[G | B |- T]] \andalso
+  [[B |- G]]
+}{
+  [[ B |- T => G ]]
+}
+\infrule[WF-FunType]{
+  [[ A |- x1:T1,,xn:Tn ]] \\ [[ A |- T => x1:T1',,xn:Tn' ]]
+}{
+  [[ |- A <x1:T1,,xn:Tn> -> <x1:T1',,xn:Tn'|T> ]]
+}
+\infrule[WF-FunEnv]{
+  [[ forall f in Th.|- Th(f)]]
+}{
+  [[ |- Th ]]
+}
+
+
+Well-typed predicates:
+
+\begin{center}
+\bcprulessavespacetrue
+\infax[Pr-Top]{ [[G |- Top]] }
+\infax[Pr-Top]{ [[G |- CQP]] }
+\infrule[Pr-Not]{
+  [[G |- ph]]
+}{ [[ G |- !ph ]] }
+\infrule[Pr-Or]{
+  [[ G |- ph1 ]] \andalso [[ G |- ph2 ]]
+}{ [[ G |- ph1 \/ ph2 ]] }
+
+\infrule[Pr-Eq]{
+  [[ G |- pval1 ]] \andalso [[G |- pval2]]
+}{ [[G |- pval1 = pval2]] }
+\infrule[Pr-App]{
+  [[ G |- pval1 ]] \andalso \cdots \andalso [[ G |- pvaln ]]
+}{ [[ G |- pfun(pval1,..,pvaln) ]]}
+\bcprulessavespacefalse
+\end{center}
+
+Well-typed predicate values
+\begin{center}
+  \bcprulessavespacetrue
+  \infax[Pv-Int]{ [[ G |- nn ]] }
+  \infax[Pv-Nu]{ [[ G |- nu ]] }
+  \infrule[Pv-AP]{
+    [[ AP_seq ~> G(x) ]]
+  }{ [[ G |- x AP_seq  ]] }
+
+  \infax[AP-Eps]{ [[ . ~> { nu: int | _ } ]] }
+  \infrule[AP-Cons]{
+    [[ AP_seq ~> T ]] \andalso r > 0
+  }{
+    [[ ->* AP_seq ~> T ref r ]]
+  }
+  \bcprulessavespacefalse
+\end{center}
+
+The addition operator is defined as in the ESOP 2020 paper.
+
+We assume that $[[ x AP_seq ]]$ is a valid variable in the underlying logic; it can be lifted to one using consistent substitution.
+
+The denotation operation is defined as:
+
+\begin{align*}
+  [[ [G, x:T] ]] & = [[ [T] x /\ [G] ]] \\
+  [[ [empty] ]] & = [[ Top ]] \\
+  [[ [{nu:int|ph} ] AP ]] & = [[ [AP/nu] ph ]] \\
+  [[ [T ref r ] x AP_seq ]] & = [[ [T] x AP_seq ->* ]] 
+\end{align*}
+
+We define a new strengthening operation $[[ T /\ nu = AP ]]$ as:
+
+\begin{align*} 
+  [[ {nu:int|ph} /\ nu = AP ]] & \triangleq [[ {nu:int|ph /\ nu = AP } ]] \\
+  [[ T ref 0 /\ nu = AP ]] & \triangleq [[ T ref 0 ]] \\
+  [[ T ref r /\ nu = AP ]] & \triangleq [[ (T /\ nu = AP->*) ref r ]] \text{ if ($r > 0$)}
+\end{align*}
+
+We now describe the type rules for the extended type system.
+We omit the rules for \rn{T-Assert, T-Seq, T-If, T-LetInt, T-Var, T-Alias, T-AliasPtr, T-Sub} as they are unchanged.
+
+\infrule[T-Assign]{
+  (\text{The shapes of $[[T']]$ and $[[T2]]$ are similar}) \\
+  [[ B |- G \ y ]] \\
+  [[ Th | G[x <- T1 /\ nu = y->*][y: (T2 /\ nu = x) ref 1] | B |- e : T => G' ]]
+}{ [[ Th | G[x: T1 + T2][y: T' ref 1] | B |- y := x ; e : T => G' ]] }
+
+\infrule[T-Let]{
+  [[ Th | G[x <- T1 /\ nu = y],y : T2 /\ nu = x | B |- e : T => G' ]] \andalso [[ x not in dom G ]]
+}{[[ Th | G[x: T1 + T2] | B |- let x = y in e : T => G' ]]}
+
+\infrule[T-Deref]{
+  [[ T1' ]] = \begin{cases}
+    [[ T1 /\ nu = x ]] & [[r > 0]] \\
+    [[ T1 ]] & [[ r = 0 ]]
+  \end{cases}  \\
+  [[ T2' ]] = \begin{cases}
+    [[ T2 /\ nu = y->* ]] & [[ r > 0 ]] \\
+    [[ T2 ]] & [[ r = 0 ]]
+  \end{cases} \\
+  [[ Th | G[y <- T1' ref r], x : T2' | B |- e : T => G']] \\
+  [[ x not in dom G' ]]
+}{
+  [[ Th | G[y: (T1 + T2) ref r] | B |- let x = *y in e : T => G' ]]
+}
+
+\infrule[T-MkRef]{
+  [[ Th | G[y <- T1 /\ nu = x->*], x : (T2 /\ nu = y) ref 1 | B |- e : T => G' ]] \\
+  [[ x not in dom G' ]]
+}{ [[ Th | G[y : T1 + T2] | B |- let x = mkref y in e : T => G' ]] }
+
+\infrule[T-Call]{
+  [[csub = [l:B/A] ]] \andalso [[ vsub = [y1/x1] ,, [yn/xn] ]] \\
+  [[ Th(f) = A < x1 : T1 ,, xn : Tn > -> < x1 : T1' ,, xn : Tn' | T > ]] \\
+  [[ G1(yi) = Ti'' + csub vsub Ti ]] \\
+  [[ G2[yi <- Ti''] ]] \andalso [[ B |- G2 ]] \\
+  [[ G3 = G1[yi <- Ti'' + csub vsub Ti'],z : csub vsub T ]] \\
+  [[ Th | G3 | B |- e : T' => G4 ]] \andalso [[ z not in dom G4 ]]
+}{
+  [[ Th | G1 | B |- let z = f l (y1,,yn) in e : T' => G4 ]]
+}
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
