@@ -133,6 +133,8 @@ grammar
 	| H ( Rv ) :: :: lkp
 	| v :: :: const
 	| nn :: :: z
+	| VM ( AP ) :: :: vm_lkp
+	| HM ( w ) :: :: hm_lkp
 
   E :: E_ ::=    {{ com evaluation context }}
     | []                ::   :: hole
@@ -217,18 +219,19 @@ grammar
 	| AP :: :: ap_rule
 
   AP {{ tex \pi }} :: 'AP_' ::=
-	| x AP_seq :: :: deref
+	| x w :: :: deref
 	| AP AP_step :: :: cons
 	| x :: :: var
 
-  AP_seq {{ tex \oldvec{\star} }} :: 'APseq_' ::=
+  w {{ tex \oldvec{\star} }} :: 'APseq_' ::=
     | AP_step1 ,, AP_step2 :: :: list {{tex [[AP_step1]] \cdots [[AP_step2]] }}
-	| AP_seq AP_step :: :: consr
-	| AP_step AP_seq :: :: consl
+	| w AP_step :: :: consr
+	| AP_step w :: :: consl
 	| . :: :: empty {{ tex \epsilon }}
 
   AP_step :: 'APs_' ::=
     | ->* :: :: deref {{ tex \star }}
+	| 0 :: :: deref_alt {{ tex \star }}
 
   pval {{ tex \widehat{v} }} :: 'LV_' ::= 
   	| pvar :: :: var
@@ -249,6 +252,7 @@ grammar
 	| [ l / c ] :: :: concrete_sub
 	| vsub1 vsub2 :: :: concat
 	| [ AP / nu ] :: :: apsub {{ tex [ [[AP]] / [[nu]] ] }}
+	| [ H , R ] :: :: path_sub
 	
 
   T {{ tex \tau }} :: T_ ::=                              {{ com type }}
@@ -261,7 +265,8 @@ grammar
                                         {{ tex [[T]] \TREF^{[[r]]} }}
     | ( T )               :: S :: paren
     | T1 + T2             :: M :: sum
-    | G ( x )             :: M :: lookup
+	| G ( AP ) :: :: lookup
+	| T ( w ) :: :: traverse
 	| csub T :: :: subst_context
 	| vsub T :: M :: subst_var
 	| T1 /\ x ph :: :: strength {{ tex [[T1]] \wedge_{[[x]]} [[ph]] }}
@@ -468,7 +473,7 @@ grammar
 	| H |- Rv ~> nn :: :: shape_move {{ tex [[H]][[|-]] [[Rv]] \Downarrow [[nn]] }}
 	| G |- ph :: :: typecheck_pred
 	| G |- pval :: :: typecheck_pval
-	| AP_seq ~> T :: :: cons_seq {{ tex [[AP_seq]] \Downarrow [[ T ]] }}
+	| w ~> T :: :: cons_seq {{ tex [[w]] \Downarrow [[ T ]] }}
 
   bind :: 'Bin_' ::= {{ com mapping function domains }}
     | x :: :: pvar
@@ -498,6 +503,12 @@ grammar
 	| VS1 '\' VS2 :: :: minus {{ tex [[VS1]] \setminus [[VS2]] }}
 	| null :: :: eset {{ tex \emptyset }}
 	| Addr :: :: addresses {{ tex \textbf{Addr} }}
+
+  VM {{ tex \mathcal{M} }}  :: 'VM_' ::=
+    | [ H , R ] :: :: denote
+
+  HM {{ tex \mathcal{H} }} :: 'HM_' ::=
+    | [ H , Rv ] :: :: denote
 
   EqT :: 'EqT_' ::= {{ com equatable terms }}
     | e :: :: expt

@@ -13,6 +13,7 @@
 \usepackage{wrapfig}
 \usepackage{paralist}
 \usepackage[numbers,sectionbib,sort]{natbib}
+\usepackage{cleveref}
 \input{local}
 \input{flow-lang}
 \begin{document}
@@ -27,7 +28,7 @@ Types and refinements:
                                & & \mid & [[ pval1 = pval2 ]] \\
                                  & & \mid & \mathcal{CP} \\
     \text{\scriptsize Refinement Values} & [[ pval ]] & ::= & [[ AP ]] \mid [[ nn ]] \mid [[ nu ]] \\
-    \text{\scriptsize Access Paths} & [[ AP ]] & ::= & [[ x AP_seq ]] \\
+    \text{\scriptsize Access Paths} & [[ AP ]] & ::= & [[ x w ]] \\
     \text{\scriptsize Function Types} & [[FT]] & ::= & [[ A <x1 : T1 ,, xn : Tn> \\ & & & -> <x1: T1' ,, xn : Tn' | T> ]] \\
     \text{\scriptsize Context Variables} & [[A]] & \in & \CVar \\
     \text{\scriptsize Concrete Context} & [[ ll ]] & ::= & [[ l : ll ]] \mid [[ . ]] \\
@@ -37,7 +38,7 @@ Types and refinements:
   \end{array}
 \]
 
-An access path denotes a path through memory by a root variable and a potentially empty sequence of references $[[ AP_seq ]]$.
+An access path denotes a path through memory by a root variable and a potentially empty sequence of references $[[ w ]]$.
 The empty sequence is denoted $[[ . ]]$. We abbreviate $[[ x . ]]$ as $[[ x ]]$.
 
 Well-formedness:
@@ -108,21 +109,21 @@ Well-typed predicate values
   \infax[Pv-Int]{ [[ G |- nn ]] }
   \infax[Pv-Nu]{ [[ G |- nu ]] }
   \infrule[Pv-AP]{
-    [[ AP_seq ~> G(x) ]]
-  }{ [[ G |- x AP_seq  ]] }
+    [[ w ~> G(x) ]]
+  }{ [[ G |- x w  ]] }
 
   \infax[AP-Eps]{ [[ . ~> { nu: int | _ } ]] }
   \infrule[AP-Cons]{
-    [[ AP_seq ~> T ]] \andalso r > 0
+    [[ w ~> T ]] \andalso r > 0
   }{
-    [[ ->* AP_seq ~> T ref r ]]
+    [[ ->* w ~> T ref r ]]
   }
   \bcprulessavespacefalse
 \end{center}
 
 The addition operator is defined as in the ESOP 2020 paper.
 
-We assume that $[[ x AP_seq ]]$ is a valid variable in the underlying logic; it can be lifted to one using consistent substitution.
+We assume that $[[ x w ]]$ is a valid variable in the underlying logic; it can be lifted to one using consistent substitution.
 
 The denotation operation is defined as:
 
@@ -130,7 +131,7 @@ The denotation operation is defined as:
   [[ [G, x:T] ]] & = [[ [T] x /\ [G] ]] \\
   [[ [empty] ]] & = [[ Top ]] \\
   [[ [{nu:int|ph} ] AP ]] & = [[ [AP/nu] ph ]] \\
-  [[ [T ref r ] x AP_seq ]] & = [[ [T] x AP_seq ->* ]] 
+  [[ [T ref r ] x w ]] & = [[ [T] x w ->* ]] 
 \end{align*}
 
 We define a new strengthening operation $[[ T /\ nu = AP ]]$ as:
@@ -184,6 +185,82 @@ We omit the rules for \rn{T-Assert, T-Seq, T-If, T-LetInt, T-Var, T-Alias, T-Ali
 }{
   [[ Th | G1 | B |- let z = f l (y1,,yn) in e : T' => G4 ]]
 }
+
+\section{Proofs}
+
+Define the partial type lookup operation $[[ G ( AP ) ]]$ as:
+
+\begin{align*}
+  [[ G (x w) ]] & = [[ G(x)(w) ]] \\
+  [[ T(.) ]] & = [[ T ]] \\
+  [[ (T' ref r)( ->* w ) ]] & = [[ T'(w) ]]
+\end{align*}
+
+\JT{defining this traversal as a map operation on $[[T]]$ is gross}
+
+$[[ [H, v] ]]$ is the partial function from $[[ w ]]$ to values $[[ Rv ]]$
+defined by
+
+\begin{align*}
+  [[ [H,v](.) = v ]] && [[ [H,v](->* w ) ]] = \begin{cases}
+    H(a) & \text{if } [[ [H,v](w) = a /\ a in dom H ]] \\
+    \mathit{undef} & o.w.
+  \end{cases}
+\end{align*}
+
+$[[ [H, R] ]]$ is the partial map from $[[ AP ]]$ to values $[[ Rv ]]$ defined by
+$[[ [H, R](x w) = [ H, R(x) ](w) ]]$
+
+\begin{lemma}\label{lemma:framed-update-pred}
+  If $[[ G \ x | B |- ph ]]$ and for all $y \neq x$ we have
+  $[[own(H, R(y), G(y))(a) = 0]]$, then $[[ [H, R][nn/nu]ph ]]$
+  is equivalent to $[[ [ H { a <- Rv' }, R ][nn/nu]ph ]]$ where $[[R(x) = a]]$.
+\end{lemma}
+\begin{proof}
+  Suppose not. Then there must be some access path $[[ AP ]]$ in $[[ ph ]]$ such that
+  for some prefix of the path (called $[[ AP' ]]$) we have $[[ [H, R](AP') = a ]]$. From
+  $[[ G \ x | B |- ph ]]$ we must have that $[[ AP' ]]$ cannot be rooted in $[[ x ]]$,
+  and must therefore be rooted in some other variable $[[ z ]]$, whereby
+  $[[ own(H, R(z), G(z))(a) = 0 ]]$. But we must then have $[[ G(AP') = T' ref 0 ]]$, which
+  contradicts our assumption that $[[ G \ x | B |- ph ]]$.
+\end{proof}
+
+\begin{lemma}
+  For any $[[ x ]], [[ a ]], [[ R ]], [[ H ]]$, $[[ G ]]$, and $[[nn]]$ such that
+  $[[ R(x) = a ]]$, $[[ H |- Rv' ~> nn ]]$, $[[ H |- H(a) ~> nn ]]$ and where for all
+  $y \neq x$ we have $[[own(H, R(y), G(y))(a) = 0]]$:
+  \begin{enumerate}
+  \item $[[ H { a <- Rv' } |- Rv' ~> nn ]]$
+  \item If $[[ G \ x | B |- T ]]$, $[[ own(H, Rv, T)(a) = 0]]$, and $[[ SATv(H, R, Rv, T) ]]$
+    then $[[ SATv(H { a <- v' }, R, Rv, T) ]]$.
+  \item If $[[ B |- G \ x ]]$, and $[[SATv(H, R, Rv, G(z))]]$, then $[[ SATv(H { a <- Rv }, R, Rv, G(z)) ]]$
+  \end{enumerate}
+\end{lemma}
+\begin{proof}\leavevmode
+  \begin{enumerate}
+  \item From $[[ H |- Rv' ~> nn ]]$ and $[[ H |- H(a) ~> nn ]]$, we must have that for
+    any possible sequence $[[ w ]]$, $[[ [ H, Rv' ] (w) != a ]]$ (if we did, then
+    we would have that $[[ Rv ]]$ reaches an integer along paths of different lengths, a clear
+    contradiction). Then the value of $[[ a ]]$ in $[[ H ]]$ is irrelevant to the derivation
+    of $[[ H |- Rv' ~> nn ]]$, giving $[[ H { a <- Rv' } |- Rv' ~> nn ]]$.
+  \item By induction on the shape of $[[ T ]]$. In the base case where $[[ T = {nu:int|ph} ]]$, from $[[ G \ x | B |- T ]]$
+    we have $[[ G \ x | B |- ph ]]$, where by from \Cref{lemma:framed-update-pred} we have $[[ [H, R][nn/nu]ph ]]$ is equivalent to
+    $[[ [H { a <- Rv' }, R][nn/nu]ph ]]$ whereby the result holds by assumption.
+
+    In the inductive step, we have $[[ T = T' ref r ]]$, and $[[ Rv = a' ]]$.
+    Suppose $[[ a = a' ]]$: from $[[ own(H, Rv, T)(a) = 0 ]]$ we must then have $[[ r = 0 ]]$,
+    whereby $[[ T' = topn ]]$. From \Cref{lem:top-type-path-sat}, item 1 above,
+    \JT{the lemma that any shape consistent values satisfy the top type}, we have
+    $[[ SATv(H { a <- Rv' }, R, a, T) ]]$.
+
+    Otherwise $[[ a != a' ]]$ in which case the result holds by inversion on
+    $[[ G \ x | B |- T ]]$, $[[ own(H, Rv, T' ref r)(a) = 0 ]]$ and the inductive hypothesis.
+
+  \item Immediate result of item 2.
+  \end{enumerate}
+\end{proof}
+
+
 
 \end{document}
 %%% Local Variables:
