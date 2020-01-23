@@ -1,6 +1,7 @@
 \let\oldvec\vec
 \documentclass[runningheads]{llncs}
 \usepackage{bcprules}\typicallabel{T-Hoge}
+\usepackage{bcpproof}
 \usepackage{graphicx,xcolor}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -16,6 +17,11 @@
 \usepackage{cleveref}
 \input{local}
 \input{flow-lang}
+\makeatletter
+\def\admitted@what[#1]{\textcolor{red}{\textbf{[Admitted: that #1]}}}
+\def\admitted@{\textcolor{red}{\textbf{Admitted}}\xspace}
+\def\admitted{\@ifnextchar[{\admitted@what}{\admitted@}}
+\makeatother
 \begin{document}
 Types and refinements:
 \[
@@ -186,6 +192,14 @@ We omit the rules for \rn{T-Assert, T-Seq, T-If, T-LetInt, T-Var, T-Alias, T-Ali
   [[ Th | G1 | B |- let z = f l (y1,,yn) in e : T' => G4 ]]
 }
 
+\infrule[T-Frame]{
+  [[ B |- Gp ]] \\
+  [[ Th | G | B |- e : T => G' ]]
+}{
+  [[ Th | G + Gp | B |- e : T => G' + Gp ]]
+}
+  
+
 \section{Proofs}
 
 Define the partial type lookup operation $[[ G ( AP ) ]]$ as:
@@ -260,6 +274,75 @@ $[[ [H, R](x w) = [ H, R(x) ](w) ]]$
   \end{enumerate}
 \end{proof}
 
+\begin{lemma}[Preservation]
+  For any $[[ e ]]$ where $[[Th | G1 | B |- e : T => G2 ]]$,
+  for all $[[ e' ]]$ and $[[ E ]]$ such that
+  $[[ Th | [] : T => G2 | B |-e E : T' => G3 ]]$ if
+  $[[ < H, R, Es , E[e] > --> D < H, R, Es, E[e']> ]]$, $[[ B |- Gp ]]$ and
+  $[[ Cons(H, R, G1 + Gp) ]]$ then there exists some $[[ G4 ]]$ such that
+  \begin{enumerate}
+  \item $[[ Cons(H', R', G4 + Gp) ]]$
+  \item $[[ Th | G4 | B |- e' : T => G2 ]]$
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  By induction on the derivation of $[[ Th | G1 | B |- e : T => G2 ]]$.
+  \begin{rncase}{T-Sub}
+    By the inductive hypothesis, that $[[ Own ]]$ is anti-monotone w.r.t the subtyping
+    relation \admitted{}, and the preservation of $[[ Cons ]]$ by subtyping
+    \admitted{} (\Cref{lem:subtyping-preserves-cons}).
+  \end{rncase}
+  \begin{rncase}{T-Frame}
+    Then we have that $[[ Th | G1' | B |- e : T => G2' ]]$ where
+    $[[ G1 = G1' + G1'' ]]$ and $[[ G2 = G2' + G1' ]]$ and where $[[ B |- G1' ]]$.
+    We have $[[ Cons(H, R, G1' + G1'' + Gp) ]]$. We must then have that $[[ B |- G1' + Gp ]]$
+    by \admitted[WF is closed under +].
+    Taking $[[ Gp ]]$ in the inductive hypothesis to be $[[ Gp + G1' ]]$, we
+    then have that $[[ Cons(H', R', G4' + Gp + G1') ]]$ and
+    $[[ Th | G4' | B |- e' : T => G2' ]]$. We take $[[ G4 = G4' + G1' ]]$. Then, by an
+    application of \rn{T-Frame} we have $[[ Th | G4 | B |- e' : T => G2 ]]$, and
+    we then have $[[ Cons(H', R', G4 + Gp) ]]$ from $[[ Cons(H', R', G4' + G1' + Gp) ]]$.
+  \end{rncase}
+
+  \begin{rneqncase}{T-Assign}{
+      [[ e = y := x; e'' ]] & [[ G1(x) = T1 + T2 ]] & [[ G1(y) = T' ref 1 ]] \\
+      [[ |T'| = |T1 + T2| ]] & [[ B |- G1 \ y ]] \\
+      \multicolumn{4}{l}{[[ Th | G[x <- T1 /\ nu = y->*][y <- (T2 /\ nu = x) ref 1] | B |- e' : T => G2 ]]} \\
+      [[ a = R(y) ]] & [[ H' = H { a <- R(x) } ]] & [[ R = R' ]] & [[ e'' = e' ]]
+    }
+    From $[[ Cons(H, R, G1 + Gp) ]]$ and from $[[ G1(y) = T' ref 1 ]]$ we must have that
+    for any variable $[[ z in dom G1 ]], z \neq y$ that
+    $[[ own(H, R(z), G1(z))(a) = 0 ]]$ and similarly for all variables in $[[ dom Gp ]]$.
+
+    We must also have that if $[[ y in Gp ]]$ that $[[ G(y) = topn ref 0 ]]$. Then by
+    \admitted[0 references are not referenced in types], we have $[[ B |- Gp \ y ]]$.
+
+    Next, from \admitted[SATv implies shape consistency], from $[[ SATv(H, R, R(y), T' ref 1) ]]$ we have that $[[ H |- R(y) ~> |T' ref 1| ]]$, whereby we have $[[ H |- H(R(y)) ~> |T'| ]]$. Similarly, from $[[ SATv(H, R, R(x), T1 + T2) ]]$ we have $[[ H |- R(x) ~> |T1 + T1| ]]$.
+
+    From the above, our assumption $[[ B |- G1 \ y ]]$ and  \Cref{lemma:framed-update-pred}
+    we then have $[[ SATv(H', R, R(z), G1(z)) ]]$ for any $[[ z != x ]]$ and
+    $[[ z != y ]]$.
+
+    Similarly, we must have that $[[ SATv(H', R, R(z), Gp(z)) ]]$ by the reasoning above
+    and \Cref{lemma:framed-update-pred}.
+
+    We must also have that $[[ SATv(H', R, R(x), T1 + T2) ]]$. From \admitted[SATv distributes
+    over +], we therefore
+    have $[[ SATv(H', R, R(x), T1) ]]$ and $[[ SATv(H', R, R(x), T2) ]]$. It is then immediate
+    that $[[ SATv(H', R, R(x), T1 /\ nu = y->*) ]]$ and $[[ SATv(H', R, R(x), T2 /\ nu = x) ]]$.
+    From the latter we then have $[[ SATv(H', R, R(y), (T2 /\ nu = x) ref 1) ]]$.
+
+    \JT{The ownership reasoning is entirely similar to the ESOP paper. We can use that
+      $[[ Cons(H, R, G1 + Gp)]]$ and that ownership is only lost in $[[ G1 ]]$ to re-establish
+      ownership consistency for $[[ G4 + Gp ]]$}
+    
+    We take $[[ G4 = G[x <- T1 /\ nu = y->*][y <- (T2 /\ nu = x) ref 1] ]]$ whereby
+    from \admitted[adding SATv envs is Cons]
+    and the previous reasoning we have $[[ Cons(H', R', G4 + Gp) ]]$.
+    That $[[ Th | G4 | B |- e' : T => G2 ]]$ is immediate from our assumption.
+  \end{rneqncase}
+    
+\end{proof}
 
 
 \end{document}

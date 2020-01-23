@@ -318,6 +318,7 @@ grammar
 
   G {{ tex \Gamma }} :: G_ ::=  {{ com type environment }}
     | empty               ::   :: em   {{ tex \bullet }}
+	| G1 + G2 :: :: sep {{ com pointwise addition }}
     | G , x : T           ::   :: vn
 	| G \ x :: :: sub {{ tex [[G]] \setminus [[x]] }}
 	| G , x1 : T1 ,, xn : Tn :: :: append {{ tex [[G]],[[x1]]\COL[[T1]],\ldots,[[xn]]\COL[[Tn]] }}
@@ -332,7 +333,6 @@ grammar
 	| vsub G :: :: subst_var 
     | Gn+1 :: ::gn1 {{ tex \tenv_{n+1} }}
 	| G @ pp :: :: env_at_point {{ tex [[G]]^[[pp]] }}
-	| G1 + G2 :: :: env_comb {{ tex [[G1]] \uplus [[G2]] }}
 
   rel_op :: Rel ::=
     | <= :: :: le
