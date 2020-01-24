@@ -188,7 +188,7 @@ is valid within some chosen logic (see \Cref{sec:types}); in \rn{R-AssertFail} w
 when the formula is \emph{not} valid.
 The substitution operation $[[ [R]ph ]]$ is defined inductively as $[[ [empty] ph = ph ]], [[ [R { x |-> nn }]ph = [R][nn/x]ph ]], [[ [R { x |-> a }] ph = [R]ph ]]$.
 In the case of an assertion failure, the semantics steps to a distinguished
-configuration $[[AssertFail]]$. The goal of our type system to show that no
+configuration $[[AssertFail]]$. The goal of our type system is to show that no
 execution of a well-typed program may reach this configuration.
 The \imp{alias} form checks whether the two references actually alias;
 i.e., if the must-alias assertion provided by the programmer is correct.

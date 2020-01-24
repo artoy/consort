@@ -375,7 +375,7 @@ environment for $[[e1]]$ is the input type environment for $[[e2]]$.
 \rn{T-LetInt} is also straightforward; since $[[x]]$ is bound to a
 constant, it is given type $[[{nu:int|nu=nn}]]$ to indicate $[[x]]$ is
 exactly $[[nn]]$.  The output type environment $[[G']]$ cannot mention
-$[[x]]$ (expressed with $[[x not in dom G]]$)
+$[[x]]$ (expressed with $[[x not in dom G']]$)
 to prevent $[[x]]$ from escaping its scope.  This requirement
 can be met by applying the subtyping rule (see below) to weaken
 refinements to no longer mention $[[x]]$. As in other refinement type
