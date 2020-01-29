@@ -137,7 +137,7 @@ To understand the benefit of this approach, let us return to
 reference with no aliases, its type indicates it returns a
 reference with ownership 1. Thus, our type system can initially
 give \imp{p} and \imp{q} types $[[ { nu:int|nu = 3} ref 1 ]]$ and $[[ {nu:int|nu = 5} ref 1]]$ respectively. The ownership $[[1]]$ on the reference type constructor $\TREF$ indicates both
-pointers hold ``exclusive'' ownership of the pointed to reference cell;
+pointers hold ``exclusive'' ownership of the pointer to a reference cell;
 from the invariant of fractional ownership types \imp{p} and \imp{q}
 must not alias. The types of both references
 can be strongly updated \emph{without} requiring spurious weak updates. As a result,

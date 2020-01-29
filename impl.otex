@@ -62,7 +62,7 @@ constraint of the form: $[[ [G@pp] ==> ph ]]$
 which requires the refinements on integer typed variables
 in scope are sufficient to prove $[[ph]]$.
 
-\paragraph{Encoding Context Sensitivity}
+\paragraph{Encoding Context Sensitivity.}
 To make inference tractable, we require the user to fix \emph{a
   priori} the maximum length of prefix queries to a constant $k$ (this
 choice is easily controlled with a command line parameter to our tool). We
@@ -90,7 +90,7 @@ propagates this value of $[[c0]]$ to $[[c1]]$ within $[[g]]$ and so on.
 The solver may then instantiate relation symbols with predicates
 that are conditional over the values of $[[ci]]$.
 
-\paragraph{Solving Constraints}
+\paragraph{Solving Constraints.}
 The results of the above process are two systems of constraints;
 real arithmetic constraints over
 ownership variables and constrained Horn clauses (CHC) over the refinement relations.
@@ -120,7 +120,7 @@ in parallel, using the first available result.
 
 \subsection{Extensions}
 
-\paragraph{Primitive Operations}
+\paragraph{Primitive Operations.}
 As defined in \Cref{sec:prelim}, our language can compare integers to zero and load
 and store them from memory, but can perform no meaningful computation
 over these numbers. To promote the flexibility of our type system and simplify
@@ -130,13 +130,13 @@ Instead, we assume any set of primitive operations
 used in a program are given sound function types in $[[Th]]$.
 For example, under the assumption that $+$ has its usual semantics
 and the underlying logic supports $+$, we can give $+$ the type
-$[[A <x:top, y:top> -> <x:top, y:top|{nu:int|nu = x + y}>]]$.
+$[[A <x:top0, y:top0> -> <x:top0, y:top0|{nu:int|nu = x + y}>]]$.
 Interactions with a nondeterministic environment
 or unknown program inputs can then be modeled with a primitive
 that returns integers refined with $[[Top]]$.
 
 
-\paragraph{Dependent Tuples}
+\paragraph{Dependent Tuples.}
 Our implementation supports types of the form:
 $[[ (x1: T1 ,, xn: Tn) ]]$, where $[[xi]]$ can appear within $[[Tj]]$
 ($j\neq i$) if $[[Ti]]$ is an integer type. For example,
@@ -155,7 +155,7 @@ straightforward; the arguments for a
 predicate symbol include any enclosing dependent tuple names
 and the environment in subtyping constraints is likewise extended.
 
-\paragraph{Recursive Types}
+\paragraph{Recursive Types.}
 Our language also supports some unbounded heap structures via recursive
 reference types. To keep inference tractable, we forbid nested
 recursive types, multiple occurrences of the recursive type variable,
@@ -185,7 +185,7 @@ guarantees are made modulo freedom of null dereferences. As $[[ [G] ]]$
 omits refinements under reference types, null pointer refinements do not affect
 the verification of programs without null pointer dereferences.
 
-\paragraph{Arrays}
+\paragraph{Arrays.}
 Our implementation supports arrays of integers. Each array is given
 an ownership describing the ownership of memory allocated for the entire array.
 The array type contains two refinements: the first refines the length of the array itself,

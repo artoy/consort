@@ -30,7 +30,7 @@ invariants on object fields to be broken during a limited period of time
 \cite{barnett2011specification,flanagan2002extended}. In particular, the work on
 Spec\# \cite{barnett2011specification} uses an ownership system which tracks
 whether object $a$ owns object $b$; like \name's ownership system,
-these ownerships are used contain the effects of mutation. However, Spec\#'s ownership
+these ownerships contain the effects of mutation. However, Spec\#'s ownership
 is quite strict and does not admit references to $b$ outside of the owning object $a$.
 % These techniques implicitly use \emph{type-based} abstract heap; like the
 % techniques above, any temporarily broken invariants on an abstract location
@@ -65,7 +65,7 @@ This invariant is maintained with a splitting operation that
 is similar to our $+$ operator.
 Further, their type system allows strong updates to reference refinements
 provided the new refinements are preserved by the rely predicate.
-Thus, rely-guarantee refinement support multiple
+Thus, rely--guarantee refinement support multiple
 mutable, aliased references with non-trivial refinement information. Unfortunately this
 expressiveness comes at the cost of automated inference and verification; an embedding
 of this system into Liquid Haskell \cite{vazou2014refinement} described in
@@ -132,7 +132,7 @@ variant of separation logic for a concurrent programming
 language~\cite{DBLP:conf/popl/BornatCOP05} to express sharing of read
 permissions among several threads.  Our previous
 work~\cite{suenaga2009fractional,suenaga2012type}, inspired by that
-in \cite{terauchi2008checking,DBLP:conf/popl/BornatCOP05} proposed methods for type-based
+in \cite{terauchi2008checking,DBLP:conf/popl/BornatCOP05}, proposed methods for type-based
 verification of resource-leak freedom, in which a rational number
 expresses an \emph{obligation} to deallocate certain resource, not
 just a permission.\looseness=-1

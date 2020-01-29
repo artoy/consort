@@ -154,7 +154,7 @@ environment and relax well-formedness to ignore variable binding order.
 \AI{If we are desperate for space, we might want to omit ``$[[pval1 = pval2]]$'' (which could be assumed in $[[pfun]]$) and ``$[[Top]]$'' (which could be expressed by, say, $[[0=0]]$) from the syntax of refinements.}
 
 
-\paragraph{Function Types, Contexts, and Context Polymorphism}
+\paragraph{Function Types, Contexts, and Context Polymorphism.}
 Our type system achieves context sensitivity
 by allowing function types to depend on where a function
 is called, i.e., the \emph{execution context} of the function invocation.
@@ -234,7 +234,7 @@ maps from function names ($[[f]]$) to function types ($[[FT]]$).
   metavariables).  But, I don't think we want to prepare new symbols
   for the sets of function names and function types.}
 
-\paragraph{Well Formedness}
+\paragraph{Well Formedness.}
 We impose two well-formedness conditions on types:
 \emph{ownership well-formedness} and \emph{refinement well-formedness}.
 The ownership condition is purely syntactic:
@@ -557,7 +557,7 @@ soundness claim (\Cref{sec:soundness}).
   \label{fig:subtyping}
 \end{figure}
 
-\paragraph{Destructive Updates, Aliasing, and Subtyping}
+\paragraph{Destructive Updates, Aliasing, and Subtyping.}
 We now discuss the handling of assignment, aliasing annotations,
 and subtyping as described in \Cref{fig:pointer-typing}.
 Although apparently unrelated, all three concern
