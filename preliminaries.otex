@@ -168,7 +168,7 @@ The semantics is mostly standard; we highlight some important points below.
 
 Return contexts $[[CE]]$ take the form $[[ E[let y = [] l in e] ]]$. A return context represents a pending
 function call with label $[[l]]$, and indicates that $[[y]]$ should be bound to
-the return value of the callee to execute $[[e]]$ within the larger execution context $[[E]]$.
+the return value of the callee during the execution of $[[e]]$ within the larger execution context $[[E]]$.
 The call stack $[[Es]]$ is a sequence of these contexts, with
 the first such return context representing the most recent function call.
 The stack grows at function calls as described by rule \rn{R-Call}.
