@@ -137,8 +137,8 @@ that returns integers refined with $[[Top]]$.
 
 
 \paragraph{Dependent Tuples.}
-Our implementation supports types of the form:
-$[[ (x1: T1 ,, xn: Tn) ]]$, where $[[xi]]$ can appear within $[[Tj]]$
+Our implementation supports types of the form: $( [[ x1 ]] : [[ T1 ]], \ldots,$ $[[ xn]]:[[Tn]])$,
+where $[[xi]]$ can appear within $[[Tj]]$
 ($j\neq i$) if $[[Ti]]$ is an integer type. For example,
 $[[ (x: {nu:int|Top}, y:{nu:int|nu>x})]]$ is the type of tuples whose
 second element is strictly greater than the first. We also extend

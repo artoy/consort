@@ -65,7 +65,7 @@ programs do not encounter assertion failures.
 % \end{remark}
 
 \begin{figure}[t]
-  \begin{minipage}{0.45\textwidth}
+  \begin{minipage}{0.2\textwidth}
   \[
     \begin{array}{rrcl}
       \text{\scriptsize Types} & [[ T ]] % & \in & \mathbf{Types} \\
@@ -75,13 +75,13 @@ programs do not encounter assertion failures.
                                & & \mid & [[ pfun(pval1,..,pvaln) ]] \\
                                & & \mid & [[ pval1 = pval2 ]] \\
                                  & & \mid & \mathcal{CP} \\
-      \text{\scriptsize Refinement Values} & [[ pval ]] & ::= & [[ x ]] \mid [[ nn ]] \mid [[ nu ]] \\
+      \text{\scriptsize Ref. Values} & [[ pval ]] & ::= & [[ x ]] \mid [[ nn ]] \mid [[ nu ]] \\
 %      \text{\scriptsize Type Env.} & [[G]] & \in & \mathbf{Var} \ra_{\textrm{fin}} \mathbf{Types}
     \end{array}
   \]
 \end{minipage}
 \hfill
-\begin{minipage}{0.49\textwidth}
+\begin{minipage}{0.59\textwidth}
   \[
     \begin{array}{rrcl}
       \text{\scriptsize Function Types} & [[FT]] & ::= & [[ A <x1 : T1 ,, xn : Tn> \\ & & & -> <x1: T1' ,, xn : Tn' | T> ]] \\
@@ -94,7 +94,7 @@ programs do not encounter assertion failures.
     \end{array}
   \]
   \end{minipage}
-  \caption{Syntax of types, refinements, and contexts}
+  \caption{Syntax of types, refinements, and contexts.}
   \label{fig:types}
 \end{figure}
 
@@ -581,11 +581,11 @@ by ownership well-formedness may only contain the $[[Top]]$ refinement.
 
 \begin{example}
   We can type the program as follows:
-  \begin{lstlisting}
-    let x = mkref 5 in       // $\color{comment-green}{[[x:{nu:int|nu=5} ref 1]]}$
-    let y = x in             // $\color{comment-green}{[[x:top1,y:{nu:int|nu=5} ref 1]]}$
-    y := 4; assert(*y = 4) // $\color{comment-green}{[[x:top1,y:{nu:int|nu=4} ref 1]]}$
-  \end{lstlisting}
+\begin{lstlisting}
+let x = mkref 5 in       // $\color{comment-green}{[[x:{nu:int|nu=5} ref 1]]}$
+let y = x in             // $\color{comment-green}{[[x:top1,y:{nu:int|nu=5} ref 1]]}$
+  y := 4; assert(*y = 4) // $\color{comment-green}{[[x:top1,y:{nu:int|nu=4} ref 1]]}$
+\end{lstlisting}
   In this and later examples, we include type annotations within comments. We stress
   that these annotations are for expository purposes only; our tool can infer these types
   automatically with no manual annotations.
@@ -619,11 +619,11 @@ hold for contents of the other and vice versa.
 
 \begin{example}[Shuffling ownerships and refinements]
   Let $[[(=nn)]]$ be $[[nu = nn]]$.
-  \begin{lstlisting}
-    let x = mkref 5 in     // $\color{comment-green}{[[x:{nu:int|(=5)} ref 1]]}$
-    let y = x in           // $\color{comment-green}{[[x:top1,y:{nu:int|(=5)} ref 1]]}$
-    y := 4; alias(x = y) // $\color{comment-green}{[[x:{nu:int|(=4)} ref 0.5,y:{nu:int|(=4)} ref 0.5]]}$    
-  \end{lstlisting}
+\begin{lstlisting}
+let x = mkref 5 in     // $\color{comment-green}{[[x:{nu:int|(=5)} ref 1]]}$
+let y = x in           // $\color{comment-green}{[[x:top1,y:{nu:int|(=5)} ref 1]]}$
+  y := 4; alias(x = y) // $\color{comment-green}{[[x:{nu:int|(=4)} ref 0.5,y:{nu:int|(=4)} ref 0.5]]}$    
+\end{lstlisting}
   The final type assignment for $[[x]]$ and $[[y]]$ is justified by
   \begin{align*}
     &[[top1 + {nu:int|(=4)} ref 1 = {nu:int|Top /\ (=4)} ref 1]][[~]]\\
@@ -644,13 +644,13 @@ that only a small number of annotations are required for larger programs.
   \label{exmp:shuffle-example}
   Let $[[(=nn)]]$ again be $[[nu = nn]]$.
   The following program uses two live, aliased references to mutate the same memory location:
-  \begin{lstlisting}
-    let x = mkref 0 in
-    let y = x in             // $\color{comment-green}{[[x:{nu:int|(=0)} ref 1,y:top1]]}$
-      x := 1; alias(x = y);  // $\color{comment-green}{[[x:top1,y:{nu:int|(=1)} ref 1]]}$
-      y := 2; alias(x = y);  // $\color{comment-green}{[[x:{nu:int|(=2)} ref 0.5,y:{nu:int|(=2)} ref 0.5]]}$
-      assert(*x = 2)
-  \end{lstlisting}
+\begin{lstlisting}
+let x = mkref 0 in
+let y = x in            // $\color{comment-green}{[[x:{nu:int|(=0)} ref 1,y:top1]]}$
+  x := 1; alias(x = y); // $\color{comment-green}{[[x:top1,y:{nu:int|(=1)} ref 1]]}$
+  y := 2; alias(x = y); // $\color{comment-green}{[[x:{nu:int|(=2)} ref 0.5,y:{nu:int|(=2)} ref 0.5]]}$
+  assert(*x = 2)
+\end{lstlisting}
   % The types shown in the comments give the type environment under
   % which the first statement on the line is typed.
   After the first aliasing
