@@ -38,7 +38,7 @@ is quite strict and does not admit references to $b$ outside of the owning objec
 % fixed invariant.
 
 Viper \cite{heule2013verification,mueller2016viper}
-(and its related projects \cite{heule2013abstract,leino2010deadlock}) use 
+(and its related projects \cite{heule2013abstract,leino2010deadlock}) uses
 access annotations (expressed as permission predicates) to explicitly transfer access/mutation
 permissions for references between static program names. Like \name,
 permissions may be fractionally transferred, allowing temporary shared, immutable
