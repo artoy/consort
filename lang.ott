@@ -148,11 +148,6 @@ grammar
     | CE : Es            ::   :: cons
     | Fn-1 : Es          ::   :: cons_new
 
-  ineq :: 'IE_' ::=
-    | = :: :: eq {{ tex \subseteq }}
-	| != :: :: ineq {{ tex \not\subseteq }}
-	| ?= :: :: unk_eq {{ tex \overset{?}{\subseteq} }}
-
   plhs {{ tex \mathcal{C} }} :: 'PLhs_' ::=
     | B :: :: ty_con
 	| l : plhs :: :: param_pref {{ tex [[l]] : [[plhs]] }}
@@ -162,8 +157,8 @@ grammar
     | ll :: :: prefix {{ tex [[ll]] }}
 
   prefix_op :: 'Pop_' ::= {{ com prefix operator }}
-    | <= :: :: subset {{ tex \subseteq }}
-	| </= :: :: not_subseteq {{ tex \not\subseteq }}
+    | <= :: :: subset {{ tex \preceq }}
+	| </= :: :: not_subseteq {{ tex \not\preceq }}
 
   CQP {{ tex \mathcal{CP} }}:: 'PQ_' ::= {{ com prefix query }}
     | prhs prefix_op plhs :: :: query {{ tex [[prhs]] [[prefix_op]] [[plhs]] }}
