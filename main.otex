@@ -64,7 +64,7 @@
    \def\@urlcolor{blue}%
    \def\@linkcolor{blue}%
 \def\UrlFont{\rmfamily}
-\def\orcidID#1{\smash{\href{http://orcid.org/#1}{\protect\raisebox{-1.25pt}{\protect\includegraphics{orcid_color.eps}}}}}
+\def\orcidID#1{\smash{\href{http://orcid.org/#1}{\protect\raisebox{-1.25pt}{\protect\includegraphics{orcid_color}}}}}
 \makeatother
 
 \ifdraftComments
@@ -144,8 +144,8 @@ feedback and suggestions, and Yosuke Fukuda and Alex Potanin for their feedback 
 This work was supported in part by JSPS KAKENHI, grant numbers JP15H05706 and JP19H04084,
 and in part by the JST ERATO MMSD Project.\looseness=-1}
 
-\bibliographystyle{plain}
-\bibliography{main.bib}
+\bibliographystyle{splncs04}
+\bibliography{main}
 
 \vfill
 
@@ -153,7 +153,7 @@ and in part by the JST ERATO MMSD Project.\looseness=-1}
 
 {\small \spaceskip .28em plus .1em minus .1em The images or other third party material in this chapter are included in the chapter's Creative Commons license, unless indicated otherwise in a credit line to the material.~If material is not included in the chapter's Creative Commons license and your intended\break use is not permitted by statutory regulation or exceeds the permitted use, you will need to obtain permission directly from the copyright holder.}
 
-\medskip\noindent\includegraphics{cc_by_4-0.eps}
+\medskip\noindent\includegraphics{cc_by_4-0}
 \newpage
 \iffullversion\input{appendix}\fi
 
