@@ -148,11 +148,6 @@ its corresponding well-formedness condition did not easily admit
 variables with mutually dependent refinements as introduced by
 our function types (see below). We therefore use an unordered
 environment and relax well-formedness to ignore variable binding order.
-\AI{I'm not sure this argument justifies our choice.  We have let-expressions to introduce additional bindings.}
-
-
-\AI{If we are desperate for space, we might want to omit ``$[[pval1 = pval2]]$'' (which could be assumed in $[[pfun]]$) and ``$[[Top]]$'' (which could be expressed by, say, $[[0=0]]$) from the syntax of refinements.}
-
 
 \paragraph{Function Types, Contexts, and Context Polymorphism.}
 Our type system achieves context sensitivity
@@ -229,10 +224,6 @@ in a typing derivation yields a valid type derivation under concrete context $[[
 
 Function type environments are denoted with $[[Th]]$ and are finite
 maps from function names ($[[f]]$) to function types ($[[FT]]$).
-\AI{$[[Th]]$ is removed from the figure because $[[f]] \ra [[FT]]$ is
-  not quite the right notation ($[[f]]$ and $[[FT]]$ are
-  metavariables).  But, I don't think we want to prepare new symbols
-  for the sets of function names and function types.}
 
 \paragraph{Well Formedness.}
 We impose two well-formedness conditions on types:

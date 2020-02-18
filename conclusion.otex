@@ -11,8 +11,6 @@ to automatic type inference; we have implemented a prototype of this inference t
 non-trivial programs and outperforms a state-of-the-art program verifier.
 As an area of future work, we plan to investigate using fractional ownership types to soundly allow refinements that mention memory
 locations.\looseness=-1
-\iffalse In addition, we plan to use the type system and language presented here as a backend language for the verification
-of high-level languages like Java, C++, etc.\fi
 
 %%% Local Variables:
 %%% mode: latex

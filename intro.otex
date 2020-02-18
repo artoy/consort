@@ -165,23 +165,6 @@ we replace \cref{line:call2} in \Cref{fig:hard-loop} with
 \imp{loop(b,b)}, the program becomes ill-typed; there
 is no way to divide \imp{b}'s ownership of 1 to into \emph{two}
 ownerships of 1.
-\iffalse Unlike systems which treat aliasing at the level of lexical regions
-\cite{grossman2002region,jim2002cyclone,matsakis2014rust,tofte1994implementation},
-\name supports \emph{fine-grained, per-statement} ownership tracking;
-i.e., multiple aliased references can be used to mutate memory within
-the same region.
-\iffalse
-For example, the mutable ownership $1$ of
-some reference may be distributed among
-many aliases, and then later collected into a different
-reference, restoring mutability.\fi
-This feature is particularly critical for the verification of programs
-where memory is mutated through multiple, live references.
-\AI{Sounds like these last two sentences introduce something new and different.  I'm not sure
-  readers can understand.  In fact, I was able to understand by reading the hidden
-  sentence in the source file.  I also feel like this statement is misleading because
-  we do not mention alias annotations at all.  Ownership transfer (without annotations) has been a difficult problem.
-}\fi
 
 Ownerships also obviate updating refinement information
 of aliases at mutation. \name ensures that only the trivial refinement

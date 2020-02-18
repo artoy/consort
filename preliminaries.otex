@@ -11,7 +11,6 @@ This section describes a simple imperative language with mutable references and 
 % where $x\in\DOM(f)$ to denote a map equivalent to $f$ except that $x$ takes value $v$.
 % We also write $\emptyset$ as a function with an empty domain.
 % \JT{This is almost certainly not a sufficient overview. write more later.}
-\AI{Notations are moved.  $f$ conflicted with the metavariable for function names and I thought it might be confusing.}
 
 \subsection{Syntax}
 \label{sec:language}
@@ -43,7 +42,6 @@ The grammar of the language is as follows.
 $[[ph]]$ stands for a formula in propositional first-order
 logic over variables, integers and contexts;
 we discuss these formulas later in \Cref{sec:types}.
-\AI{\textbf{Labels} is removed because it is rarely used.}
 
 Variables are introduced by function parameters or let bindings.
 Like ML, the variable bindings introduced by let expressions and parameters

@@ -548,8 +548,6 @@ type addition operator $+$ ``distributes'' over $[[SATv]]$ and $[[own]]$.
   }{
    [[ R |- T ref r ]]
  }
- \AI{Using $\sigma$, which is a metavariable, as a subscript may suggest that
- the judgment is parameterized by $\sigma$, which is not the case here.}
 \end{definition}
 
 \begin{lemma} % L4
@@ -713,8 +711,6 @@ type addition operator $+$ ``distributes'' over $[[SATv]]$ and $[[own]]$.
 
 \begin{lemma}[Environment Weakening] % L27
   \label{lem:tyenv-weaken}
-  \AI{Haven't really checked the proof (yet).  The statement is similar to
-  \Cref{lem:subtype-transitive}; I'm wondering if we can merge...}
   Define the partial operation $[[G1 + G2]]$ for two environments such $[[dom G1 /\ dom G2 = null]]$:
   \[
     [[(G1 + G2)(x)]] = \begin{cases}
