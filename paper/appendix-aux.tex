@@ -1,0 +1,811 @@
+\section{Auxiliary Lemmas and Definitions}
+\label{sec:aux-defn-lem}
+% roughly
+% * Execution Context properties
+% * context substitution properties
+% * variable substitution
+% * variable removal
+% * subtype properties
+% * homomorphisms
+% * updates
+% * call, return, and inversion move to the following
+
+\input{wf_rules}
+
+The well-formedness rules omitted from the main paper are found in \Cref{fig:type-wf}. We write
+$ \mathcal{L}   \vdash _{\wf}  \tau   \produces   \Gamma $ as shorthand for $ \mathcal{L}   \vdash _{\wf}  \Gamma $ and $ \mathcal{L}   \mid   \Gamma   \vdash _{\wf}  \tau $.
+
+We first prove that the subtyping relations are transitive.
+
+\begin{lemma} % L15
+  \label{lem:subtype-transitive}
+  \leavevmode
+  \begin{enumerate}
+  \item \label{part:sub-env-impl} If $\Gamma  \leq  \Gamma'$ then $\models   \sem{ \Gamma }   \implies   \sem{ \Gamma' } $.
+  \item \label{part:single-env-trans} If $\Gamma  \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{2}}}$ and $\Gamma  \vdash  \tau_{{\mathrm{2}}}  \leq  \tau_{{\mathrm{3}}}$, then $\Gamma  \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{3}}}$
+  \item \label{part:env-sup-subtype} If $\Gamma  \leq  \Gamma'$ and $\Gamma'  \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{2}}}$, then $\Gamma  \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{2}}}$
+  \item \label{part:env-sub-trans} If $\Gamma  \leq  \Gamma'$,  $\Gamma  \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{2}}}$, and $\Gamma'  \vdash  \tau_{{\mathrm{2}}}  \leq  \tau_{{\mathrm{3}}}$, then $\Gamma  \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{3}}}$.
+  \item If $\Gamma  \leq  \Gamma'$ and $\Gamma'  \leq  \Gamma''$, then $\Gamma  \leq  \Gamma''$.
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  \leavevmode
+  \begin{enumerate}
+  \item It suffices to show that $\models   \sem{ \Gamma }   \implies  \ottsym{[}  \mathit{x}  \ottsym{/} \, \nu \, \ottsym{]} \, \varphi'$ for any $ \mathit{x}  \in   \DOM( \Gamma' )  $ where $\Gamma'  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi' } $.
+    From $\Gamma  \leq  \Gamma'$ we have $\models   \sem{ \Gamma }   \wedge  \varphi  \implies  \varphi'$ where $\Gamma  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi } $.
+    We must then have $\models   \sem{ \Gamma }   \wedge  \ottsym{[}  \mathit{x}  \ottsym{/} \, \nu \, \ottsym{]} \, \varphi  \implies  \ottsym{[}  \mathit{x}  \ottsym{/} \, \nu \, \ottsym{]} \, \varphi'$. From the definition of $ \sem{ \Gamma } $ we have $ \sem{ \Gamma }   \wedge  \ottsym{[}  \mathit{x}  \ottsym{/} \, \nu \, \ottsym{]} \, \varphi  \iff   \sem{ \Gamma } $, giving the desired result.
+  \item By induction on $\Gamma  \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{2}}}$. We only consider the base case where $\tau_{{\mathrm{1}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi_{{\mathrm{1}}} } $ and $\tau_{{\mathrm{2}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi_{{\mathrm{2}}} } $,
+    the case for reference types follows from the induction hypothesis.
+    By further inversion on $\Gamma  \vdash  \tau_{{\mathrm{2}}}  \leq  \tau_{{\mathrm{3}}}$ we therefore have:
+    
+    \begin{bcpcasearray}
+      \tau_{{\mathrm{3}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi_{{\mathrm{3}}} }  & \\
+      \models   \sem{ \Gamma }   \wedge  \varphi_{{\mathrm{1}}}  \implies  \varphi_{{\mathrm{2}}} & \models   \sem{ \Gamma }   \wedge  \varphi_{{\mathrm{2}}}  \implies  \varphi_{{\mathrm{3}}}
+    \end{bcpcasearray}
+    
+    From which it is immediate that we must have $\models   \sem{ \Gamma }   \wedge  \varphi_{{\mathrm{1}}}  \implies  \varphi_{{\mathrm{3}}}$, whereby \rn{S-Int} gives $\Gamma  \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{3}}}$.
+  \item By induction on $\Gamma'  \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{2}}}$. The case for reference types is immediate from the inductive hypothesis, we focus
+    on the base case where $\tau_{{\mathrm{1}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi_{{\mathrm{1}}} } $ and $\tau_{{\mathrm{2}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi_{{\mathrm{2}}} } $, and where $\models   \sem{ \Gamma' }   \wedge  \varphi_{{\mathrm{1}}}  \implies  \varphi_{{\mathrm{2}}}$.
+    From $\Gamma  \leq  \Gamma'$ and \Cref{part:sub-env-impl} above, we have $\models   \sem{ \Gamma }   \implies   \sem{ \Gamma' } $ from which we can derive $ \sem{ \Gamma }   \wedge  \varphi_{{\mathrm{1}}}  \implies  \varphi_{{\mathrm{2}}}$, i.e.,
+    $\Gamma  \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{2}}}$.
+  \item Immediate from \Cref{part:single-env-trans,part:env-sup-subtype}.
+  \item Immediate corollary of \Cref{part:env-sub-trans}.
+  \end{enumerate}
+\end{proof}
+
+\begin{definition}
+  A value $v$ reaches an integer with $n$ dereferences in heap $\ottnt{H}$ when it is in the relation  $ \ottnt{H} \vdash   v  \Downarrow  n $
+  defined as the smallest relation closed under the following rules:
+  \begin{enumerate}
+  \item If $ v  \in  \mathbb{Z} $ then $ \ottnt{H} \vdash   v  \Downarrow  \ottsym{0} $
+  \item If $ \ottnt{H} \vdash   v  \Downarrow  n $ and $\ottnt{H}  \ottsym{(}  \ottmv{a}  \ottsym{)} \, \ottsym{=} \, v$ then $ \ottnt{H} \vdash   \ottmv{a}  \Downarrow  n  \ottsym{+}  \ottsym{1} $
+  \end{enumerate}
+  We will write $ \ottnt{H} \vdash   v  \Downarrow   | \tau |  $ to indicate a value $v$ is shape consistent with $\tau$ in heap $\ottnt{H}$, where
+  $ | \tau | $ is the number of reference constructors in the type $\tau$.
+\end{definition}
+
+We also prove a standard inversion lemma to
+handle the fact our typing rules are not syntax directed.
+
+\begin{lemma}[Inversion] % L14
+  \label{lem:inversion}
+  If 
+  $ \Theta   \mid   \mathcal{L}   \mid   \Gamma   \vdash   \ottnt{e_{{\mathrm{0}}}}  :  \tau   \produces   \Gamma' $,
+  then there exists some $\Gamma_{\ottmv{p}}$, $\tau_{\ottmv{p}}$, and $\Gamma'_{\ottmv{p}}$
+  such that $\Gamma  \leq  \Gamma_{\ottmv{p}}$, $ \oldvec{\ell}   \vdash _{\wf}  \Gamma_{\ottmv{p}} $, $\Gamma'_{\ottmv{p}}  \ottsym{,}  \tau_{\ottmv{p}}  \leq  \Gamma'  \ottsym{,}  \tau$, and:
+  \begin{enumerate}
+  \item If $\ottnt{e_{{\mathrm{0}}}}  \ottsym{=}  \mathit{x}$ then $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}  \tau_{\ottmv{p}}  \ottsym{+}  \tau'$,  $\Gamma'_{\ottmv{p}}  \ottsym{=}  \Gamma_{\ottmv{p}}  \ottsym{[}  \mathit{x}  \hookleftarrow  \tau'  \ottsym{]}$.
+  \item If $\ottnt{e_{{\mathrm{0}}}}  \ottsym{=}   \LET  \mathit{x}  =  \mathit{y}  \IN  \ottnt{e} $, then
+    $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}  \ottsym{[}  \mathit{y}  \hookleftarrow   \tau_{{\mathrm{1}}}  \wedge_{ \mathit{y} }   \mathit{y}  =_{ \tau_{{\mathrm{1}}} }  \mathit{x}    \ottsym{]}  \ottsym{,}  \mathit{x}  \ottsym{:}  \ottsym{(}   \tau_{{\mathrm{2}}}  \wedge_{ \mathit{x} }   \mathit{x}  =_{ \tau_{{\mathrm{2}}} }  \mathit{y}    \ottsym{)}   \vdash   \ottnt{e}  :  \tau_{\ottmv{p}}   \produces   \Gamma'_{\ottmv{p}} $
+    and $ \mathit{x}  \not\in   \DOM( \Gamma'_{\ottmv{p}} )  $ where $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{=}  \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}$.
+  \item If $\ottnt{e_{{\mathrm{0}}}}  \ottsym{=}   \LET  \mathit{x}  =  n  \IN  \ottnt{e} $ then $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}  \ottsym{,}  \mathit{x}  \ottsym{:}   \set{  \nu  \COL \TINT \mid  \nu \, \ottsym{=} \, n }    \vdash   \ottnt{e}  :  \tau_{\ottmv{p}}   \produces   \Gamma'_{\ottmv{p}} $ and $ \mathit{x}  \not\in   \DOM( \Gamma'_{\ottmv{p}} )  $.
+  \item If $\ottnt{e_{{\mathrm{0}}}}  \ottsym{=}   \IFZERO  \mathit{x}  \THEN  \ottnt{e_{{\mathrm{1}}}}  \ELSE  \ottnt{e_{{\mathrm{2}}}} $ then:
+    \begin{itemize}
+    \item $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi } $
+    \item $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}  \ottsym{[}  \mathit{x}  \hookleftarrow   \set{  \nu  \COL \TINT \mid   \varphi  \wedge  \nu \, \ottsym{=} \, \ottsym{0}  }   \ottsym{]}   \vdash   \ottnt{e_{{\mathrm{1}}}}  :  \tau_{\ottmv{p}}   \produces   \Gamma'_{\ottmv{p}} $
+    \item $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}  \ottsym{[}  \mathit{x}  \hookleftarrow   \set{  \nu  \COL \TINT \mid   \varphi  \wedge  \nu \, \neq \, \ottsym{0}  }   \ottsym{]}   \vdash   \ottnt{e_{{\mathrm{2}}}}  :  \tau_{\ottmv{p}}   \produces   \Gamma'_{\ottmv{p}} $
+    \end{itemize}
+  \item If $\ottnt{e_{{\mathrm{0}}}}  \ottsym{=}   \LET  \mathit{x}  =   \MKREF  \mathit{y}   \IN  \ottnt{e} $, then $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{=}  \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}$, $ \Theta   \mid   \mathcal{L}   \mid   \Gamma  \ottsym{[}  \mathit{y}  \hookleftarrow  \tau_{{\mathrm{1}}}  \ottsym{]}  \ottsym{,}  \mathit{x}  \ottsym{:}   \ottsym{(}   \tau_{{\mathrm{2}}}  \wedge_{ \mathit{x} }   \mathit{x}  =_{ \tau_{{\mathrm{2}}} }  \mathit{y}    \ottsym{)}  \TREF^{ \ottsym{1} }    \vdash   \ottnt{e}  :  \tau   \produces   \Gamma'_{\ottmv{p}} $, and $ \mathit{x}  \not\in   \DOM( \Gamma'_{\ottmv{p}} )  $
+  \item If $\ottnt{e_{{\mathrm{0}}}}  \ottsym{=}   \LET  \mathit{x}  =   *  \mathit{y}   \IN  \ottnt{e} $, then:
+    \begin{itemize}
+    \item $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{=}   \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}  \TREF^{ r } $
+    \item $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}  \ottsym{[}  \mathit{y}  \hookleftarrow   \tau''  \TREF^{ r }   \ottsym{]}  \ottsym{,}  \mathit{x}  \ottsym{:}  \tau_{{\mathrm{2}}}   \vdash   \ottnt{e}  :  \tau_{\ottmv{p}}   \produces   \Gamma'_{\ottmv{p}} $
+    \item $ \mathit{x}  \not\in \DOM( \Gamma'_{\ottmv{p}} ) $
+    \item \[
+        \tau'' = \begin{cases}
+          \ottsym{(}   \tau_{{\mathrm{1}}}  \wedge_{ \mathit{y} }   \mathit{y}  =_{ \tau_{{\mathrm{1}}} }  \mathit{x}    \ottsym{)} &  r   \ottsym{>}   \ottsym{0}  \\
+          \tau_{{\mathrm{1}}} & r  \ottsym{=}  \ottsym{0}
+        \end{cases}
+      \]
+    \end{itemize}
+  \item If $\ottnt{e_{{\mathrm{0}}}}  \ottsym{=}   \LET  \mathit{x}  =   \mathit{f} ^ \ell (  \mathit{y_{{\mathrm{1}}}} ,\ldots, \mathit{y_{\ottmv{n}}}  )   \IN  \ottnt{e} $ then:
+    \begin{itemize}
+    \item $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{y_{\ottmv{i}}}  \ottsym{)}  \ottsym{=}  \sigma_{\alpha} \, \sigma_{x} \, \tau_{\ottmv{i}}$ for each $i \in \set{1,\ldots,n}$
+    \item $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}  \ottsym{[}  \mathit{y_{\ottmv{i}}}  \hookleftarrow  \sigma_{\alpha} \, \sigma_{x} \, \tau'_{\ottmv{i}}  \ottsym{]}  \ottsym{,}  \mathit{x}  \ottsym{:}  \sigma_{\alpha} \, \sigma_{x} \, \tau   \vdash   \ottnt{e}  :  \tau_{\ottmv{p}}   \produces   \Gamma'_{\ottmv{p}} $
+    \item $\Theta  \ottsym{(}  \mathit{f}  \ottsym{)}  \ottsym{=}   \forall  \lambda .\tuple{ \mathit{x_{{\mathrm{1}}}} \COL \tau_{{\mathrm{1}}} ,\dots, \mathit{x_{\ottmv{n}}} \COL \tau_{\ottmv{n}} }\ra\tuple{ \mathit{x_{{\mathrm{1}}}} \COL \tau'_{{\mathrm{1}}} ,\dots, \mathit{x_{\ottmv{n}}} \COL \tau'_{\ottmv{n}}  \mid  \tau } $
+    \item $\sigma_{\alpha}  \ottsym{=}  \ottsym{[}  \ell  \ottsym{:}  \mathcal{L}  \ottsym{/}  \lambda  \ottsym{]}$
+    \item $\sigma_{x}  \ottsym{=}    [  \mathit{y_{{\mathrm{1}}}}  /  \mathit{x_{{\mathrm{1}}}}  ]  \cdots  [  \mathit{y_{\ottmv{n}}}  /  \mathit{x_{\ottmv{n}}}  ]  $
+    \item $ \mathit{x}  \not\in   \DOM( \Gamma'_{\ottmv{p}} )  $
+    \end{itemize}
+  \item If $\ottnt{e_{{\mathrm{0}}}}  \ottsym{=}   \mathit{y}  \WRITE  \mathit{x}  \SEQ  \ottnt{e} $ then:
+    \begin{itemize}
+    \item $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}  \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}$
+    \item $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{=}   \tau'  \TREF^{ \ottsym{1} } $
+    \item $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}  \ottsym{[}  \mathit{x}  \hookleftarrow  \tau_{{\mathrm{1}}}  \ottsym{]}  \ottsym{[}  \mathit{y}  \hookleftarrow   \ottsym{(}   \tau_{{\mathrm{2}}}  \wedge_{ \mathit{y} }   \mathit{y}  =_{ \tau_{{\mathrm{2}}} }  \mathit{x}    \ottsym{)}  \TREF^{ \ottsym{1} }   \ottsym{]}   \vdash   \ottnt{e}  :  \tau_{\ottmv{p}}   \produces   \Gamma'_{\ottmv{p}} $
+    \item The shapes of $\tau'$ and $\tau_{{\mathrm{2}}}$ are similar, i.e, $ | \tau' |  \, \ottsym{=} \,  | \tau_{{\mathrm{2}}} | $.
+    \end{itemize}
+  \item If $\ottnt{e_{{\mathrm{0}}}}  \ottsym{=}   \ALIAS( \mathit{x}  =  \mathit{y} ) \SEQ  \ottnt{e} $ then there exist some $\tau_{{\mathrm{1}}}, \tau_{{\mathrm{2}}}, \tau'_{{\mathrm{1}}}, \tau'_{{\mathrm{2}}}, r_{{\mathrm{1}}}, r_{{\mathrm{2}}}, r'_{{\mathrm{1}}}, r'_{{\mathrm{2}}}$ such that:
+    \begin{itemize}
+    \item $  \tau_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} }   \ottsym{+}  \tau_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} }   \approx    \tau'_{{\mathrm{1}}}  \TREF^{ r'_{{\mathrm{1}}} }   \ottsym{+}  \tau'_{{\mathrm{2}}}  \TREF^{ r'_{{\mathrm{2}}} } $
+    \item $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}   \tau_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} } $ and $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{=}   \tau_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} } $
+    \item $ \Theta   \mid   \mathcal{L}   \mid   \Gamma  \ottsym{[}  \mathit{x}  \hookleftarrow   \tau'_{{\mathrm{1}}}  \TREF^{ r'_{{\mathrm{1}}} }   \ottsym{]}  \ottsym{[}  \mathit{y}  \hookleftarrow   \tau'_{{\mathrm{2}}}  \TREF^{ r'_{{\mathrm{2}}} }   \ottsym{]}   \vdash   \ottnt{e}  :  \tau_{\ottmv{p}}   \produces   \Gamma'_{\ottmv{p}} $
+    \end{itemize}
+  \item If $\ottnt{e_{{\mathrm{0}}}}  \ottsym{=}   \ALIAS( \mathit{x}  = *  \mathit{y} ) \SEQ  \ottnt{e} $ then there exist some $\tau_{{\mathrm{1}}}, \tau_{{\mathrm{2}}}, \tau'_{{\mathrm{1}}}, \tau'_{{\mathrm{2}}}, r_{{\mathrm{1}}}, r_{{\mathrm{2}}}, r'_{{\mathrm{1}}}, r'_{{\mathrm{2}}}, r$, such that:
+    \begin{itemize}
+    \item $  \tau_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} }   \ottsym{+}  \tau_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} }   \approx    \tau'_{{\mathrm{1}}}  \TREF^{ r'_{{\mathrm{1}}} }   \ottsym{+}  \tau'_{{\mathrm{2}}}  \TREF^{ r'_{{\mathrm{2}}} } $
+    \item $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}   \tau_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} } $ and $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{=}   \ottsym{(}   \tau_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} }   \ottsym{)}  \TREF^{ r } $
+    \item $ \Theta   \mid   \mathcal{L}   \mid   \Gamma  \ottsym{[}  \mathit{x}  \hookleftarrow   \tau'_{{\mathrm{1}}}  \TREF^{ r'_{{\mathrm{1}}} }   \ottsym{]}  \ottsym{[}  \mathit{y}  \hookleftarrow   \ottsym{(}   \tau'_{{\mathrm{2}}}  \TREF^{ r'_{{\mathrm{2}}} }   \ottsym{)}  \TREF^{ r }   \ottsym{]}   \vdash   \ottnt{e}  :  \tau_{\ottmv{p}}   \produces   \Gamma'_{\ottmv{p}} $
+    \end{itemize}
+  \item If $ \ottnt{e_{{\mathrm{0}}}}  \ottsym{=}  \ottnt{e_{{\mathrm{1}}}}  \SEQ  \ottnt{e_{{\mathrm{2}}}} $ then $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}   \vdash   \ottnt{e_{{\mathrm{1}}}}  :  \tau_{{\mathrm{1}}}   \produces   \Gamma_{{\mathrm{1}}} $ and $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{{\mathrm{1}}}   \vdash   \ottnt{e_{{\mathrm{2}}}}  :  \tau_{\ottmv{p}}   \produces   \Gamma'_{\ottmv{p}} $
+  \item If $ \ottnt{e_{{\mathrm{0}}}}  \ottsym{=}  \mathit{x}  \SEQ  \ottnt{e'} $ then $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}  \ottsym{[}  \mathit{x}  \ottsym{:}  \tau'  \ottsym{+}  \tau_{{\mathrm{0}}}  \ottsym{]}   \vdash   \mathit{x}  :  \tau_{{\mathrm{1}}}   \produces   \Gamma_{\ottmv{p}}  \ottsym{[}  \mathit{x}  \hookleftarrow  \tau_{{\mathrm{0}}}  \ottsym{]} $ and $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}  \ottsym{[}  \mathit{x}  \hookleftarrow  \tau_{{\mathrm{0}}}  \ottsym{]}   \vdash   \ottnt{e'}  :  \tau_{\ottmv{p}}   \produces   \Gamma'_{\ottmv{p}} $
+  \item If $\ottnt{e_{{\mathrm{0}}}}  \ottsym{=}   \ASSERT( \varphi ) \SEQ  \ottnt{e} $ then $\Gamma_{\ottmv{p}}  \models  \varphi$ and $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}   \vdash   \ottnt{e}  :  \tau_{\ottmv{p}}   \produces   \Gamma'_{\ottmv{p}} $
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  By straightforward induction on the typing relation and
+  the transitivity of the subtyping relation \Cref{lem:subtype-transitive}.
+
+  The only case of note is the case for $ \ottnt{e_{{\mathrm{0}}}}  \ottsym{=}  \mathit{x}  \SEQ  \ottnt{e_{{\mathrm{2}}}} $. If the subderivation for $\mathit{x}$
+  has applications of \rn{T-Sub} then the subtypings on the output environment can be pushed
+  into application subtyping on input environments when typing $\ottnt{e'}$. Similarly,
+  any input subtypings on the input environment of the derivation of $\mathit{x}$ can be pushed
+  into \rn{T-Sub} rules such that $\Gamma  \leq  \Gamma_{\ottmv{p}}  \ottsym{[}  \mathit{x}  \ottsym{:}  \tau'  \ottsym{+}  \tau_{{\mathrm{0}}}  \ottsym{]}$.
+\end{proof}
+
+\Cref{lem:stack_var,lem:ectxt-sub-well-typed} prove some standard properties of execution contexts:
+any decomposition of a well-typed expression into a execution context and redex can be well-typed,
+and substituting a well-typed expression matching a context's hole type yields a well-typed expression
+
+\begin{lemma} % L26
+  \label{lem:stack_var}
+  For any $\ottnt{E}$ and $\ottnt{e'}$ such that $\ottnt{E}  \ottsym{[}  \ottnt{e'}  \ottsym{]}  \ottsym{=}  \ottnt{e}$ where
+  $ \Theta   \mid   \mathcal{L}   \mid   \Gamma   \vdash   \ottnt{e}  :  \tau   \produces   \Gamma' $ there exists some $\tau_{{\mathrm{0}}}$, $\Gamma_{{\mathrm{0}}}$ such that
+  $\Theta  \mid  \HOLE  \ottsym{:}  \tau_{{\mathrm{0}}}  \produces  \Gamma_{{\mathrm{0}}}  \mid  \mathcal{L}  \vdash_{\mathit{ectx} }  \ottnt{E}  \ottsym{:}  \tau  \produces  \Gamma'$ and
+  $ \Theta   \mid   \mathcal{L}   \mid   \Gamma   \vdash   \ottnt{e'}  :  \tau_{{\mathrm{0}}}   \produces   \Gamma_{{\mathrm{0}}} $.
+\end{lemma}
+\begin{proof}
+  By induction on the structure of $\ottnt{E}$.
+  \begin{rncase}{$\ottnt{E}  \ottsym{=}  \HOLE$}
+    Trivial, by taking $\tau_{{\mathrm{0}}}  \ottsym{=}  \tau$ and $\Gamma_{{\mathrm{0}}}  \ottsym{=}  \Gamma'$.
+  \end{rncase}
+  \begin{rncase}{$ \ottnt{E}  \ottsym{=}  \ottnt{E'} \SEQ \ottnt{e''} $}
+    Then $ \ottnt{E}  \ottsym{[}  \ottnt{e'}  \ottsym{]}  \ottsym{=}  \ottnt{E'}  \ottsym{[}  \ottnt{e'}  \ottsym{]}  \SEQ  \ottnt{e''}   \ottsym{=}  \ottnt{e}$. By
+    \Cref{lem:inversion} we have
+	\[
+      \begin{bcpcasearray}
+         \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}   \vdash   \ottnt{E'}  \ottsym{[}  \ottnt{e'}  \ottsym{]}  :  \tau_{{\mathrm{1}}}   \produces   \Gamma_{{\mathrm{1}}}  &  \Theta   \mid   \mathcal{L}   \mid   \Gamma_{{\mathrm{1}}}   \vdash   \ottnt{e''}  :  \tau_{\ottmv{p}}   \produces   \Gamma'_{\ottmv{p}}  \\
+        \Gamma  \leq  \Gamma_{\ottmv{p}} & \Gamma'_{\ottmv{p}}  \ottsym{,}  \tau_{\ottmv{p}}  \leq  \Gamma'  \ottsym{,}  \tau
+      \end{bcpcasearray}
+    \]
+    for some $\Gamma_{\ottmv{p}}$, $\Gamma'_{\ottmv{p}}$, and $\tau_{\ottmv{p}}$.
+    
+    By the induction hypothesis
+    we then have $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}   \vdash   \ottnt{e'}  :  \tau_{{\mathrm{0}}}   \produces   \Gamma_{{\mathrm{0}}} $ and
+    $\Theta  \mid  \HOLE  \ottsym{:}  \tau_{{\mathrm{0}}}  \produces  \Gamma_{{\mathrm{0}}}  \mid  \mathcal{L}  \vdash_{\mathit{ectx} }  \ottnt{E'}  \ottsym{:}  \tau_{{\mathrm{1}}}  \produces  \Gamma_{{\mathrm{1}}}$. for some $\tau_{{\mathrm{0}}}$ and $\Gamma_{{\mathrm{0}}}$.
+    
+    Next, as $\Gamma'_{\ottmv{p}}  \ottsym{,}  \tau_{\ottmv{p}}  \leq  \Gamma'  \ottsym{,}  \tau$ by an application of \rn{T-Sub},
+    we have $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{{\mathrm{1}}}   \vdash   \ottnt{e''}  :  \tau   \produces   \Gamma' $. By \rn{TE-Seq}, we therefore
+    have: $\Theta  \mid  \HOLE  \ottsym{:}  \tau_{{\mathrm{0}}}  \produces  \Gamma_{{\mathrm{0}}}  \mid  \mathcal{L}  \vdash_{\mathit{ectx} }   \ottnt{E'} \SEQ \ottnt{e''}   \ottsym{:}  \tau  \produces  \Gamma'$.
+
+    Finally, from $\Gamma  \leq  \Gamma_{\ottmv{p}}$ and $ \Theta   \mid   \mathcal{L}   \mid   \Gamma_{\ottmv{p}}   \vdash   \ottnt{e'}  :  \tau_{{\mathrm{0}}}   \produces   \Gamma_{{\mathrm{0}}} $,
+    and application of \rn{T-Sub}, we have $ \Theta   \mid   \mathcal{L}   \mid   \Gamma   \vdash   \ottnt{e'}  :  \tau_{{\mathrm{0}}}   \produces   \Gamma_{{\mathrm{0}}} $.
+  \end{rncase}
+\end{proof}
+
+\begin{lemma} % L24
+  \label{lem:ectxt-sub-well-typed}
+  If $\Theta  \mid  \HOLE  \ottsym{:}  \tau  \produces  \Gamma'  \mid  \mathcal{L}  \vdash_{\mathit{ectx} }  \ottnt{E}  \ottsym{:}  \tau''  \produces  \Gamma''$ and $ \Theta   \mid   \mathcal{L}   \mid   \Gamma   \vdash   \ottnt{e}  :  \tau   \produces   \Gamma' $ for some $\Gamma$,
+  then  $ \Theta   \mid   \mathcal{L}   \mid   \Gamma   \vdash   \ottnt{E}  \ottsym{[}  \ottnt{e}  \ottsym{]}  :  \tau''   \produces   \Gamma'' $.
+\end{lemma}
+\begin{proof}
+  By induction on the typing derivation of $\ottnt{E}$.
+  \begin{rneqncase}{TE-Seq}{
+      \ottnt{E} =  \ottnt{E'} \SEQ \ottnt{e'}  \\  \ottnt{E}  \ottsym{[}  \ottnt{e}  \ottsym{]}  \ottsym{=}  \ottnt{E'}  \ottsym{[}  \ottnt{e}  \ottsym{]}  \SEQ  \ottnt{e'}  \\
+      \Theta  \mid  \HOLE  \ottsym{:}  \tau  \produces  \Gamma'  \mid  \mathcal{L}  \vdash_{\mathit{ectx} }  \ottnt{E'}  \ottsym{:}  \tau_{{\mathrm{0}}}  \produces  \Gamma_{{\mathrm{0}}} \\  \Theta   \mid   \mathcal{L}   \mid   \Gamma_{{\mathrm{0}}}   \vdash   \ottnt{e'}  :  \tau''   \produces   \Gamma''  \\
+    }
+    By the induction hypothesis we have $ \Theta   \mid   \mathcal{L}   \mid   \Gamma   \vdash   \ottnt{E'}  \ottsym{[}  \ottnt{e}  \ottsym{]}  :  \tau_{{\mathrm{0}}}   \produces   \Gamma_{{\mathrm{0}}} $. We then
+    have our result via an application of \rn{T-Seq}.
+  \end{rneqncase}
+  \begin{rncase}{TE-Hole}
+    Trivial, as $\tau  \ottsym{=}  \tau''$ and $\Gamma'  \ottsym{=}  \Gamma''$ and $\ottnt{E}  \ottsym{[}  \ottnt{e}  \ottsym{]}  \ottsym{=}  \ottnt{e}$.
+  \end{rncase}
+\end{proof}
+
+%% CONTEXT SUBSTITUTION
+
+\def\subref#1#2{\Cref{#1} (part \labelcref{#2})}
+
+\begin{lemma}[Context Variable Substitution]\label{lem:ctxt-substitution}
+  \leavevmode
+  \begin{enumerate}
+  \item \label{itm:ctxt-sub-distribute} If $\tau_{{\mathrm{3}}}  \ottsym{=}  \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}$ then $\ottsym{[}  \mathcal{L}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{3}}}  \ottsym{=}  \ottsym{[}  \mathcal{L}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{1}}}  \ottsym{+}  \ottsym{[}  \mathcal{L}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{2}}}$
+  \item \label{itm:ctxt-sub-wf}For any $\oldvec{\ell}$:
+    \begin{enumerate}
+    \item If $ \lambda   \vdash _{\wf}  \Gamma $ then $ \oldvec{\ell}   \vdash _{\wf}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma $
+    \item If $ \lambda   \mid   \Gamma   \vdash _{\wf}  \tau $ then $ \oldvec{\ell}   \mid   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma   \vdash _{\wf}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau $
+    \item If $ \lambda   \vdash _{\wf}  \tau   \produces   \Gamma $ then $ \oldvec{\ell}   \vdash _{\wf}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau   \produces   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma $
+    \end{enumerate}
+  \item \label{itm:ctxt-sub-subtype} For any $\Gamma$, $\tau_{{\mathrm{1}}}$, $\tau_{{\mathrm{2}}}$, $\lambda$ and $\oldvec{\ell}$, If $\Gamma  \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{2}}}$, then $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \vdash  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{1}}}  \leq  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{2}}}$
+  \item \label{itm:ctxt-subst-assert} If $\Gamma  \models  \varphi$ where $ \lambda  \not\in  \mathbf{FCV} \, \ottsym{(}  \varphi  \ottsym{)} $ then $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \models  \varphi$
+  \item \label{itm:ctxt-subst-well-typed} If $ \Theta   \mid   \lambda   \mid   \Gamma   \vdash   \ottnt{e}  :  \tau   \produces   \Gamma' $ then $ \Theta   \mid   \oldvec{\ell}   \mid   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma   \vdash   \ottnt{e}  :  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau   \produces   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma' $
+  \end{enumerate}
+\end{lemma}
+\begin{proof}\leavevmode
+  \begin{enumerate}
+  \item By straightforward induction on the definition of $\tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}  \ottsym{=}  \tau_{{\mathrm{3}}}$.
+  \item Observe that any substitution of context variables cannot change simple
+    types within $\Gamma$ and thus all types and refinements remain well-formed with respect
+    to integer variables in $\Gamma$.
+    It thus suffices to show that $\mathbf{FCV} \, \ottsym{(}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \varphi  \ottsym{)} \subseteq \ottkw{CV} \, \ottsym{(}  \oldvec{\ell}  \ottsym{)} = \emptyset$
+    for any refinement $\varphi$ appearing in $\tau$ or a type in $\Gamma$.
+    By the assumed well-formedness of $\tau$ with respect to context
+    variable $\lambda$ (resp. $\Gamma$), after substitution all free
+    context variables in $\tau$ (resp. the types in $\Gamma$) will be
+    replaced with $\oldvec{\ell}$. Thus, post-substitution no free context
+    variables appear in the refinement of $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau$ (resp. refinements of
+    types in $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma$), trivially satisfying our requirements.
+  \item If $\lambda$ does not appear free in $\tau_{{\mathrm{1}}}$, $\tau_{{\mathrm{2}}}$ or $\Gamma$, then the result trivially holds. Let us then assume
+    $\lambda$ appears free. We prove the result by induction on the subtyping derivation.
+
+    \begin{rneqncase}{S-Ref}{
+        \tau_{{\mathrm{1}}}  \ottsym{=}   \tau'_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} }  & \tau_{{\mathrm{2}}}  \ottsym{=}   \tau'_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} }  \\
+        \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{1}}}  \ottsym{=}   \ottsym{(}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau'_{{\mathrm{1}}}  \ottsym{)}  \TREF^{ r_{{\mathrm{1}}} }  & \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{2}}}  \ottsym{=}   \ottsym{(}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau'_{{\mathrm{2}}}  \ottsym{)}  \TREF^{ r_{{\mathrm{2}}} }  \\
+        \Gamma  \vdash  \tau'_{{\mathrm{1}}}  \leq  \tau'_{{\mathrm{2}}} & r_{{\mathrm{2}}}  \le  r_{{\mathrm{1}}}
+      }
+      We must show that $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \vdash  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau'_{{\mathrm{1}}}  \leq  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau'_{{\mathrm{2}}}$
+      which holds immediately from the induction hypothesis.
+    \end{rneqncase}
+
+    \begin{rneqncase}{S-Int}{
+        \tau_{{\mathrm{1}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi_{{\mathrm{1}}} }  & \tau_{{\mathrm{2}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi_{{\mathrm{2}}} }  \\
+        \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{1}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \varphi_{{\mathrm{1}}} }  & \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{2}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \varphi_{{\mathrm{2}}} }  \\
+        \Gamma  \models  \varphi_{{\mathrm{1}}}  \implies  \varphi_{{\mathrm{2}}}
+      }
+      We must show that $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \models  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \varphi_{{\mathrm{1}}}  \implies  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \varphi_{{\mathrm{2}}}$, i.e. $\models   \sem{ \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma }   \wedge  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \varphi_{{\mathrm{1}}}  \implies  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \varphi_{{\mathrm{2}}}$.
+      From our assumption that $\Gamma  \models  \varphi_{{\mathrm{1}}}  \implies  \varphi_{{\mathrm{2}}}$ we have that $\models   \sem{ \Gamma }   \wedge  \varphi_{{\mathrm{1}}}  \implies  \varphi_{{\mathrm{2}}}$ is valid,
+      whereby the formula $ \sem{ \Gamma }   \wedge  \varphi_{{\mathrm{1}}}  \implies  \varphi_{{\mathrm{2}}}$ is true for any possible concrete valuation of the free context
+      variable $\lambda$. As $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \,  \sem{ \Gamma } $ is equivalent to $ \sem{ \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma } $
+      we have the formula $ \sem{ \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma }   \wedge  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \varphi_{{\mathrm{1}}}  \implies  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \varphi_{{\mathrm{2}}}$ must also be valid.
+    \end{rneqncase}
+  \item If $\lambda$ does not appear free in $ \sem{ \Gamma } $, then the result trivially holds. Otherwise
+    $\models   \sem{ \Gamma }   \implies  \varphi$ holds for any concrete valuation of the free context variable $\lambda$.
+    Then the formula $\models   \sem{ \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma }   \implies  \varphi$ must be valid from the equivalence of $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \,  \sem{ \Gamma } $ and $ \sem{ \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma } $.
+  \item By induction on the typing derivation $ \Theta   \mid   \lambda   \mid   \Gamma   \vdash   \ottnt{e}  :  \tau   \produces   \Gamma' $.
+    In every case, that $ \oldvec{\ell}   \vdash _{\wf}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau   \produces   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma' $ and $ \oldvec{\ell}   \vdash _{\wf}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma $
+    holds from \Cref{itm:ctxt-sub-wf}.
+    
+    \begin{rneqncase}{T-Var}{
+        \ottnt{e}  \ottsym{=}  \mathit{x} & \tau  \ottsym{=}  \tau_{{\mathrm{2}}} \\
+        \Gamma  \ottsym{=}  \Gamma_{{\mathrm{0}}}  \ottsym{[}  \mathit{x}  \ottsym{:}  \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}  \ottsym{]} & \Gamma'  \ottsym{=}  \Gamma_{{\mathrm{0}}}  \ottsym{[}  \mathit{x}  \hookleftarrow  \tau_{{\mathrm{2}}}  \ottsym{]}
+      }
+      By application of \Cref{itm:ctxt-sub-distribute}.
+    \end{rneqncase}
+    \begin{rneqncase}{T-LetInt}{
+        \ottnt{e}  \ottsym{=}   \LET  \mathit{x}  =  n  \IN  \ottnt{e'}  &  \Theta   \mid   \lambda   \mid   \Gamma  \ottsym{,}  \mathit{x}  \ottsym{:}   \set{  \nu  \COL \TINT \mid  \nu \, \ottsym{=} \, n }    \vdash   \ottnt{e'}  :  \tau   \produces   \Gamma'  \\
+         \mathit{x}  \not\in   \DOM( \Gamma' )   &
+      }
+      The induction hypothesis gives
+      \[
+         \Theta   \mid   \oldvec{\ell}   \mid   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \ottsym{,}  \mathit{x}  \ottsym{:}   \set{  \nu  \COL \TINT \mid  \nu \, \ottsym{=} \, n }    \vdash   \ottnt{e}  :  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau   \produces   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma' 
+      \]
+      We conclude $ \Theta   \mid   \oldvec{\ell}   \mid   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma   \vdash    \LET  \mathit{x}  =  n  \IN  \ottnt{e}   :  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau   \produces   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma' $
+      as required.
+    \end{rneqncase}
+
+    \begin{rneqncase}{T-Let}{
+        & \ottnt{e}  \ottsym{=}   \LET  \mathit{x}  =  \mathit{y}  \IN  \ottnt{e'}  &  \mathit{x}  \not\in   \DOM( \Gamma' )   \\
+        &  \Theta   \mid   \lambda   \mid   \Gamma_{{\mathrm{1}}}   \vdash   \ottnt{e'}  :  \tau   \produces   \Gamma'  & \Gamma_{{\mathrm{1}}}  \ottsym{=}  \Gamma  \ottsym{[}  \mathit{y}  \hookleftarrow  \ottsym{(}   \tau_{{\mathrm{1}}}  \wedge_{ \mathit{y} }   \mathit{y}  =_{ \tau_{{\mathrm{1}}} }  \mathit{x}    \ottsym{)}  \ottsym{]}  \ottsym{,}  \mathit{x}  \ottsym{:}  \ottsym{(}   \tau_{{\mathrm{2}}}  \wedge_{ \mathit{x} }   \mathit{x}  =_{ \tau_{{\mathrm{2}}} }  \mathit{y}    \ottsym{)} \\
+        & \Gamma \quad \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{=}   \mathit{y} \COL \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}} 
+      }
+      By \Cref{itm:ctxt-sub-distribute},
+      $\ottsym{(}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \ottsym{)}  \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{=}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \ottsym{(}  \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}  \ottsym{)}  \ottsym{=}  \ottsym{(}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{1}}}  \ottsym{+}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{2}}}  \ottsym{)}$. We must then
+      show that $ \Theta   \mid   \oldvec{\ell}   \mid   \Gamma'_{{\mathrm{1}}}   \vdash   \ottnt{e'}  :  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau   \produces   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma' $
+      where
+      \[
+        \Gamma'_{{\mathrm{1}}}  \ottsym{=}  \ottsym{(}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \ottsym{)}  \ottsym{[}  \mathit{y}  \hookleftarrow   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{1}}}  \wedge_{ \mathit{y} }  \mathit{y} \, \ottsym{=} \, \mathit{x}   \ottsym{]}  \ottsym{,}  \mathit{x}  \ottsym{:}  \ottsym{(}   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{2}}}  \wedge_{ \mathit{x} }  \mathit{x} \, \ottsym{=} \, \mathit{y}   \ottsym{)}
+      \]
+      As $\Gamma'_{{\mathrm{1}}}  \ottsym{=}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma_{{\mathrm{1}}}$ the induction hypothesis gives the required typing judgment.
+    \end{rneqncase}
+
+    \begin{rncase}{T-If,T-Seq}
+      By trivial application of the inductive hypothesis.
+    \end{rncase}
+
+    \begin{rncase}{T-MkRef,T-Deref}
+      By reasoning similar to \rn{T-Let}.
+    \end{rncase}
+
+    \begin{rneqncase}{T-Call}{
+        \ottnt{e}  \ottsym{=}   \LET  \mathit{x}  =   \mathit{f} ^ \ell (  \mathit{y_{{\mathrm{1}}}} ,\ldots, \mathit{y_{\ottmv{n}}}  )   \IN  \ottnt{e'}  \\
+        \sigma_{x}  \ottsym{=}    [  \mathit{y_{{\mathrm{1}}}}  /  \mathit{x_{{\mathrm{1}}}}  ]  \cdots  [  \mathit{y_{\ottmv{n}}}  /  \mathit{x_{\ottmv{n}}}  ]   \\
+        \sigma_{\alpha}  \ottsym{=}  \ottsym{[}  \ell  \ottsym{:}  \lambda  \ottsym{/}  \lambda'  \ottsym{]} \\
+         \Theta   \mid   \lambda   \mid   \Gamma_{{\mathrm{1}}}   \vdash   \ottnt{e'}  :  \tau   \produces   \Gamma'  \\
+         \mathit{y}  \not\in   \DOM( \Gamma' )  \\
+        \Theta  \ottsym{(}  \mathit{f}  \ottsym{)}  \ottsym{=}   \forall  \lambda' .\tuple{ \mathit{x_{{\mathrm{1}}}} \COL \tau_{{\mathrm{1}}} ,\dots, \mathit{x_{\ottmv{n}}} \COL \tau_{\ottmv{n}} }\ra\tuple{ \mathit{x_{{\mathrm{1}}}} \COL \tau'_{{\mathrm{1}}} ,\dots, \mathit{x_{\ottmv{n}}} \COL \tau'_{\ottmv{n}}  \mid  \tau' }   \\
+        \Gamma_{{\mathrm{1}}}  \ottsym{=}  \Gamma  \ottsym{[}  \mathit{y_{\ottmv{i}}}  \hookleftarrow  \sigma_{\alpha} \, \sigma_{x} \, \tau'_{\ottmv{i}}  \ottsym{]}  \ottsym{,}  \mathit{x}  \ottsym{:}  \sigma_{\alpha} \, \sigma_{x} \, \tau'
+      }
+      We must first show that for $\sigma_{\alpha}'  \ottsym{=}  \ottsym{[}  \ell  \ottsym{:}  \oldvec{\ell}  \ottsym{/}  \lambda'  \ottsym{]}$:
+      \[
+         \Theta   \mid   \oldvec{\ell}   \mid   \Gamma_{{\mathrm{3}}}   \vdash   \ottnt{e'}  :  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau   \produces   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma' 
+      \]
+      where $\Gamma_{{\mathrm{3}}}  \ottsym{=}  \ottsym{(}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \ottsym{)}  \ottsym{[}  \mathit{y_{\ottmv{i}}}  \hookleftarrow  \sigma_{\alpha}' \, \sigma_{x} \, \tau'_{\ottmv{i}}  \ottsym{]}  \ottsym{,}  \mathit{x}  \ottsym{:}  \sigma_{\alpha}' \, \sigma_{x} \, \tau'$.
+
+      We first observe that $\Gamma_{{\mathrm{3}}}  \ottsym{=}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma_{{\mathrm{1}}}$ (this follows from the
+      equivalence of $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \ottsym{[}  \ell  \ottsym{:}  \lambda  \ottsym{/}  \lambda'  \ottsym{]}$ and
+      $\ottsym{[}  \ell  \ottsym{:}  \oldvec{\ell}  \ottsym{/}  \lambda'  \ottsym{]}$) whereby the induction hypothesis
+      gives the required typing derivation.
+
+      We must also show that
+      $\forall i \in \set{1..n}.\ottsym{(}  \ottsym{[}  \ell  \ottsym{:}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \ottsym{)}  \ottsym{(}  \mathit{y_{\ottmv{i}}}  \ottsym{)}  \ottsym{=}  \sigma_{\alpha}' \, \sigma_{x} \, \tau_{\ottmv{i}}$.
+      From the assumed well-typing of the term under $\lambda$ we have
+      that $\forall i \in\set{1..n}.\Gamma  \ottsym{(}  \mathit{y_{\ottmv{i}}}  \ottsym{)}  \ottsym{=}  \sigma_{\alpha} \, \sigma_{x} \, \tau_{\ottmv{i}}$. Recall
+      that $\sigma_{\alpha}'$ is equivalent to $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \sigma_{\alpha}$, whereby we have
+      $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \ottsym{(}  \mathit{y_{\ottmv{i}}}  \ottsym{)}  \ottsym{=}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \sigma_{\alpha} \, \sigma_{x} \, \tau_{\ottmv{i}}  \ottsym{=}  \sigma_{\alpha}' \, \sigma_{x} \, \tau_{\ottmv{i}}$ for any $\ottmv{i}$ as
+      equality is preserved by consistent substitution.
+    \end{rneqncase}
+
+    \begin{rncase}{T-Assign}
+      By the inductive hypothesis and application of \Cref{itm:ctxt-sub-distribute}.
+    \end{rncase}
+
+    \begin{rneqncase}{T-Alias}{
+         \Theta   \mid   \lambda   \mid   \Gamma  \ottsym{[}  \mathit{x}  \ottsym{:}   \tau_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} }   \ottsym{]}  \ottsym{[}  \mathit{y}  \ottsym{:}   \tau_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} }   \ottsym{]}   \vdash    \ALIAS( \mathit{x}  =  \mathit{y} ) \SEQ  \ottnt{e}   :  \tau   \produces   \Gamma  \\
+          \tau_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} }   \ottsym{+}  \tau_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} }   \approx    \tau'_{{\mathrm{1}}}  \TREF^{ r'_{{\mathrm{1}}} }   \ottsym{+}  \tau'_{{\mathrm{2}}}  \TREF^{ r'_{{\mathrm{2}}} }  \\
+         \Theta   \mid   \lambda   \mid   \Gamma  \ottsym{[}  \mathit{x}  \hookleftarrow   \tau'_{{\mathrm{1}}}  \TREF^{ r'_{{\mathrm{1}}} }   \ottsym{]}  \ottsym{[}  \mathit{y}  \hookleftarrow   \tau'_{{\mathrm{2}}}  \TREF^{ r'_{{\mathrm{2}}} }   \ottsym{]}   \vdash   \ottnt{e}  :  \tau   \produces   \Gamma 
+      }
+      From \Cref{itm:ctxt-sub-distribute} we have that $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \ottsym{(}   \tau_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} }   \ottsym{)}  \ottsym{+}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \ottsym{(}   \tau_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} }   \ottsym{)}  \ottsym{=}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \ottsym{(}    \tau_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} }   \ottsym{+}  \tau_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} }   \ottsym{)}$
+      and similarly for $  \tau'_{{\mathrm{1}}}  \TREF^{ r'_{{\mathrm{1}}} }   \ottsym{+}  \tau'_{{\mathrm{2}}}  \TREF^{ r'_{{\mathrm{2}}} } $. It therefore remains to show that: \[
+        \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \ottsym{(}    \tau_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} }   \ottsym{+}  \tau_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} }   \ottsym{)}  \approx  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \ottsym{(}    \tau'_{{\mathrm{1}}}  \TREF^{ r'_{{\mathrm{1}}} }   \ottsym{+}  \tau'_{{\mathrm{2}}}  \TREF^{ r'_{{\mathrm{2}}} }   \ottsym{)}
+      \]
+      For which it suffices to show that $ \bullet   \vdash  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \ottsym{(}    \tau_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} }   \ottsym{+}  \tau_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} }   \ottsym{)}  \leq  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \ottsym{(}    \tau'_{{\mathrm{1}}}  \TREF^{ r'_{{\mathrm{1}}} }   \ottsym{+}  \tau'_{{\mathrm{2}}}  \TREF^{ r'_{{\mathrm{2}}} }   \ottsym{)}$
+      and $ \bullet   \vdash  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \ottsym{(}    \tau'_{{\mathrm{1}}}  \TREF^{ r'_{{\mathrm{1}}} }   \ottsym{+}  \tau'_{{\mathrm{2}}}  \TREF^{ r'_{{\mathrm{2}}} }   \ottsym{)}  \leq  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \ottsym{(}    \tau_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} }   \ottsym{+}  \tau_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} }   \ottsym{)}$. From
+      $  \tau_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} }   \ottsym{+}  \tau_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} }   \approx    \tau'_{{\mathrm{1}}}  \TREF^{ r'_{{\mathrm{1}}} }   \ottsym{+}  \tau'_{{\mathrm{2}}}  \TREF^{ r'_{{\mathrm{2}}} } $ these both follow from \Cref{itm:ctxt-sub-subtype},
+      whereby the result follows from the inductive hypothesis.
+    \end{rneqncase}
+
+    \begin{rncase}{T-AliasPtr}
+      By similar reasoning to the \rn{T-Alias} case.
+    \end{rncase}
+
+    \begin{rneqncase}{T-Sub}{
+         \Theta   \mid   \lambda   \mid   \Gamma_{{\mathrm{1}}}   \vdash   \ottnt{e}  :  \tau_{{\mathrm{1}}}   \produces   \Gamma_{{\mathrm{2}}}  & \Gamma  \leq  \Gamma_{{\mathrm{1}}} \\
+        \Gamma_{{\mathrm{2}}}  \ottsym{,}  \tau_{{\mathrm{1}}}  \leq  \Gamma'  \ottsym{,}  \tau \\
+      }
+      By the induction hypothesis we have that: $ \Theta   \mid   \oldvec{\ell}   \mid   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma_{{\mathrm{1}}}   \vdash   \ottnt{e}  :  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{1}}}   \produces   \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma_{{\mathrm{2}}} $.
+      If we show that $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \leq  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma_{{\mathrm{1}}}$ and $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma_{{\mathrm{2}}}  \ottsym{,}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{1}}}  \leq  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma'  \ottsym{,}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau$
+      we will have the required result. To show the first requirement, for any $ \mathit{x}  \in \DOM( \Gamma ) $ we have that
+      $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \vdash  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \ottsym{(}  \mathit{x}  \ottsym{)}  \leq  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma_{{\mathrm{1}}}  \ottsym{(}  \mathit{x}  \ottsym{)}$ from \Cref{itm:ctxt-sub-subtype} so we have $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \leq  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma_{{\mathrm{1}}}$.
+      To show the latter requirement, we observe that $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma_{{\mathrm{2}}}  \ottsym{,}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau_{{\mathrm{1}}}  \leq  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma'  \ottsym{,}  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]} \, \tau$ is equivalent to showing
+      $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \ottsym{(}  \Gamma_{{\mathrm{2}}}  \ottsym{,}  \mathit{x}  \ottsym{:}  \tau_{{\mathrm{1}}}  \ottsym{)}  \leq  \ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \ottsym{(}  \Gamma'  \ottsym{,}  \mathit{x}  \ottsym{:}  \tau  \ottsym{)}$ for some $ \mathit{x}  \not\in   \DOM( \Gamma_{{\mathrm{2}}} )  $,
+      whereby we have the required subtyping relationship from the application of \Cref{itm:ctxt-sub-subtype}.
+    \end{rneqncase}
+    \begin{rneqncase}{T-Assert}{
+         \Theta   \mid   \lambda   \mid   \Gamma   \vdash    \ASSERT( \varphi ) \SEQ  \ottnt{e}   :  \tau   \produces   \Gamma'  & \Gamma  \models  \varphi \\
+         \Theta   \mid   \lambda   \mid   \Gamma   \vdash   \ottnt{e}  :  \tau   \produces   \Gamma'  &   \epsilon    \mid   \Gamma   \vdash _{\wf}  \varphi 
+      }
+      By induction hypothesis, the result holds if we can show $\ottsym{[}  \oldvec{\ell}  \ottsym{/}  \lambda  \ottsym{]}  \Gamma  \models  \varphi$ which
+      follows from \Cref{itm:ctxt-subst-assert} (that $ \lambda  \not\in  \mathbf{FCV} \, \ottsym{(}  \varphi  \ottsym{)} $ follows
+      from the well-formedness of $\varphi$ with respect to $ \epsilon $).
+    \end{rneqncase}
+  \end{enumerate}
+\end{proof}
+
+%% VARIABLE SUBSTITUTION
+
+\begin{lemma}[Substitution] % L19
+  \label{lem:substitution}
+  If $ \Theta   \mid   \mathcal{L}   \mid   \Gamma   \vdash   \ottnt{e}  :  \tau   \produces   \Gamma' $ and $ \mathit{x'}  \not\in \DOM( \Gamma ) $, then
+  $ \Theta   \mid   \mathcal{L}   \mid    [  \mathit{x'}  /  \mathit{x}  ]  \, \Gamma   \vdash   \ottnt{e}  :   [  \mathit{x'}  /  \mathit{x}  ]  \, \tau   \produces    [  \mathit{x'}  /  \mathit{x}  ]  \, \Gamma' $.
+\end{lemma}
+\begin{proof}
+  By straightforward induction of typing rules.
+\end{proof}
+
+We now prove that if every variable satisfies its refinement in a type environment $\Gamma$,
+we must have $\models  \ottsym{[}  \ottnt{R}  \ottsym{]} \,  \sem{ \Gamma } $.
+
+\begin{lemma}
+  \label{lem:sat-implies-gamma}
+  If $\ottkw{SAT} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)}$ then $\models  \ottsym{[}  \ottnt{R}  \ottsym{]} \,  \sem{ \Gamma } $.
+\end{lemma}
+\begin{proof}
+  To show $\models  \ottsym{[}  \ottnt{R}  \ottsym{]} \,  \sem{ \Gamma } $, it suffices to show that for any $ \mathit{x}  \in   \DOM( \Gamma )  $ where $\Gamma  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi } $
+  $\models  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \mathit{x}  \ottsym{/} \, \nu \, \ottsym{]} \, \varphi$ holds. From $\ottkw{SAT} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)}$, we must have $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)} , \Gamma  \ottsym{(}  \mathit{x}  \ottsym{)} ) $, whereby
+  we have $ \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)}  \in  \mathbb{Z} $ and $\ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{/}  \nu  \ottsym{]}  \varphi$. As $\ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \mathit{x}  \ottsym{/} \, \nu \, \ottsym{]} \, \varphi$ is equivalent to $\ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{/}  \nu  \ottsym{]}  \varphi$,
+  and we have the desired result.
+\end{proof}
+
+% PROPERTIES OF SUBTYPING
+
+We prove that subtyping preserves the consistency relation in the following sense.
+
+\begin{lemma} % L18
+  \label{lem:subtyp-preserves-cons}
+  If $\Gamma  \leq  \Gamma'$ and $\ottkw{Cons} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)}$ then:
+  \begin{enumerate}
+  \item For any $ \mathit{x}  \in   \DOM( \Gamma' )  $, $\forall \,  \ottmv{a}  \in \DOM( \ottnt{H} )   \ottsym{.}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{,}  \Gamma  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{)}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \le  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{,}  \Gamma'  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{)}  \ottsym{(}  \ottmv{a}  \ottsym{)}$
+  \item $\forall \,  \ottmv{a}  \in \DOM( \ottnt{H} )   \ottsym{.}  \ottkw{Own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma'  \ottsym{)}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \le  \ottsym{1}$
+  \item If $\Gamma  \vdash  \tau  \leq  \tau'$ and $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \tau ) $ then $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \tau' ) $
+  \item $\ottkw{SAT} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma'  \ottsym{)}$
+  \item $\ottkw{Cons} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma'  \ottsym{)}$
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  \leavevmode
+  \begin{enumerate}
+  \item By induction on $\Gamma  \vdash  \Gamma  \ottsym{(}  \mathit{x}  \ottsym{)}  \leq  \Gamma'  \ottsym{(}  \mathit{x}  \ottsym{)}$.
+  \item Direct consequence of 1 and that $\forall \,  \ottmv{a}  \in \DOM( \ottnt{H} )   \ottsym{.}  \ottkw{Own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \le  \ottsym{1}$ from $\ottkw{Cons} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)}$.
+  \item From $\ottkw{Cons} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)}$ we have $\ottkw{SAT} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)}$ which by \Cref{lem:sat-implies-gamma} we have $\models  \ottsym{[}  \ottnt{R}  \ottsym{]} \,  \sem{ \Gamma } $.
+    We now proceed by induction on $\Gamma  \vdash  \tau  \leq  \tau'$.
+    \begin{eqncase}{
+        \tau  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi }  & \tau'  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi' }  \\
+        \models   \sem{ \Gamma }   \wedge  \varphi  \implies  \varphi'
+      }
+      From $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \tau ) $ we have $\models  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}  \varphi$.
+      We must show that $\models  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}  \varphi'$.
+      From $\models   \sem{ \Gamma }   \wedge  \varphi  \implies  \varphi'$ we must have
+      $\models  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}   \sem{ \Gamma }   \wedge  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}  \varphi  \implies  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}  \varphi'$ is valid.
+      As $\nu$ does not appear free in $ \sem{ \Gamma } $, we have
+      $\models  \ottsym{[}  \ottnt{R}  \ottsym{]} \,  \sem{ \Gamma }   \wedge  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}  \varphi  \implies  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}  \varphi'$ is
+      valid whereby the result is immediate.
+    \end{eqncase}
+    
+    \begin{eqncase}{
+        \tau  \ottsym{=}   \tau_{\ottmv{p}}  \TREF^{ r_{{\mathrm{1}}} }  & \tau'  \ottsym{=}   \tau'_{\ottmv{p}}  \TREF^{ r_{{\mathrm{2}}} }  \\
+        r_{{\mathrm{2}}}  \le  r_{{\mathrm{1}}}
+      }
+      Immediate from the induction hypothesis.
+    \end{eqncase}
+  \item Immediate consequence of 3 and that
+    $\Gamma  \leq  \Gamma'$ implies that $\Gamma  \vdash  \Gamma  \ottsym{(}  \mathit{x}  \ottsym{)}  \leq  \Gamma'  \ottsym{(}  \mathit{x}  \ottsym{)}$ for any $ \mathit{x}  \in \DOM( \Gamma' ) $.
+  \item Immediate from 2 and 4.
+  \end{enumerate}
+\end{proof}
+
+To show consistency is preserved during evaluation, \Cref{lem:sattosat,lem:ownequiv-preserv}
+show types equivalent according to $ \approx $ are equivalent for the purposes
+of $\ottkw{own}$ and $\ottkw{SATv}$. Then \Cref{lem:ownadd,lem:satadd} show that the
+type addition operator $+$ ``distributes'' over $\ottkw{SATv}$ and $\ottkw{own}$.
+
+\begin{lemma}[Type Equivalence Preserves Satisfiability] % L10
+  \label{lem:sattosat}
+  If $\tau_{{\mathrm{1}}}  \approx  \tau_{{\mathrm{2}}}$, then $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \tau_{{\mathrm{1}}} )   \iff   \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \tau_{{\mathrm{2}}} ) $.
+\end{lemma}
+\begin{proof}
+  We prove the forward case by induction on $ \bullet   \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{2}}}$ as implied by
+  $\tau_{{\mathrm{1}}}  \approx  \tau_{{\mathrm{2}}}$. The inductive case follows from the IH. In the the base case
+  where $\tau_{{\mathrm{1}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi_{{\mathrm{1}}} } $ and $\tau_{{\mathrm{2}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi_{{\mathrm{2}}} } $, from $ \bullet   \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{2}}}$
+  we have that $\models  \varphi_{{\mathrm{1}}}  \implies  \varphi_{{\mathrm{2}}}$ is valid, from which we must have $\models  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}  \varphi_{{\mathrm{1}}}  \implies  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}  \varphi_{{\mathrm{2}}}$,
+  where from the definition of $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \tau_{{\mathrm{1}}} ) $ we must then have $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \tau_{{\mathrm{2}}} ) $.
+    
+  The backwards case follows similar reasoning by induction on $ \bullet   \vdash  \tau_{{\mathrm{2}}}  \leq  \tau_{{\mathrm{1}}}$.
+\end{proof}
+
+\begin{lemma} % L12
+  \label{lem:ownequiv-preserv}
+  If $\tau_{{\mathrm{1}}}  \approx  \tau_{{\mathrm{2}}}$, then $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{1}}}  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{2}}}  \ottsym{)}$.
+\end{lemma}
+\begin{proof}
+  By reasoning similar to that in \Cref{lem:sattosat}.
+\end{proof}
+
+\begin{lemma} % L11
+  \label{lem:ownadd}
+  If $\tau_{\ottmv{p}}  \ottsym{=}  \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}$, then $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{\ottmv{p}}  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{1}}}  \ottsym{)}  \ottsym{+}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{2}}}  \ottsym{)}$.
+\end{lemma}
+\begin{proof}
+  By induction on the rules used to derive $\tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}  \ottsym{=}  \tau_{\ottmv{p}}$.
+  \begin{rncase}{Tadd-Int}
+    We have $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{\ottmv{p}}  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}  \ottsym{)}$, where $\tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid   \varphi_{{\mathrm{1}}}  \wedge  \varphi_{{\mathrm{2}}}  } $,
+    $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{1}}}  \ottsym{)}$ and $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{2}}}  \ottsym{)}$, where $\tau_{{\mathrm{1}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi_{{\mathrm{1}}} } , \tau_{{\mathrm{2}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi_{{\mathrm{2}}} } $.
+  
+    From the definition of ownership, we have $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{\ottmv{p}}  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{1}}}  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{2}}}  \ottsym{)}  \ottsym{=}   \emptyset $.
+    It is thus trivial that $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{\ottmv{p}}  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{1}}}  \ottsym{)}  \ottsym{+}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{2}}}  \ottsym{)}$.
+  \end{rncase}
+
+  \begin{rncase}{Tadd-Ref}
+    We assume $\ottnt{v} \, \ottsym{=} \, \ottmv{a}$ and $ \ottmv{a}  \in   \DOM( \ottnt{H} )  $, otherwise the result trivially holds.
+    
+    We have $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{\ottmv{p}}  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{1}}}  \ottsym{)}$, where $\tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}  \ottsym{=}   \ottsym{(}  \tau'_{{\mathrm{1}}}  \ottsym{+}  \tau'_{{\mathrm{2}}}  \ottsym{)}  \TREF^{ r_{{\mathrm{1}}}  \ottsym{+}  r_{{\mathrm{2}}} } $,
+    and  $\tau_{{\mathrm{1}}}  \ottsym{=}   \tau'_{{\mathrm{1}}}  \TREF^{ r_{{\mathrm{1}}} } $, $\tau_{{\mathrm{2}}}  \ottsym{=}   \tau'_{{\mathrm{2}}}  \TREF^{ r_{{\mathrm{2}}} } $.
+    
+    From the definition of ownership, we have $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{\ottmv{p}}  \ottsym{)}  \ottsym{=}  \ottsym{\{}  \ottmv{a}  \mapsto  r_{{\mathrm{1}}}  \ottsym{+}  r_{{\mathrm{2}}}  \ottsym{\}}  \ottsym{+}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{H}  \ottsym{(}  \ottnt{v}  \ottsym{)}  \ottsym{,}  \tau'_{{\mathrm{1}}}  \ottsym{+}  \tau'_{{\mathrm{2}}}  \ottsym{)}$ and:
+    \begin{align*}
+      \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{1}}}  \ottsym{)}  \ottsym{+}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{2}}}  \ottsym{)} & = \ottsym{\{}  \ottmv{a}  \mapsto  r_{{\mathrm{1}}}  \ottsym{\}}  \ottsym{+}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{H}  \ottsym{(}  \ottnt{v}  \ottsym{)}  \ottsym{,}  \tau'_{{\mathrm{1}}}  \ottsym{)}  \ottsym{+}  \ottsym{\{}  \ottmv{a}  \mapsto  r_{{\mathrm{2}}}  \ottsym{\}}  \ottsym{+}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{H}  \ottsym{(}  \ottnt{v}  \ottsym{)}  \ottsym{,}  \tau'_{{\mathrm{2}}}  \ottsym{)} \\
+                                    & = \ottsym{\{}  \ottmv{a}  \mapsto  r_{{\mathrm{1}}}  \ottsym{+}  r_{{\mathrm{2}}}  \ottsym{\}}  \ottsym{+}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{H}  \ottsym{(}  \ottnt{v}  \ottsym{)}  \ottsym{,}  \tau'_{{\mathrm{1}}}  \ottsym{)}  \ottsym{+}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{H}  \ottsym{(}  \ottnt{v}  \ottsym{)}  \ottsym{,}  \tau'_{{\mathrm{2}}}  \ottsym{)}
+    \end{align*}
+    By the induction hypothesis, have that $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{H}  \ottsym{(}  \ottnt{v}  \ottsym{)}  \ottsym{,}  \tau'_{{\mathrm{1}}}  \ottsym{+}  \tau'_{{\mathrm{2}}}  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{H}  \ottsym{(}  \ottnt{v}  \ottsym{)}  \ottsym{,}  \tau'_{{\mathrm{1}}}  \ottsym{)}  \ottsym{+}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{H}  \ottsym{(}  \ottnt{v}  \ottsym{)}  \ottsym{,}  \tau'_{{\mathrm{2}}}  \ottsym{)}$ and can conclude that $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{\ottmv{p}}  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{1}}}  \ottsym{)}  \ottsym{+}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau_{{\mathrm{2}}}  \ottsym{)}$.
+  \end{rncase}
+\end{proof}
+
+\begin{lemma} % L13
+  \label{lem:satadd}
+  If $\tau_{\ottmv{p}}  \ottsym{=}  \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}$, we have
+    $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , v , \tau_{\ottmv{p}} ) $ iff. $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , v , \tau_{{\mathrm{1}}} ) $ and $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , v , \tau_{{\mathrm{2}}} ) $
+\end{lemma}
+\begin{proof}
+  By induction on the rules used to derive $\tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}$. In the following
+  we only prove the forward direction of the implication; the backwards
+  direction is symmetric.
+  \begin{rncase}{Tadd-Int}
+    We have $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , v , \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}} ) $, where $\tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid   \varphi_{{\mathrm{1}}}  \wedge  \varphi_{{\mathrm{2}}}  } $,
+    we must show $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , v , \tau_{{\mathrm{1}}} ) $ and $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , v , \tau_{{\mathrm{2}}} ) $,
+    where $\tau_{{\mathrm{1}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi_{{\mathrm{1}}} } , \tau_{{\mathrm{2}}}  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi_{{\mathrm{2}}} } $.
+
+    From the definition of $\ottkw{SATv}$, we must show $\ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  v  \ottsym{/}  \nu  \ottsym{]}  \varphi_{{\mathrm{1}}}$ and $\ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}  \varphi_{{\mathrm{2}}}$.
+    From $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , v , \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}} ) $ we have $\ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \mathit{x}  \ottsym{]}  \ottsym{(}   \varphi_{{\mathrm{1}}}  \wedge  \varphi_{{\mathrm{2}}}   \ottsym{)}$.
+    It is immediate that for any value $v$ such that $\ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}  \ottsym{(}   \varphi_{{\mathrm{1}}}  \wedge  \varphi_{{\mathrm{2}}}   \ottsym{)}$, we must have $\ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}  \varphi_{{\mathrm{1}}}$ and $\ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}  \varphi_{{\mathrm{2}}}$.
+    We then conclude $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , v , \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}} ) $ implies $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , v , \tau_{{\mathrm{1}}} ) $ and $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , v , \tau_{{\mathrm{2}}} ) $.
+  \end{rncase}
+
+  \begin{rncase}{Tadd-Ref}
+    Immediate from the definition of $\ottkw{SATv}$ and the inductive hypothesis.
+  \end{rncase}
+\end{proof}
+
+%% UPDATES AND EXTENSION
+
+\begin{definition}
+  The valid substitution relation, written $ \ottnt{R} \vdash _{vs}  \tau $ is the smallest relation closed
+  under the following rules:
+  \infrule[]{
+    \forall \,  \mathit{x}  \in   \ottkw{FPV} \, \ottsym{(}  \varphi  \ottsym{)}  \setminus   \set{ \nu }     \ottsym{.}  \exists \, n  \ottsym{.}  \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}  n
+  }{
+     \ottnt{R} \vdash _{vs}   \set{  \nu  \COL \TINT \mid  \varphi }  
+  }
+  \infrule[]{
+     \ottnt{R} \vdash _{vs}  \tau 
+  }{
+    \ottnt{R} \vdash _{vs}   \tau  \TREF^{ r }  
+ }
+\end{definition}
+
+\begin{lemma} % L4
+  \label{lem:r-valid-subst}
+  If $ \oldvec{\ell}   \vdash _{\wf}  \Gamma $ and $\ottkw{Cons} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)}$, then $\forall \,  \mathit{x}  \in   \DOM( \Gamma )    \ottsym{.}   \ottnt{R} \vdash _{vs}  \Gamma  \ottsym{(}  \mathit{x}  \ottsym{)} $.
+\end{lemma}
+\begin{proof}
+  By $\ottkw{Cons} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)}$, all integer variables in $\Gamma$ must be in
+  the domain of $\ottnt{R}$ and must be an integer. From $ \oldvec{\ell}   \vdash _{\wf}  \Gamma $, any free variables
+  in any refinement of any type in $\Gamma$ must be an integer valued variable in $\Gamma$,
+  which gives the required result.
+\end{proof}
+
+\begin{definition}
+  We will write $ \ottnt{R}  \sqsubseteq  \ottnt{R'} $ to denote two register files such that:
+  \begin{enumerate}
+  \item $ \DOM( \ottnt{R} )  \subseteq  \DOM( \ottnt{R'} ) $, and
+  \item $\forall \,  \mathit{x}  \in \DOM( \ottnt{R} )   \ottsym{.}  \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}  \ottnt{R'}  \ottsym{(}  \mathit{x}  \ottsym{)}$
+  \end{enumerate}
+\end{definition}
+
+\begin{definition}
+  Two heaps $\ottnt{H}$ and $\ottnt{H'}$ are \emph{equivalent modulo $\ottmv{a}$}, written $ \ottnt{H}   \approx _ \ottmv{a}   \ottnt{H'} $ if:
+  \begin{enumerate}
+  \item $ \DOM( \ottnt{H} )   \ottsym{=}   \DOM( \ottnt{H'} ) $
+  \item $\forall \,  \ottmv{a'}  \in   \DOM( \ottnt{H} )    \ottsym{.}  \ottmv{a'} \, \neq \, \ottmv{a}  \implies  \ottnt{H}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{=}  \ottnt{H}  \ottsym{(}  \ottmv{a'}  \ottsym{)}$
+  \item For any $n$, $ \ottnt{H} \vdash   \ottmv{a}  \Downarrow  n $ iff $ \ottnt{H'} \vdash   \ottmv{a}  \Downarrow  n $
+  \end{enumerate}
+\end{definition}
+
+\begin{lemma}
+  \label{lem:top-type-empty-omap}
+  For any type $\tau  \ottsym{=}  \top_{\ottmv{n}}$, $\ottnt{H}, \ottnt{v}$, $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \top_{\ottmv{n}}  \ottsym{)}  \ottsym{=}   \emptyset $.
+\end{lemma}
+\begin{proof}
+  By induction on $\tau$. In the base case, the result is trivial.
+  Then consider the case where $\tau  \ottsym{=}   \top_{{\ottmv{n}-1}}  \TREF^{ \ottsym{0} } $. If $ \ottnt{v}  \not\in   \textbf{Addr}  $,
+  or if $\ottnt{v} \, \ottsym{=} \, \ottmv{a}$ and $ \ottmv{a}  \not\in   \DOM( \ottnt{H} )  $, then the result trivially holds.
+  Otherwise the result holds from the inductive hypothesis, the definition of $+$ and $\ottsym{\{}  \ottmv{a}  \mapsto  \ottsym{0}  \ottsym{\}}$.
+\end{proof}
+
+\begin{lemma}[Heap Update Ownership Preservation] % L6
+  \label{lem:heapop}
+  If $ \ottnt{H}   \approx _ \ottmv{a}   \ottnt{H'} $ and $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau  \ottsym{)}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{=}  \ottsym{0}$, then
+  $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H'}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau  \ottsym{)}$.
+\end{lemma}
+\begin{proof}
+  By induction on the shape of $\tau$. If $\tau  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi } $ then
+  the result trivially holds. Otherwise, $\tau  \ottsym{=}   \tau'  \TREF^{ r } $. We assume
+  that $\ottnt{v} \, \ottsym{=} \, \ottmv{a''}$ and $ \ottmv{a''}  \in \DOM( \ottnt{H} ) $ (otherwise the result
+  trivially holds, as $ \DOM( \ottnt{H} )   \ottsym{=}   \DOM( \ottnt{H'} ) $ by $ \ottnt{H}   \approx _ \ottmv{a}   \ottnt{H'} $).
+  Consider the case where $\ottmv{a''} \, \ottsym{=} \, \ottmv{a}$. By definition
+  $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottmv{a}  \ottsym{,}  \tau  \ottsym{)}  \ottsym{=}  \ottsym{\{}  \ottmv{a}  \mapsto  r  \ottsym{\}}  \ottsym{+}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{H}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{,}  \tau'  \ottsym{)}$, and by the
+  assumption that $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottmv{a}  \ottsym{,}  \tau  \ottsym{)}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{=}  \ottsym{0}$ we must have that
+  $r  \ottsym{=}  \ottsym{0}$. Further, by the ownership well-formedness of types,
+  we must have $\tau'  \ottsym{=}  \top_{\ottmv{n}}$ for some $n$, thus by \Cref{lem:top-type-empty-omap}
+  we have $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau  \ottsym{)}  \ottsym{=}   \emptyset   \ottsym{=}  \ottsym{\{}  \ottmv{a}  \mapsto  \ottsym{0}  \ottsym{\}}  \ottsym{+}  \ottkw{own} \, \ottsym{(}  \ottnt{H'}  \ottsym{,}  \ottnt{H'}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{,}  \top_{\ottmv{n}}  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H'}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau  \ottsym{)}$.
+
+  Finally, consider the case where $\ottmv{a''} \, \neq \, \ottmv{a}$. Then from the
+  definition of $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottmv{a''}  \ottsym{,}  \tau  \ottsym{)}$ and our assumption that
+  $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottmv{a''}  \ottsym{,}  \tau  \ottsym{)}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{=}  \ottsym{0}$, we have $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{H}  \ottsym{(}  \ottmv{a''}  \ottsym{)}  \ottsym{,}  \tau'  \ottsym{)}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{=}  \ottsym{0}$,
+  and the result holds from the inductive hypothesis and that $\ottnt{H}  \ottsym{(}  \ottmv{a''}  \ottsym{)} \, \ottsym{=} \, \ottnt{H'}  \ottsym{(}  \ottmv{a''}  \ottsym{)}$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:sat-implies-shape-cons}
+  For any $\ottnt{H}$, $\ottnt{R}$, $\ottnt{v}$, and $\tau$, if $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \tau ) $ then $ \ottnt{H} \vdash   \ottnt{v}  \Downarrow   | \tau |  $
+\end{lemma}
+\begin{proof}
+  By induction on $\tau$ and the definition of $\ottkw{SATv}$.
+\end{proof}
+
+\begin{lemma} % L7
+  \label{lem:top-type-sat-all}
+  For any $n$, if $ \ottnt{H} \vdash   v  \Downarrow  n $ then for any $\ottnt{R}$, $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \top_{\ottmv{n}} ) $.
+\end{lemma}
+\begin{proof}
+  By induction on $n$. In the base case, by inversion on $ \ottnt{H} \vdash   \ottnt{v}  \Downarrow  \ottsym{0} $ we have
+  $ \ottnt{v}  \in  \mathbb{Z} $ and as $\ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  \ottnt{v}  \ottsym{/}  \nu  \ottsym{]}   \top   \implies   \top $, we conclude $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \top_{{\mathrm{0}}} ) $.
+
+  For $n > 0$, by inversion on $ \ottnt{H} \vdash   v  \Downarrow  n $ we have that
+  $\ottnt{v} \, \ottsym{=} \, \ottmv{a}$, $ \ottmv{a}  \in   \DOM( \ottnt{H} )  $, and $ \ottnt{H} \vdash   \ottnt{H}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \Downarrow  n  \ottsym{-}  \ottsym{1} $,
+  whereby the result holds from the inductive hypothesis.
+\end{proof}
+  
+\begin{lemma}[Heap Update Consistency Preservation] % L8
+  \label{lem:heapfor0}
+  If $ \ottnt{H}   \approx _ \ottmv{a}   \ottnt{H'} $ and $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau  \ottsym{)}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{=}  \ottsym{0}$ and $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \tau ) $, then $ \ottkw{SATv} ( \ottnt{H'} , \ottnt{R} , \ottnt{v} , \tau ) $.
+\end{lemma}
+\begin{proof}
+  By induction on the shape of $\tau$. The base case where
+  $\tau  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi } $ is trivial. We therefore consider the case
+  where $\ottnt{v} \, \ottsym{=} \, \ottmv{a'}$ and $\tau  \ottsym{=}   \tau'  \TREF^{ r } $.
+
+  We first consider the case where $\ottmv{a'} \, \ottsym{=} \, \ottmv{a}$, then by
+  our assumption that $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottmv{a}  \ottsym{,}  \tau  \ottsym{)}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{=}  \ottsym{0}$, we must have that
+  $\tau  \ottsym{=}   \tau'  \TREF^{ \ottsym{0} } $, whereby $\tau  \ottsym{=}  \top_{\ottmv{n}}$ for some $\ottmv{n}$.
+  From $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottmv{a} , \tau ) $ and \Cref{lem:sat-implies-shape-cons}, we must have that
+  $ \ottnt{H} \vdash   \ottmv{a}  \Downarrow   | \tau |  $,
+  and from $ \ottnt{H}   \approx _ \ottmv{a}   \ottnt{H'} $, we therefore have that $ \ottnt{H'} \vdash   \ottmv{a}  \Downarrow   | \tau |  $
+  whereby the result holds from \Cref{lem:top-type-sat-all}.
+
+  Otherwise, we have that $\ottmv{a'} \, \neq \, \ottmv{a}$, and by definition we must have that
+  $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{H}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{,}  \tau'  \ottsym{)}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{=}  \ottsym{0}$ and $\ottnt{H'}  \ottsym{(}  \ottmv{a}  \ottsym{)} \, \ottsym{=} \, \ottnt{H}  \ottsym{(}  \ottmv{a}  \ottsym{)}$ hence the result follows
+  from the inductive hypothesis.
+\end{proof}
+
+\begin{lemma}[Register Weakening] % L5 
+  \label{lem:register}
+  If $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , v , \tau ) $ and $ \ottnt{R} \vdash _{vs}  \tau $,
+  then for any $\ottnt{R'}$ such that $ \ottnt{R}  \sqsubseteq  \ottnt{R'} $, $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R'} , v , \tau ) $.
+\end{lemma}
+\begin{proof}
+  By induction on the shape of $\tau$. If $\tau  \ottsym{=}   \tau'  \TREF^{ r } $, then
+  the result follows from the inductive hypothesis.
+  We therefore consider the case where
+  $\tau  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi } $. Without loss of generality, we consider
+  the case where $ \DOM( \ottnt{R'} )  \setminus  \DOM( \ottnt{R} )  = \set{x}$,
+  and $\ottnt{R'}  \ottsym{(}  \mathit{x}  \ottsym{)} \, \ottsym{=} \, n$. (If $\ottnt{R'}  \ottsym{(}  \mathit{x}  \ottsym{)} \, \ottsym{=} \, \ottmv{a}$, the extra binding
+  also has no effect, and the case where more than one binding is
+  added follows from $n$ applications of the following argument.)
+
+  From $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , v , \tau ) $, we conclude that $ v  \in  \mathbb{Z} $ and that
+  $\ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  v  \ottsym{/}  \nu  \ottsym{]}  \varphi$. If $ \mathit{x}  \not\in  \ottkw{FPV} \, \ottsym{(}  \varphi  \ottsym{)} $ then $\ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  v  \ottsym{/}  \nu  \ottsym{]}  \varphi  \iff  \ottsym{[}  \ottnt{R'}  \ottsym{]} \, \ottsym{[}  v  \ottsym{/}  \nu  \ottsym{]}  \varphi$
+  and the result holds trivially. Otherwise, if $ \mathit{x}  \in  \ottkw{FPV} \, \ottsym{(}  \varphi  \ottsym{)} $ and $ \mathit{x}  \not\in \DOM( \ottnt{R} ) $
+  then $\ottnt{R}$ is not a valid substitution, violating our assumption.
+\end{proof}
+
+\begin{lemma}[Heap Extension Consistency Preservation] % L9
+  \label{lem:newaddheap}
+  If we have heap $H$, such that $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \tau ) $, for any heap 
+  $\ottnt{H'}  \ottsym{=}  \ottnt{H}  \ottsym{\{}  \ottmv{a}  \mapsto  \ottnt{v'}  \ottsym{\}},  \ottmv{a}  \not\in \DOM( \ottnt{H} ) $, then we have $ \ottkw{SATv} ( \ottnt{H'} , \ottnt{R} , \ottnt{v} , \tau ) $.
+\end{lemma}
+\begin{proof}
+  By induction on the shape of $\tau$.
+  The base case where $\tau  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi } $ is trivial.
+  Next, we consider the case where $\tau  \ottsym{=}   \tau'  \TREF^{ r } $.
+  We must show that $ \ottnt{v}  \in   \DOM( \ottnt{H'} )  $ and $ \ottkw{SATv} ( \ottnt{H'} , \ottnt{R} , \ottnt{H'}  \ottsym{(}  \ottnt{v}  \ottsym{)} , \tau' ) $.
+  The first condition is immediately satisfied by inversion on $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \tau' ) $,
+  and from $ \ottmv{a}  \not\in \DOM( \ottnt{H} ) $, we have $v\neq a$, which gives that $H'(v)=H(v)$.
+  That is we must show $ \ottkw{SATv} ( \ottnt{H'} , \ottnt{R} , \ottnt{H}  \ottsym{(}  \ottnt{v}  \ottsym{)} , \tau' ) $, which is follows from
+  the induction hypothesis.
+\end{proof}
+
+\begin{lemma}[Heap Extension Ownership Preservation]
+  \label{lem:ownaddheap}
+  If $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \tau ) $, then for any $ \ottmv{a}  \not\in   \DOM( \ottnt{H} )  $
+  $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{\{}  \ottmv{a}  \mapsto  \ottnt{v'}  \ottsym{\}}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau  \ottsym{)}$ for any value $\ottnt{v'}$.
+\end{lemma}
+\begin{proof}
+  By induction on $\tau$. The base case is trivial as $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}   \set{  \nu  \COL \TINT \mid  \varphi }   \ottsym{)}  \ottsym{=}   \emptyset   \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{\{}  \ottmv{a}  \mapsto  \ottnt{v}  \ottsym{\}}  \ottsym{,}  \ottnt{v}  \ottsym{,}   \set{  \nu  \COL \TINT \mid  \varphi }   \ottsym{)}$.
+  We therefore consider the case where $\tau  \ottsym{=}   \tau'  \TREF^{ r } $.
+
+  From $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{v} , \tau ) $ we must have that $\ottnt{v} \, \ottsym{=} \, \ottmv{a'}$ and
+  $ \ottmv{a'}  \in   \DOM( \ottnt{H} )  $ (and by extension $ \ottmv{a'}  \in   \DOM( \ottnt{H}  \ottsym{\{}  \ottmv{a}  \mapsto  \ottnt{v'}  \ottsym{\}} )  $).
+  From the definition of the ownership function, we have that $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{H}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{,}  \tau'  \ottsym{)}  \ottsym{+}  \ottsym{\{}  \ottmv{a'}  \mapsto  r  \ottsym{\}}$.
+  and $\ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{\{}  \ottmv{a}  \mapsto  \ottnt{v'}  \ottsym{\}}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau  \ottsym{)}  \ottsym{=}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{\{}  \ottmv{a}  \mapsto  \ottnt{v'}  \ottsym{\}}  \ottsym{,}  \ottnt{H}  \ottsym{\{}  \ottmv{a}  \mapsto  \ottnt{v'}  \ottsym{\}}  \ottsym{(}  \ottmv{a'}  \ottsym{)}  \ottsym{,}  \tau'  \ottsym{)}  \ottsym{+}  \ottsym{\{}  \ottmv{a'}  \mapsto  r  \ottsym{\}}$
+  Then from our requirement that  $ \ottmv{a}  \not\in   \DOM( \ottnt{H} )  $, we have $\ottmv{a} \, \neq \, \ottmv{a'}$ and therefore
+  $\ottnt{H}  \ottsym{(}  \ottmv{a'}  \ottsym{)} \, \ottsym{=} \, \ottnt{H}  \ottsym{\{}  \ottmv{a}  \mapsto  \ottnt{v'}  \ottsym{\}}  \ottsym{(}  \ottmv{a'}  \ottsym{)}$, whereby the result holds from the inductive hypothesis.
+\end{proof}
+
+\begin{lemma}[Environment Weakening] % L27
+  \label{lem:tyenv-weaken}
+  Define the partial operation $ \Gamma_{{\mathrm{1}}}  \uplus  \Gamma_{{\mathrm{2}}} $ for two environments such $  \DOM( \Gamma_{{\mathrm{1}}} )   \cap   \DOM( \Gamma_{{\mathrm{2}}} )    \ottsym{=}   \emptyset $:
+  \[
+    \ottsym{(}   \Gamma_{{\mathrm{1}}}  \uplus  \Gamma_{{\mathrm{2}}}   \ottsym{)} \quad \ottsym{(}  \mathit{x}  \ottsym{)} = \begin{cases}
+      \Gamma_{{\mathrm{1}}} \quad \ottsym{(}  \mathit{x}  \ottsym{)} &  \mathit{x}  \in   \DOM( \Gamma_{{\mathrm{1}}} )   \\
+      \Gamma_{{\mathrm{2}}} \quad \ottsym{(}  \mathit{x}  \ottsym{)} &  \mathit{x}  \in   \DOM( \Gamma_{{\mathrm{2}}} )   \\
+      \textit{undef} & o.w.
+    \end{cases}
+  \]
+  
+  Then, for any $\Gamma$ and $\Gamma''$ where $  \DOM( \Gamma )   \cap   \DOM( \Gamma'' )    \ottsym{=}   \emptyset $:
+  \begin{enumerate}
+  \item $\Gamma  \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{2}}}$ implies $ \Gamma  \uplus  \Gamma''   \vdash  \tau_{{\mathrm{1}}}  \leq  \tau_{{\mathrm{2}}}$
+  \item $\Gamma  \leq  \Gamma'$ implies $ \Gamma  \uplus  \Gamma''   \leq   \Gamma'  \uplus  \Gamma'' $
+  \item If $ \Theta   \mid   \mathcal{L}   \mid   \Gamma   \vdash   \ottnt{e}  :  \tau   \produces   \Gamma' $, $ \mathcal{L}   \vdash _{\wf}   \Gamma  \uplus  \Gamma''  $, and $ \mathcal{L}   \vdash _{\wf}   \Gamma'  \uplus  \Gamma''  $, then $ \Theta   \mid   \mathcal{L}   \mid    \Gamma  \uplus  \Gamma''    \vdash   \ottnt{e}  :  \tau   \produces    \Gamma''  \uplus  \Gamma  $
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  \leavevmode
+  \begin{enumerate}
+  \item As in the proof of \subref{lem:ctxt-substitution}{itm:ctxt-sub-subtype}, at the root of
+    the subtyping derivation is a logical judgment of the form
+    $\models   \sem{ \Gamma }   \wedge  \varphi_{{\mathrm{1}}}  \implies  \varphi_{{\mathrm{2}}}$ which can be shown to be valid. We
+    must then show that $\models   \sem{  \Gamma  \uplus  \Gamma''  }   \wedge  \varphi_{{\mathrm{1}}}  \implies  \varphi_{{\mathrm{2}}}$ is valid. As
+    $ \sem{  \Gamma''  \uplus  \Gamma  }   \wedge  \varphi_{{\mathrm{1}}}  \ottsym{=}   \sem{ \Gamma'' }   \wedge   \sem{ \Gamma }   \wedge  \varphi$ only strengthens the pre-condition
+    $ \sem{ \Gamma }   \wedge  \varphi_{{\mathrm{1}}}$, $\models   \sem{  \Gamma''  \uplus  \Gamma  }   \wedge  \varphi_{{\mathrm{1}}}  \implies  \varphi_{{\mathrm{2}}}$ must
+    also be valid.
+  \item It suffices to show that $ \Gamma  \uplus  \Gamma''   \vdash  \ottsym{(}   \Gamma  \uplus  \Gamma''   \ottsym{)}  \ottsym{(}  \mathit{x}  \ottsym{)}  \leq  \ottsym{(}   \Gamma'  \uplus  \Gamma''   \ottsym{)}  \ottsym{(}  \mathit{x}  \ottsym{)}$ for
+    any arbitrary $ \mathit{x}  \in   \DOM(  \Gamma'  \uplus  \Gamma''  )  $. If $ \mathit{x}  \in \DOM( \Gamma' ) $ then we must have
+    $\Gamma  \vdash  \Gamma  \ottsym{(}  \mathit{x}  \ottsym{)}  \leq  \Gamma'  \ottsym{(}  \mathit{x}  \ottsym{)}$ by inversion on $\Gamma  \leq  \Gamma'$,
+    whereby $ \Gamma  \uplus  \Gamma''   \vdash  \ottsym{(}   \Gamma  \uplus  \Gamma''   \ottsym{)}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}  \Gamma  \ottsym{(}  \mathit{x}  \ottsym{)}  \leq   \Gamma'  \uplus  \Gamma''   \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}  \Gamma'  \ottsym{(}  \mathit{x}  \ottsym{)}$ from part 1.
+
+    If $ \mathit{x}  \not\in \DOM( \Gamma' ) $, then we must show $\ottsym{(}   \Gamma  \uplus  \Gamma''   \ottsym{)}  \vdash  \Gamma''  \ottsym{(}  \mathit{x}  \ottsym{)}  \leq  \Gamma''  \ottsym{(}  \mathit{x}  \ottsym{)}$, which trivially holds.
+  \item By induction on the typing derivation of
+    $ \Theta   \mid   \mathcal{L}   \mid   \Gamma   \vdash   \ottnt{e}  :  \tau   \produces   \Gamma' $. We assume that the variables bound in
+    any let expressions that appear within $\ottnt{e}$ are not in the domain
+    of $\Gamma''$; this requirement can be easily enforced with
+    consistent renaming and is preserved during evaluation. The only interesting cases are
+    \rn{T-Sub} and \rn{T-Assert} and the let bindings;
+    the other cases follow from the induction hypothesis.
+    
+    We now prove the relevant cases.
+
+    \begin{rneqncase}{T-Let}{
+         \Theta   \mid   \mathcal{L}   \mid   \Gamma   \vdash    \LET  \mathit{x}  =  \mathit{y}  \IN  \ottnt{e}   :  \tau   \produces   \Gamma'  \\
+         \Theta   \mid   \mathcal{L}   \mid   \Gamma  \ottsym{[}  \mathit{y}  \hookleftarrow   \tau_{{\mathrm{1}}}  \wedge_{ \mathit{y} }   \mathit{y}  =_{ \tau_{{\mathrm{1}}} }  \mathit{x}    \ottsym{]}  \ottsym{,}  \mathit{x}  \ottsym{:}   \tau_{{\mathrm{2}}}  \wedge_{ \mathit{x} }   \mathit{x}  =_{ \tau_{{\mathrm{2}}} }  \mathit{y}     \vdash   \ottnt{e}  :  \tau   \produces   \Gamma'  \\
+        \Gamma  \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{=}  \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}} \andalso  \mathit{x}  \not\in   \DOM( \Gamma' )  
+      }
+      Let $ \Gamma'''  \ottsym{=}  \Gamma''  \uplus  \Gamma   \ottsym{[}  \mathit{y}  \hookleftarrow   \tau_{{\mathrm{1}}}  \wedge_{ \mathit{y} }   \mathit{y}  =_{ \tau_{{\mathrm{1}}} }  \mathit{x}    \ottsym{]}  \ottsym{,}  \mathit{x}  \ottsym{:}   \tau_{{\mathrm{2}}}  \wedge_{ \mathit{x} }   \mathit{x}  =_{ \tau_{{\mathrm{2}}} }  \mathit{y}  $.
+      To use the inductive hypothesis, we must show that
+      $ \mathcal{L}   \vdash _{\wf}  \Gamma''' $ and $ \mathcal{L}   \vdash _{\wf}   \Gamma'  \uplus  \Gamma''  $. The latter holds by assumption.
+      To show the former, it suffices
+      to show $ \mathcal{L}   \mid   \Gamma'''   \vdash _{\wf}   \tau_{{\mathrm{1}}}  \wedge_{ \mathit{y} }   \mathit{y}  =_{ \tau_{{\mathrm{1}}} }  \mathit{x}   $ and $ \mathcal{L}   \mid   \Gamma'''   \vdash _{\wf}   \tau_{{\mathrm{2}}}  \wedge_{ \mathit{x} }   \mathit{x}  =_{ \tau_{{\mathrm{2}}} }  \mathit{y}   $.
+      From the assumed well-formedness $ \mathcal{L}   \vdash _{\wf}   \Gamma  \uplus  \Gamma''  $, we must have $ \mathcal{L}   \mid    \Gamma  \uplus  \Gamma''    \vdash _{\wf}  \tau_{{\mathrm{1}}}  \ottsym{+}  \tau_{{\mathrm{2}}} $,
+      and in particular $ \mathcal{L}   \mid    \Gamma  \uplus  \Gamma''    \vdash _{\wf}  \tau_{{\mathrm{1}}} $ and $ \mathcal{L}   \mid    \Gamma  \uplus  \Gamma''    \vdash _{\wf}  \tau_{{\mathrm{2}}} $. From this
+      we conclude both conditions hold. To show the well-typing of the overall let expression,
+      we must show $ \mathit{x}  \not\in   \DOM(  \Gamma'  \uplus  \Gamma''  )  $, which follows from our assumption and $ \mathit{x}  \not\in   \DOM( \Gamma' )  $.
+      Finally, we must also show that $ \mathcal{L}   \mid    \Gamma'  \uplus  \Gamma''    \vdash _{\wf}  \tau $. From $ \mathcal{L}   \mid   \Gamma'   \vdash _{\wf}  \tau $
+      and the fact that$\forall \,  \mathit{x}  \in   \DOM( \Gamma' )    \ottsym{.}  \Gamma'  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}   \set{  \nu  \COL \TINT \mid \_ } $ iff
+      $\ottsym{(}   \Gamma'  \uplus  \Gamma''   \ottsym{)}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}   \set{  \nu  \COL \TINT \mid \_ } $, we must have $ \mathcal{L}   \mid    \Gamma'  \uplus  \Gamma''    \vdash _{\wf}  \tau $. 
+    \end{rneqncase}
+    \begin{namedcase}{\casefont{Cases \rn{T-LetInt}, \rn{T-Mkref}, \rn{T-Mkref}, \rn{T-Deref}, \rn{T-Call}: }}
+      Similar to the reasoning in \rn{T-Let}.
+    \end{namedcase}
+
+    \begin{rneqncase}{T-Sub}{
+        \Gamma  \leq  \Gamma_{{\mathrm{1}}} &  \Theta   \mid   \mathcal{L}   \mid   \Gamma_{{\mathrm{1}}}   \vdash   \ottnt{e}  :  \tau_{{\mathrm{2}}}   \produces   \Gamma_{{\mathrm{2}}}  \\
+        \Gamma_{{\mathrm{2}}}  \ottsym{,}  \tau_{{\mathrm{2}}}  \leq  \Gamma'  \ottsym{,}  \tau \\
+      }
+      From the rules for subtyping, we must have
+      $  \DOM( \Gamma_{{\mathrm{1}}} )   \subseteq   \DOM( \Gamma )  $ and $  \DOM( \Gamma' )   \subseteq   \DOM( \Gamma_{{\mathrm{2}}} )  $. A simple inductive argument
+      gives that $  \DOM( \Gamma_{{\mathrm{2}}} )   \subseteq   \DOM( \Gamma_{{\mathrm{1}}} )  $, therefore we have $  \DOM( \Gamma' )   \subseteq   \DOM( \Gamma_{{\mathrm{1}}} )  $.
+      Let $\mathcal{LV}$ be the set of free variables in the refinements of $\Gamma''$
+      that are not in the domain of $\Gamma''$. From the assumed well-formedness of
+      $ \mathcal{L}   \vdash _{\wf}   \Gamma'  \uplus  \Gamma''  $, we must have that
+      $\forall x \in \mathcal{LV}. \mathit{x}  \in   \DOM( \Gamma' )    \wedge  \Gamma'  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}   \set{  \nu  \COL \TINT \mid \_ } $. Thus,
+      $\mathcal{LV} \subseteq \Gamma_{{\mathrm{1}}}$ and $\mathcal{LV} \subseteq \Gamma_{{\mathrm{2}}}$. Further, by definition,
+      for any $\Gamma_{\ottmv{p}}  \leq  \Gamma_{\ottmv{q}}$, if $\Gamma_{\ottmv{q}}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}   \set{  \nu  \COL \TINT \mid \_ } $ then $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}   \set{  \nu  \COL \TINT \mid \_ } $,
+      i.e. subtyping preserves simple types.
+      We conclude that $ \mathcal{L}   \vdash _{\wf}   \Gamma_{{\mathrm{1}}}  \uplus  \Gamma''  $ and
+      $ \mathcal{L}   \vdash _{\wf}   \Gamma_{{\mathrm{2}}}  \uplus  \Gamma''  $, whereby the inductive hypothesis gives
+      $ \Theta   \mid   \mathcal{L}   \mid    \Gamma_{{\mathrm{1}}}  \uplus  \Gamma''    \vdash   \ottnt{e}  :  \tau_{{\mathrm{2}}}   \produces    \Gamma_{{\mathrm{2}}}  \uplus  \Gamma''  $. To prove the overall result, we must
+      show that $ \Gamma  \uplus  \Gamma''   \leq   \Gamma_{{\mathrm{1}}}  \uplus  \Gamma'' $ and $ \Gamma_{{\mathrm{2}}}  \uplus  \Gamma''   \ottsym{,}  \tau_{{\mathrm{2}}}  \leq   \Gamma'  \uplus  \Gamma''   \ottsym{,}  \tau$
+      which follow from parts 1 and 2 above.
+      That $ \mathcal{L}   \mid    \Gamma_{{\mathrm{2}}}  \uplus  \Gamma''    \vdash _{\wf}  \tau_{{\mathrm{2}}} $ follows by reasoning to the case for \rn{T-Let} above.
+    \end{rneqncase}
+    \begin{rncase}{T-Assert}
+      We must show that $\models   \sem{  \Gamma''  \uplus  \Gamma  }   \implies  \varphi$ which is equivalent to
+      $\models   \sem{ \Gamma'' }   \wedge   \sem{ \Gamma }   \implies  \varphi$. As the source term was well typed,
+      $\models   \sem{ \Gamma }   \implies  \varphi$ is valid, we must then have $\models   \sem{ \Gamma'' }   \wedge   \sem{ \Gamma }   \implies  \varphi$
+      whereby the inductive hypothesis gives the required result.
+    \end{rncase}
+  \end{enumerate}
+\end{proof}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

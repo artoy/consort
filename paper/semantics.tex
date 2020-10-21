@@ -1,0 +1,100 @@
+\bcprulessavespacetrue
+%edit by shiki
+\begin{figure}[t]
+  \scriptsize
+  \begin{center}
+  \infrule[R-Var]{
+  }{
+      \tuple{ \ottnt{H} ,  \ottnt{R} ,  F  \ottsym{:}  \oldvec{F} ,  \mathit{x} }     \longrightarrow _{ \ottnt{D} }     \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  F  \ottsym{[}  \mathit{x}  \ottsym{]} }  
+   }
+   \infrule[R-Seq]{
+   }{
+       \tuple{ \ottnt{H} ,  \ottnt{R} ,  F  \ottsym{:}  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \mathit{x}  \SEQ  \ottnt{e}   \ottsym{]} }     \longrightarrow _{ \ottnt{D} }     \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}  \ottnt{e}  \ottsym{]} }  
+   }
+  \infrule[R-Let]{
+     \mathit{x'}  \not\in \DOM( \ottnt{R} ) 
+  }{
+     \begin{array}{l}  \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \LET  \mathit{x}  =  \mathit{y}  \IN  \ottnt{e}   \ottsym{]} }   \\ \quad   \longrightarrow _{ \ottnt{D} }     \tuple{ \ottnt{H} ,  \ottnt{R}  \ottsym{\{}  \mathit{x'}  \mapsto  \ottnt{R}  \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{\}} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}    [  \mathit{x'}  /  \mathit{x}  ]    \ottnt{e}   \ottsym{]} }  \end{array} 
+  }
+  \infrule[R-LetInt]{
+     \mathit{x'}  \not\in \DOM( \ottnt{R} ) 
+  }{
+     \begin{array}{l}  \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \LET  \mathit{x}  =  n  \IN  \ottnt{e}   \ottsym{]} }   \\ \quad   \longrightarrow _{ \ottnt{D} }     \tuple{ \ottnt{H} ,  \ottnt{R}  \ottsym{\{}  \mathit{x'}  \mapsto  n  \ottsym{\}} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}    [  \mathit{x'}  /  \mathit{x}  ]    \ottnt{e}   \ottsym{]} }  \end{array} 
+  }
+  \infrule[R-IfTrue]{
+    \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)} \, \ottsym{=} \, \ottsym{0}
+  }{
+     \begin{array}{l}  \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \IFZERO  \mathit{x}  \THEN  \ottnt{e_{{\mathrm{1}}}}  \ELSE  \ottnt{e_{{\mathrm{2}}}}   \ottsym{]} }   \\ \quad   \longrightarrow _{ \ottnt{D} }     \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}  \ottnt{e_{{\mathrm{1}}}}  \ottsym{]} }  \end{array} 
+  }
+  \infrule[R-IfFalse]{
+    \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)} \, \neq \, \ottsym{0}
+  }{
+     \begin{array}{l}  \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \IFZERO  \mathit{x}  \THEN  \ottnt{e_{{\mathrm{1}}}}  \ELSE  \ottnt{e_{{\mathrm{2}}}}   \ottsym{]} }   \\ \quad   \longrightarrow _{ \ottnt{D} }     \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}  \ottnt{e_{{\mathrm{2}}}}  \ottsym{]} }  \end{array} 
+  }
+  \infrule[R-MkRef]{
+     \ottmv{a}  \not\in \DOM( \ottnt{H} )  \andalso  \mathit{x'}  \not\in \DOM( \ottnt{R} ) 
+  }{
+     \begin{array}{r}  \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \LET  \mathit{x}  =   \MKREF  \mathit{y}   \IN  \ottnt{e}   \ottsym{]} }     \longrightarrow _{ \ottnt{D} }   \\   \tuple{ \ottnt{H}  \ottsym{\{}  \ottmv{a}  \mapsto  \ottnt{R}  \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{\}} ,  \ottnt{R}  \ottsym{\{}  \mathit{x'}  \mapsto  \ottmv{a}  \ottsym{\}} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}    [  \mathit{x'}  /  \mathit{x}  ]    \ottnt{e}   \ottsym{]} }  \end{array} 
+  }
+  \infrule[R-Deref]{
+    \ottnt{R}  \ottsym{(}  \mathit{y}  \ottsym{)} \, \ottsym{=} \, \ottmv{a} \andalso \ottnt{H}  \ottsym{(}  \ottmv{a}  \ottsym{)} \, \ottsym{=} \, \ottnt{v} \andalso  \mathit{x'}  \not\in \DOM( \ottnt{R} ) 
+  }{
+     \begin{array}{r}  \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \LET  \mathit{x}  =   *  \mathit{y}   \IN  \ottnt{e}   \ottsym{]} }     \longrightarrow _{ \ottnt{D} }   \\   \tuple{ \ottnt{H} ,  \ottnt{R}  \ottsym{\{}  \mathit{x'}  \mapsto  \ottnt{v}  \ottsym{\}} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}    [  \mathit{x'}  /  \mathit{x}  ]    \ottnt{e}   \ottsym{]} }  \end{array} 
+  }
+\end{center}
+\caption{Transition Rules (1).}
+\label{fig:transitionRules1}
+\end{figure}
+\begin{figure}[t]
+  \scriptsize
+  \begin{center}
+  \infrule[R-Call]{
+     \mathit{f}  \mapsto  \ottsym{(}  \mathit{x_{{\mathrm{1}}}}  \ottsym{,} \, .. \, \ottsym{,}  \mathit{x_{\ottmv{n}}}  \ottsym{)}  \ottnt{e}  \in  \ottnt{D} 
+  }{
+     \begin{array}{l}  \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \LET  \mathit{x}  =   \mathit{f} ^ \ell (  \mathit{y_{{\mathrm{1}}}} ,\ldots, \mathit{y_{\ottmv{n}}}  )   \IN  \ottnt{e'}   \ottsym{]} }   \\ \quad   \longrightarrow _{ \ottnt{D} }     \tuple{ \ottnt{H} ,  \ottnt{R} ,   \ottnt{E} [\LET  \mathit{x}  =   \HOLE^ \ell   \IN  \ottnt{e'}  ]   \ottsym{:}  \oldvec{F} ,     [  \mathit{y_{{\mathrm{1}}}}  /  \mathit{x_{{\mathrm{1}}}}  ]  \cdots  [  \mathit{y_{\ottmv{n}}}  /  \mathit{x_{\ottmv{n}}}  ]     \ottnt{e}  }  \end{array} 
+  }
+  \infrule[R-Assign]{
+    \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)} \, \ottsym{=} \, \ottmv{a} \andalso  \ottmv{a}  \in \DOM( \ottnt{H} ) 
+  }{
+     \begin{array}{r}  \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \mathit{x}  \WRITE  \mathit{y}  \SEQ  \ottnt{e}   \ottsym{]} }     \longrightarrow _{ \ottnt{D} }   \\   \tuple{ \ottnt{H}  \ottsym{\{}  \ottmv{a}  \hookleftarrow  \ottnt{R}  \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{\}} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}  \ottnt{e}  \ottsym{]} }  \end{array} 
+  }
+  \infrule[R-Alias]{
+    \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)} \, \ottsym{=} \, \ottnt{R}  \ottsym{(}  \mathit{y}  \ottsym{)}
+  }{
+     \begin{array}{l}  \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \ALIAS( \mathit{x}  =  \mathit{y} ) \SEQ  \ottnt{e}   \ottsym{]} }   \\ \quad   \longrightarrow _{ \ottnt{D} }     \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}  \ottnt{e}  \ottsym{]} }  \end{array} 
+  }
+  \infrule[R-AliasPtr]{
+    \ottnt{R}  \ottsym{(}  \mathit{y}  \ottsym{)} \, \ottsym{=} \, \ottmv{a} \andalso \ottnt{H}  \ottsym{(}  \ottmv{a}  \ottsym{)} \, \ottsym{=} \, \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)}
+  }{
+      \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \ALIAS( \mathit{x}  = *  \mathit{y} ) \SEQ  \ottnt{e}   \ottsym{]} }     \longrightarrow _{ \ottnt{D} }     \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}  \ottnt{e}  \ottsym{]} }  
+  }
+  \infrule[R-AliasFail]{
+    \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)} \, \neq \, \ottnt{R}  \ottsym{(}  \mathit{y}  \ottsym{)}
+  }{
+      \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \ALIAS( \mathit{x}  =  \mathit{y} ) \SEQ  \ottnt{e}   \ottsym{]} }     \longrightarrow _{ \ottnt{D} }     \mathbf{AliasFail}  
+  }
+  \infrule[R-AliasPtrFail]{
+    \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)} \, \neq \, \ottnt{H}  \ottsym{(}  \ottnt{R}  \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{)}
+  }{
+      \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \ALIAS( \mathit{x}  = *  \mathit{y} ) \SEQ  \ottnt{e}   \ottsym{]} }     \longrightarrow _{ \ottnt{D} }     \mathbf{AliasFail}  
+  }
+  \infrule[R-Assert]{
+    \models  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \varphi
+  }{
+     \begin{array}{l}  \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \ASSERT( \varphi ) \SEQ  \ottnt{e}   \ottsym{]} }   \\ \quad   \longrightarrow _{ \ottnt{D} }     \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}  \ottnt{e}  \ottsym{]} }  \end{array} 
+  }
+  \infrule[R-AssertFail]{
+    \not\models  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \varphi
+  }{
+      \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E}  \ottsym{[}   \ASSERT( \varphi ) \SEQ  \ottnt{e}   \ottsym{]} }     \longrightarrow _{ \ottnt{D} }     \mathbf{AssertFail}  
+  }
+  \end{center}
+\caption{Transition Rules (2).}
+\label{fig:transitionRules2}
+\end{figure}
+\bcprulessavespacefalse
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

@@ -1,0 +1,221 @@
+\section{Target Language}
+\label{sec:prelim}
+This section describes a simple imperative language with mutable references and first-order, recursive functions.
+
+% \subsection{Notation}
+% For a (meta-level, set-theoretic) function $f$ we will write $\DOM(f)$ to indicate the domain of
+% the function and write
+% $f \{ x \mapsto v \}$ where $x \not\in\DOM(f)$ to denote a map
+% which takes all values in $\DOM(f)$ to their values in $f$ and which
+% additionally takes $x$ to $v$. We will write $ f \{ x \hookleftarrow v \}$
+% where $x\in\DOM(f)$ to denote a map equivalent to $f$ except that $x$ takes value $v$.
+% We also write $\emptyset$ as a function with an empty domain.
+% \JT{This is almost certainly not a sufficient overview. write more later.}
+
+\subsection{Syntax}
+\label{sec:language}
+We assume a set of \emph{variables}, ranged over by $x,y,z,\dots$,
+a set of \emph{function names}, ranged over by $f$, and
+a set of \emph{labels}, ranged over by $\ell_{{\mathrm{1}}}, \ell_{{\mathrm{2}}}, \dots$.
+The grammar of the language is as follows.
+\[
+  \begin{array}{rcl}
+  \ottnt{d} &::=& \mathit{f}  \mapsto  \ottsym{(}  \mathit{x_{{\mathrm{1}}}}  \ottsym{,} \, ... \, \ottsym{,}  \mathit{x_{\ottmv{n}}}  \ottsym{)}  \ottnt{e} \\
+  \ottnt{e} &::= &
+               \mathit{x} \mid
+                \LET  \mathit{x}  =  \mathit{y}  \IN  \ottnt{e}  \mid
+                \LET  \mathit{x}  =  n  \IN  \ottnt{e}  \mid
+                \IFZERO  \mathit{x}  \THEN  \ottnt{e_{{\mathrm{1}}}}  \ELSE  \ottnt{e_{{\mathrm{2}}}}  \\
+        &\mid&  \LET  \mathit{x}  =   \MKREF  \mathit{y}   \IN  \ottnt{e}  \mid
+                \LET  \mathit{x}  =   *  \mathit{y}   \IN  \ottnt{e}  \mid
+                \LET  \mathit{x}  =   \mathit{f} ^ \ell (  \mathit{y_{{\mathrm{1}}}} ,\ldots, \mathit{y_{\ottmv{n}}}  )   \IN  \ottnt{e}  \\
+        &\mid&  \mathit{x}  \WRITE  \mathit{y}  \SEQ  \ottnt{e}  \mid
+                \ALIAS( \mathit{x}  =  \mathit{y} ) \SEQ  \ottnt{e}  \mid
+                \ALIAS( \mathit{x}  = *  \mathit{y} ) \SEQ  \ottnt{e}  \mid
+                \ASSERT( \varphi ) \SEQ  \ottnt{e}  \mid
+                \ottnt{e_{{\mathrm{1}}}}  \SEQ  \ottnt{e_{{\mathrm{2}}}}  \\
+%    \ottnt{v} &::=& n \mid \mathit{x} \\
+    \ottnt{P} &::=&  \tuple{ \ottsym{\{}  \ottnt{d_{{\mathrm{1}}}}  \ottsym{,} \, ... \, \ottsym{,}  \ottnt{d_{\ottmv{n}}}  \ottsym{\}} ,  \ottnt{e} }  %\\
+%    \ell &\in& \textbf{Labels}\\
+  \end{array}
+\]
+$\varphi$ stands for a formula in propositional first-order
+logic over variables, integers and contexts;
+we discuss these formulas later in \Cref{sec:types}.
+
+Variables are introduced by function parameters or let bindings.
+Like ML, the variable bindings introduced by let expressions and parameters
+are immutable.
+Mutable variable declarations such as \texttt{int x = 1;} in C are achieved in our language with:\looseness=-1
+\[
+   \LET  \mathit{y}  =  \ottsym{1}  \IN  \ottsym{(}   \LET  \mathit{x}  =   \MKREF  \mathit{y}   \IN   \ldots    \ottsym{)} \ .
+\]
+As a convenience, we assume all variable names
+introduced with let bindings and function parameters are distinct.
+
+Unlike ML (and like C or Java) we do not allow general expressions on the right hand side of
+let bindings. The simplest right hand forms are a variable $\mathit{y}$ or an integer literal $n$.
+$ \MKREF  \mathit{y} $ creates a reference cell with value $\mathit{y}$, and
+$ *  \mathit{y} $ accesses the contents of reference $\mathit{y}$. For simplicity,
+we do not include an explicit null value;
+an extension to support null is discussed in \Cref{sec:infr}.
+Function calls must occur on the right hand side of a variable binding
+and take the form $ \mathit{f} ^ \ell (  \mathit{x_{{\mathrm{1}}}} ,\ldots, \mathit{x_{\ottmv{n}}}  ) $, where $ \mathit{x_{{\mathrm{1}}}} ,\ldots, \mathit{x_{\ottmv{n}}} $ are distinct variables and $\ell$ is a
+(unique) label. % drawn from \textbf{Labels}.
+These labels are used to make our type system context-sensitive as
+discussed in \Cref{sec:cs}.
+
+The single base case for expressions is a single variable.
+If the variable expression is executed in a tail position of a function,
+then the value of that variable is the return value of the function,
+otherwise the value is ignored.
+
+The only intraprocedural control-flow operations in our language are if statements.
+$\ottkw{ifz}$ checks whether the condition variable $\mathit{x}$ equals zero and chooses
+the corresponding branch. Loops can be implemented with recursive functions and
+we do not include them explicitly in our formalism.
+
+Our grammar requires that side-effecting, result-free statements, \lstinline{assert}($\varphi$)
+\lstinline{alias}($\mathit{x}$ = $\mathit{y}$), \lstinline{alias}($\mathit{x} = *\mathit{y}$) and
+assignment $\mathit{x} := \mathit{y}$ are followed by a continuation expression.
+We impose this requirement for technical reasons to ease our formal
+presentation; this requirement does not reduce expressiveness
+as dummy continuations can be inserted as needed.
+The $ \ASSERT( \varphi ) \SEQ  \ottnt{e} $ form executes $\ottnt{e}$ if the predicate
+$\varphi$ holds in the current state and aborts the program otherwise.
+$ \ALIAS( \mathit{x}  =  \mathit{y} ) \SEQ  \ottnt{e} $ and $ \ALIAS( \mathit{x}  = *  \mathit{y} ) \SEQ  \ottnt{e} $ assert a must-aliasing relationship between $x$ and $y$ (resp. $\mathit{x}$ and $ *  \mathit{y} $)
+and then execute $\ottnt{e}$.
+\imp{alias} statements
+are effectively \emph{annotations} that our type system exploits to gain
+added precision.
+$ \mathit{x}  \WRITE  \mathit{y}  \SEQ  \ottnt{e} $ updates the contents of the memory cell pointed to by $\mathit{x}$
+with the value of $\mathit{y}$.
+In addition to the above continuations, our language supports general sequencing with
+$ \ottnt{e_{{\mathrm{1}}}}  \SEQ  \ottnt{e_{{\mathrm{2}}}} $.
+
+A program is a pair $ \tuple{ \ottnt{D} ,  \ottnt{e} } $, where
+$\ottnt{D}  \ottsym{=}  \ottsym{\{}  \ottnt{d_{{\mathrm{1}}}}  \ottsym{,} \, ... \, \ottsym{,}  \ottnt{d_{\ottmv{n}}}  \ottsym{\}}$ is a set of first-order, mutually recursive function definitions, and $\ottnt{e}$
+is the program entry point. A function definition $\ottnt{d}$
+maps the function name to a tuple of argument names $\mathit{x_{{\mathrm{1}}}}  \ottsym{,} \, ... \, \ottsym{,}  \mathit{x_{\ottmv{n}}}$
+that are
+bound within the function body $\ottnt{e}$.
+
+\paragraph{Paper Syntax.}
+In the remainder of the paper, we will write programs that
+are technically illegal according to our grammar, but can be
+easily ``de-sugared'' into an equivalent, valid program.
+For example, we will write
+\begin{lstlisting}
+  let x = mkref 4 in assert(*x = 4)
+\end{lstlisting}
+as syntactic sugar for:
+\begin{lstlisting}
+  let f = 4 in let x = mkref f in
+  let tmp = *x in assert(tmp = 4); let dummy = 0 in dummy
+\end{lstlisting}
+%We have used a dummy continuation for the assert statement in the desugaring.
+
+% \begin{figure}[t]
+% \[
+%   \begin{array}{rcl}
+%     \ottnt{E} & ::= &  \ottnt{E'} \SEQ \ottnt{e}  \mid  \HOLE  \\
+%     F & ::= & \ottnt{E}  \ottsym{[}   \LET  \mathit{y}  =   \HOLE^ \ell   \IN  \ottnt{e}   \ottsym{]}
+%   \end{array}
+% \]
+% \caption{Grammar of evaluation and return contexts}
+% \label{fig:eval-context-grammar}
+% \end{figure}
+
+\input{semantics}
+
+\subsection{Operational Semantics}
+\label{sec:semantics}
+We now introduce the operational semantics for our language.
+We assume a finite domain of heap addresses \textbf{Addr}:
+we denote an arbitrary address with $\ottmv{a}$.
+A runtime state is represented by a configuration $ \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{e} } $, which consists of a heap,
+register file, stack, and currently reducing expression respectively.
+The register file maps variables to runtime values $v$, which are
+either integers $n$ or addresses $\ottmv{a}$. The heap maps a finite subset
+of addresses to runtime values. The runtime stack represents pending
+function calls as a sequence of return contexts, which we
+describe below.
+While the final configuration component is an expression,
+the rewriting rules are defined in terms of $\ottnt{E}  \ottsym{[}  \ottnt{e}  \ottsym{]}$, which is
+an evaluation context $\ottnt{E}$ and redex $\ottnt{e}$, as is standard.
+The grammar for evaluation contexts is defined by: 
+\(
+    \ottnt{E}  ::=   \ottnt{E'} \SEQ \ottnt{e}  \mid  \HOLE .
+  \)
+
+Our operational semantics is given in \Cref{fig:transitionRules1,fig:transitionRules2}.
+We write $ \DOM( \ottnt{H} ) $ to indicate the domain of
+a function and $\ottnt{H}  \ottsym{\{}  \ottmv{a}  \mapsto  v  \ottsym{\}}$ where $ \ottmv{a}  \not\in   \DOM( \ottnt{H} )  $ to denote a map
+which takes all values in $\DOM(H)$ to their values in $H$ and which
+additionally takes $\ottmv{a}$ to $v$.
+We will write $ \ottnt{H}  \ottsym{\{}  \ottmv{a}  \hookleftarrow  v  \ottsym{\}}$
+where $ \ottmv{a}  \in   \DOM( \ottnt{H} )  $ to denote a map equivalent to $\ottnt{H}$ except that $\ottmv{a}$ takes value $v$.
+We use similar notation for $ \DOM( \ottnt{R} ) $ and $\ottnt{R}  \ottsym{\{}  \mathit{x}  \mapsto  v  \ottsym{\}}$.
+We also write $\emptyset$ for the empty register file and heap.
+%
+The step relation  $ \longrightarrow _{ \ottnt{D} } $ is parameterized
+by a set of function definitions $\ottnt{D}$; a program $ \tuple{ \ottnt{D} ,  \ottnt{e} } $ is executed
+by stepping the initial configuration $ \tuple{  \emptyset  ,   \emptyset  ,   \cdot  ,  \ottnt{e} } $ according
+to $\longrightarrow_{\ottnt{D}}$.
+The semantics is mostly standard; we highlight some important points below.
+
+Return contexts $F$ take the form $\ottnt{E}  \ottsym{[}   \LET  \mathit{y}  =   \HOLE^ \ell   \IN  \ottnt{e}   \ottsym{]}$. A return context represents a pending
+function call with label $\ell$, and indicates that $\mathit{y}$ should be bound to
+the return value of the callee during the execution of $\ottnt{e}$ within the larger execution context $\ottnt{E}$.
+The call stack $\oldvec{F}$ is a sequence of these contexts, with
+the first such return context representing the most recent function call.
+The stack grows at function calls as described by rule \rn{R-Call}.
+For a call $\ottnt{E}  \ottsym{[}   \LET  \mathit{x}  =   \mathit{f} ^ \ell (  \mathit{y_{{\mathrm{1}}}} ,\ldots, \mathit{y_{\ottmv{n}}}  )   \IN  \ottnt{e}   \ottsym{]}$ where
+$f$ is defined as $\ottsym{(}  \mathit{x_{{\mathrm{1}}}}  \ottsym{,} \, ... \, \ottsym{,}  \mathit{x_{\ottmv{n}}}  \ottsym{)}  \ottnt{e'}$, the return context $\ottnt{E}  \ottsym{[}   \LET  \mathit{y}  =   \HOLE^ \ell   \IN  \ottnt{e}   \ottsym{]}$ is
+prepended onto the stack of the input configuration.
+The substitution of formal arguments for parameters in $e'$, denoted by $   [  \mathit{y_{{\mathrm{1}}}}  /  \mathit{x_{{\mathrm{1}}}}  ]  \cdots  [  \mathit{y_{\ottmv{n}}}  /  \mathit{x_{\ottmv{n}}}  ]     \ottnt{e'} $,
+becomes the currently reducing expression in the output configuration.
+Function returns are handled by \rn{R-Var}.
+Our semantics return values by name; when the currently executing function fully reduces to a single variable $x$,
+$x$ is substituted into the return context on the top of the stack,
+denoted by $\ottnt{E}  \ottsym{[}   \LET  \mathit{y}  =   \HOLE^ \ell   \IN  \ottnt{e}   \ottsym{]}[x]$.
+
+In the rules \rn{R-Assert} we write $\models  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \varphi$ to mean that the formula
+yielded by substituting the concrete values in $\ottnt{R}$ for the variables in $\varphi$
+is valid within some chosen logic (see \Cref{sec:types}); in \rn{R-AssertFail} we write $\not\models  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \varphi$
+when the formula is \emph{not} valid.
+The substitution operation $\ottsym{[}  \ottnt{R}  \ottsym{]} \, \varphi$ is defined inductively as $\ottsym{[}   \emptyset   \ottsym{]} \, \varphi  \ottsym{=}  \varphi, \ottsym{[}  \ottnt{R}  \ottsym{\{}  \mathit{x}  \mapsto  n  \ottsym{\}}  \ottsym{]} \, \varphi  \ottsym{=}  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  n  \ottsym{/}  \mathit{x}  \ottsym{]}  \varphi, \ottsym{[}  \ottnt{R}  \ottsym{\{}  \mathit{x}  \mapsto  \ottmv{a}  \ottsym{\}}  \ottsym{]} \, \varphi  \ottsym{=}  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \varphi$.
+In the case of an assertion failure, the semantics steps to a distinguished
+configuration $ \mathbf{AssertFail} $. The goal of our type system is to show that no
+execution of a well-typed program may reach this configuration.
+The \imp{alias} form checks whether the two references actually alias;
+i.e., if the must-alias assertion provided by the programmer is correct.
+If not, our semantics steps to the distinguished $ \mathbf{AliasFail} $ configuration.
+Our type system does \emph{not} guarantee that $ \mathbf{AliasFail} $ is unreachable;
+aliasing assertions are effectively trusted annotations that are assumed to hold.
+
+In order to avoid duplicate variable names in our register file due to recursive functions,
+we refresh the bound variable $\mathit{x}$ in a let expression to $\mathit{x'}$.
+Take expression $ \LET  \mathit{x}  =  \mathit{y}  \IN  \ottnt{e} $ as an example;
+we substitute a fresh variable $\mathit{x'}$ for $\mathit{x}$ in $\ottnt{e}$, then bind $\mathit{x'}$ to the value
+of variable $\mathit{y}$.
+We assume this refreshing of variables preserves our assumption that all variable
+bindings introduced with let and function parameters are unique, i.e. $\mathit{x'}$ does
+not overlap with variable names that occur in the program.
+% \JT{Do we want to mention this at all?}
+% \AI{We may want to remove if we need more space.}
+% Finally, although $\rn{R-MkRef}$ allocates memory, our language does not
+% support memory reclamation.
+% We assume a garbage collected environment and consider memory reclamation an orthogonal concern.
+% \JT{Do we want
+%   to say that we could have explicit free and use suenaga's
+%   approach, but don't want to because it unnecessarily complicates
+%   the system?}
+  
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
+
+%  LocalWords:  ownerships mkref redex

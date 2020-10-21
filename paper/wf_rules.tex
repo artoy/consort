@@ -1,0 +1,73 @@
+\begin{figure}[t]
+  \bcprulessavespacetrue
+  \scriptsize
+  \leavevmode
+  \begin{center}
+  \infrule[WF-Env]{
+    \forall \,  \mathit{x}  \in \DOM( \Gamma )   \ottsym{.}   \mathcal{L}   \mid   \Gamma   \vdash _{\wf}  \Gamma  \ottsym{(}  \mathit{x}  \ottsym{)} 
+  }{
+     \mathcal{L}   \vdash _{\wf}  \Gamma 
+  }
+  \infrule[WF-Int]{
+     \mathcal{L}   \mid   \Gamma   \vdash _{\wf}  \varphi 
+  }{
+     \mathcal{L}   \mid   \Gamma   \vdash _{\wf}   \set{  \nu  \COL \TINT \mid  \varphi }   
+  }
+  \infrule[WF-Ref]{
+     \mathcal{L}   \mid   \Gamma   \vdash _{\wf}  \tau 
+  }{
+     \mathcal{L}   \mid   \Gamma   \vdash _{\wf}   \tau  \TREF^{ r }  
+  }
+  \infrule[WF-Phi]{
+    \forall \,  \mathit{x}  \in   \ottkw{FPV} \, \ottsym{(}  \varphi  \ottsym{)}  \setminus   \set{ \nu }     \ottsym{.}  \Gamma  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{=}   \set{  \nu  \COL \TINT \mid \_ }  \\
+    \mathbf{FCV} \, \ottsym{(}  \varphi  \ottsym{)} \subseteq \ottkw{CV} \, \ottsym{(}  \mathcal{L}  \ottsym{)}
+  }{
+     \mathcal{L}   \mid   \Gamma   \vdash _{\wf}  \varphi 
+  }
+  \infrule[WF-Result]{
+     \mathcal{L}   \mid   \Gamma   \vdash _{\wf}  \tau  \andalso
+     \mathcal{L}   \vdash _{\wf}  \Gamma 
+  }{
+     \mathcal{L}   \vdash _{\wf}  \tau   \produces   \Gamma 
+  }
+  \infrule[WF-FunType]{
+     \lambda   \vdash _{\wf}   \mathit{x_{{\mathrm{1}}}} \COL \tau_{{\mathrm{1}}} ,\ldots, \mathit{x_{\ottmv{n}}} \COL \tau_{\ottmv{n}}   \\  \lambda   \vdash _{\wf}  \tau   \produces    \mathit{x_{{\mathrm{1}}}} \COL \tau'_{{\mathrm{1}}} ,\ldots, \mathit{x_{\ottmv{n}}} \COL \tau'_{\ottmv{n}}  
+  }{
+     \vdash _{\wf}   \forall  \lambda .\tuple{ \mathit{x_{{\mathrm{1}}}} \COL \tau_{{\mathrm{1}}} ,\dots, \mathit{x_{\ottmv{n}}} \COL \tau_{\ottmv{n}} }\ra\tuple{ \mathit{x_{{\mathrm{1}}}} \COL \tau'_{{\mathrm{1}}} ,\dots, \mathit{x_{\ottmv{n}}} \COL \tau'_{\ottmv{n}}  \mid  \tau }  
+  }
+  \infrule[WF-FunEnv]{
+    \forall \,  \mathit{f}  \in \DOM( \Theta )   \ottsym{.}   \vdash _{\wf}  \Theta  \ottsym{(}  \mathit{f}  \ottsym{)} 
+  }{
+     \vdash _{\wf}  \Theta 
+  }
+  \end{center}
+  \bcprulessavespacefalse
+%   \begin{minipage}[t]{0.48\textwidth}
+%   \[
+%     \begin{array}{lrcl}
+%       \text{Simple Types} & \tau_{S} & ::= &  \TINT  \mid  \tau_{S}  \TREF  \\
+%       \text{Simple Ty. Env} & \Gamma_{S} & ::= &  \emptyset  \mid \Gamma_{S}  \ottsym{,}  \mathit{x}  \ottsym{:}  \tau_{S} \\
+%       \text{Lifting} &  \llparenthesis   \set{  \nu  \COL \TINT \mid  \varphi }  \rrparenthesis  & = &  \TINT  \\
+%                           &  \llparenthesis   \tau  \TREF^{ r }  \rrparenthesis  & = &   \llparenthesis  \tau \rrparenthesis   \TREF  \\
+%                           &  \llparenthesis   \bullet   \rrparenthesis  & = &  \emptyset  \\
+%                           &  \llparenthesis  \Gamma  \ottsym{,}  \mathit{x}  \ottsym{:}  \tau  \rrparenthesis  & = &  \llparenthesis  \Gamma  \rrparenthesis   \ottsym{,}  \mathit{x}  \ottsym{:}   \llparenthesis  \tau \rrparenthesis  
+%     \end{array}
+%   \]
+% \end{minipage}
+% \begin{minipage}[t]{0.485\textwidth}
+  \[
+    \begin{array}{rrl}
+      \text{Free Ctxt Vars} & \mathbf{FCV} \, \ottsym{(}  \varphi_{{\mathrm{1}}}  \vee  \varphi_{{\mathrm{2}}}  \ottsym{)} & =  \mathbf{FCV} \, \ottsym{(}  \varphi_{{\mathrm{1}}}  \ottsym{)}  \cup  \mathbf{FCV} \, \ottsym{(}  \varphi_{{\mathrm{2}}}  \ottsym{)}  \\
+                            & \mathbf{FCV} \, \ottsym{(}   \neg  \varphi   \ottsym{)} & = \mathbf{FCV} \, \ottsym{(}  \varphi  \ottsym{)} \\
+                            & \mathbf{FCV} \, \ottsym{(}  \widehat{v}_{{\mathrm{1}}} \, \ottsym{=} \, \widehat{v}_{{\mathrm{2}}}  \ottsym{)} & = \mathbf{FCV} \, \ottsym{(}  \phi  \ottsym{(}  \widehat{v}_{{\mathrm{1}}}  \ottsym{,} \, .. \, \ottsym{,}  \widehat{v}_{\ottmv{n}}  \ottsym{)}  \ottsym{)}  \ottsym{=}   \emptyset  \\
+                            & \mathbf{FCV} \, \ottsym{(}    \oldvec{\ell}     \preceq    \mathcal{C}   \ottsym{)} & = \mathbf{FCV} \, \ottsym{(}  \mathcal{C}  \ottsym{)} \\
+                            & \mathbf{FCV} \, \ottsym{(}   \ell  :  \mathcal{C}   \ottsym{)} & = \mathbf{FCV} \, \ottsym{(}  \mathcal{C}  \ottsym{)} \\
+                            & \mathbf{FCV} \, \ottsym{(}  \mathcal{L}  \ottsym{)} & = \ottkw{CV} \, \ottsym{(}  \mathcal{L}  \ottsym{)} \\
+      \text{Ctxt Vars} & \ottkw{CV} \, \ottsym{(}  \oldvec{\ell}  \ottsym{)} & =  \emptyset  \\
+                            & \ottkw{CV} \, \ottsym{(}  \lambda  \ottsym{)} & =  \set{ \lambda } 
+    \end{array}
+  \]
+% \end{minipage}
+\caption{Well-formedness of types and environments. }
+  \label{fig:type-wf}
+\end{figure}

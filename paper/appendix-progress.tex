@@ -1,0 +1,125 @@
+\section{Proof of Progress}
+\label{sec:progress-proof}
+
+We first state the standard decomposition lemma.
+\begin{lemma}[Decomposition]
+  \label{lem:decomposition}
+  For any term $\ottnt{e}$, either $\ottnt{e}  \ottsym{=}  \mathit{x}$ for some $\mathit{x}$ or there exists some $\ottnt{E}$ and $\ottnt{e'}$ where $\ottnt{E}  \ottsym{[}  \ottnt{e'}  \ottsym{]}  \ottsym{=}  \ottnt{e}$ and one of the following
+  cases hold:
+  \begin{enumerate}
+  \item $\ottnt{e'}  \ottsym{=}   \LET  \mathit{x}  =   \MKREF  \mathit{y}   \IN  \ottnt{e''} $
+  \item $\ottnt{e'}  \ottsym{=}   \LET  \mathit{x}  =  \mathit{y}  \IN  \ottnt{e''} $
+  \item $\ottnt{e'}  \ottsym{=}   \LET  \mathit{x}  =  n  \IN  \ottnt{e''} $
+  \item $\ottnt{e'}  \ottsym{=}   \LET  \mathit{x}  =   *  \mathit{y}   \IN  \ottnt{e''} $
+  \item $\ottnt{e'}  \ottsym{=}   \LET  \mathit{x}  =   \mathit{f} ^ \ell (  \mathit{y_{{\mathrm{1}}}} ,\ldots, \mathit{y_{\ottmv{n}}}  )   \IN  \ottnt{e''} $
+  \item $ \ottnt{e'}  \ottsym{=}  \mathit{x}  \SEQ  \ottnt{e''} $
+  \item $\ottnt{e'}  \ottsym{=}   \ALIAS( \mathit{x}  =  \mathit{y} ) \SEQ  \ottnt{e''} $
+  \item $\ottnt{e'}  \ottsym{=}   \ALIAS( \mathit{x}  = *  \mathit{y} ) \SEQ  \ottnt{e''} $
+  \item $\ottnt{e'}  \ottsym{=}   \IFZERO  \mathit{x}  \THEN  \ottnt{e_{{\mathrm{1}}}}  \ELSE  \ottnt{e_{{\mathrm{2}}}} $
+  \item $\ottnt{e'}  \ottsym{=}   \ASSERT( \varphi ) \SEQ  \ottnt{e''} $
+  \item $\ottnt{e'}  \ottsym{=}   \mathit{x}  \WRITE  \mathit{y}  \SEQ  \ottnt{e} $
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  Straightforward induction on $\ottnt{e}$.
+\end{proof}
+
+\begin{proof}[Progress; \Cref{lem:progress}]
+  By inversion on $ \vdash_{\mathit{conf} }^D  \mathbf{C} $, either $\mathbf{C}  \ottsym{=}   \mathbf{AliasFail} $ or $\mathbf{C}  \ottsym{=}   \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{e} } $.
+  In the former case the result is immediate. In the latter case we have
+  that $ \Theta   \mid   \oldvec{\ell}   \mid   \Gamma   \vdash   \ottnt{e}  :  \tau   \produces   \Gamma' $ for some $\tau, \Gamma$ and $\Gamma'$,
+  and further from   \Cref{lem:decomposition}, we have that either $\ottnt{e}  \ottsym{=}  \mathit{x}$ for some $\mathit{x}$ or there exists
+  some $\ottnt{E}$ or $\ottnt{e'}$ where $\ottnt{e}  \ottsym{=}  \ottnt{E}  \ottsym{[}  \ottnt{e'}  \ottsym{]}$ and $\ottnt{e'}$ meets one of the cases in
+  \Cref{lem:decomposition}.
+
+  In the case $\ottnt{e}  \ottsym{=}  \mathit{x}$, we further make case analysis on the form of $\oldvec{F}$.
+  The case where $\oldvec{F}  \ottsym{=}   \epsilon $ is immediate;
+  In the other case where $\oldvec{F}  \ottsym{=}  F  \ottsym{:}  \oldvec{F}'$, the configuration can step
+  to $ \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  F  \ottsym{[}  \mathit{x}  \ottsym{]} } $ according to \rn{R-Var}.
+  
+  For the remaining cases where $\ottnt{e}  \ottsym{=}  \ottnt{E}  \ottsym{[}  \ottnt{e'}  \ottsym{]}$,
+  by the well-typing of $\ottnt{e}$ with respect to $\Gamma$ and \Cref{lem:stack_var},
+  we have that $ \Theta   \mid   \mathcal{L}   \mid   \Gamma   \vdash   \ottnt{e'}  :  \tau_{{\mathrm{0}}}   \produces   \Gamma_{{\mathrm{0}}} $ some $\tau_{{\mathrm{0}}}$ and $\Gamma_{{\mathrm{0}}}$.
+
+  We now treat the remaining forms of $\ottnt{e'}$
+  \begin{eqncase}{
+      \ottnt{e'}  \ottsym{=}   \LET  \mathit{x}  =   *  \mathit{y}   \IN  \ottnt{e''} 
+    }
+    By inversion (\Cref{lem:inversion}) and \Cref{lem:subtyp-preserves-cons} we must have
+    that for some $\Gamma_{\ottmv{p}}$ where $\ottkw{Cons} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma_{\ottmv{p}}  \ottsym{)}$ that $ \mathit{y}  \in   \DOM( \Gamma_{\ottmv{p}} )  $ and
+    $\Gamma_{\ottmv{p}}  \ottsym{(}  \mathit{y}  \ottsym{)}  \ottsym{=}   \tau'  \TREF^{ r } $. From $\ottkw{Cons} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma_{\ottmv{p}}  \ottsym{)}$ we must have $ \mathit{y}  \in   \DOM( \ottnt{R} )  $
+    and further $ \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{R}  \ottsym{(}  \mathit{y}  \ottsym{)} ,  \tau'  \TREF^{ r' }  ) $, from which we must have
+    $\ottnt{R}  \ottsym{(}  \mathit{y}  \ottsym{)} \, \ottsym{=} \, \ottmv{a}$ and  $ \ottmv{a}  \in   \DOM( \ottnt{H} )  $. Then $\mathbf{C}$ can step according to \rn{R-Deref}.
+  \end{eqncase}
+  
+  \begin{eqncase}{\ottnt{e'}  \ottsym{=}   \LET  \mathit{x}  =  \mathit{y}  \IN  \ottnt{e''} }
+    Again, by \Cref{lem:inversion,lem:subtyp-preserves-cons} and the definition
+    of $\ottkw{Cons}$, we must have that $ \mathit{y}  \in   \DOM( \ottnt{R} )  $, and the system can step
+    according to \rn{R-LetVar}.
+  \end{eqncase}
+
+  \begin{eqncase}{\ottnt{e'}  \ottsym{=}   \LET  \mathit{x}  =   \MKREF  \mathit{y}   \IN  \ottnt{e''} }
+    Similar to the \rn{R-LetVar} case above.
+  \end{eqncase}
+
+  \begin{eqncase}{
+      \ottnt{e'}  \ottsym{=}   \LET  \mathit{x}  =  n  \IN  \ottnt{e''}  \\
+       \ottnt{e'}  \ottsym{=}  \mathit{x}  \SEQ  \ottnt{e''}  \\
+      \ottnt{e'}  \ottsym{=}   \ASSERT( \varphi ) \SEQ  \ottnt{e''} 
+    }
+    The first two can trivially step according to \rn{R-LetInt} and \rn{R-Seq} respectively.
+    the last can step according to \rn{R-Assert} or \rn{R-AssertFalse} (although
+    by \Cref{lem:preservation,lem:assertfail} the latter is impossible).
+  \end{eqncase}
+  
+  \begin{eqncase}{
+      \ottnt{e'}  \ottsym{=}   \ALIAS( \mathit{x}  =  \mathit{y} ) \SEQ  \ottnt{e''} 
+    }
+    Again by \Cref{lem:inversion,lem:subtyp-preserves-cons} and that
+    $\ottkw{Cons} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma_{\ottmv{p}}  \ottsym{)}$ implies $\mathit{x}$ and $\mathit{y}$ are bound to addresses
+    in the register file, we have that the configuration can step according to \rn{R-Alias}
+    or \rn{R-AliasFail}.
+  \end{eqncase}
+
+  \begin{eqncase}{
+      \ottnt{e'}  \ottsym{=}   \ALIAS( \mathit{x}  = *  \mathit{y} ) \SEQ  \ottnt{e''}  
+    }
+    Similar to the case above, we must have that $\mathit{x}$ is bound to an address
+    in the register file, and that $\mathit{y}$ is bound to an address that
+    is itself mapped to an address in the heap $\ottnt{H}$. Then the configuration may
+    step according to \rn{R-AliasPtr} or \rn{R-AliasPtrFail}
+  \end{eqncase}
+
+  \begin{eqncase}{
+      \ottnt{e}  \ottsym{=}   \IFZERO  \mathit{x}  \THEN  \ottnt{e_{{\mathrm{1}}}}  \ELSE  \ottnt{e_{{\mathrm{2}}}} 
+    }
+    As above, from the well-typing we must have that $\mathit{x}$ is bound in $\ottnt{R}$
+    to some integer $n$. Then the configuration may step according to \rn{R-IfTrue}
+    or \rn{R-IfFalse} depending on whether
+    $n \, \ottsym{=} \, \ottsym{0}$ or $n \, \neq \, \ottsym{0}$.
+  \end{eqncase}
+  
+  \begin{eqncase}{
+      \ottnt{e'}  \ottsym{=}   \mathit{x}  \WRITE  \mathit{y}  \SEQ  \ottnt{e''} 
+    }
+    From the well-typing of $\ottnt{e'}$,
+    \Cref{lem:inversion,lem:subtyp-preserves-cons} and the definition
+    of $\ottkw{Cons}$, we must have that $ \mathit{y}  \in   \DOM( \ottnt{R} )  $,
+    $ \mathit{x}  \in   \DOM( \ottnt{R} )  $, $\ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)} \, \ottsym{=} \, \ottmv{a}$, and $ \ottmv{a}  \in   \DOM( \ottnt{H} )  $. Then
+    the configuration can step according \rn{R-Assign}.
+  \end{eqncase}
+
+  \begin{eqncase}{
+      \ottnt{e'}  \ottsym{=}   \LET  \mathit{x}  =   \mathit{f} ^ \ell (  \mathit{y_{{\mathrm{1}}}} ,\ldots, \mathit{y_{\ottmv{n}}}  )   \IN  \ottnt{e''} 
+    }
+    From the well-typing of the function call we must have that $ \mathit{f}  \in   \DOM( \Theta )  $.
+    From $\Theta  \vdash  \ottnt{D}$ in the precondition of $ \vdash_{\mathit{conf} }^D  \mathbf{C} $, we must have that
+    $ \mathit{f}  \mapsto  \ottsym{(}  \mathit{x_{{\mathrm{1}}}}  \ottsym{,} \, .. \, \ottsym{,}  \mathit{x_{\ottmv{j}}}  \ottsym{)}  \ottnt{e'''}  \in  \ottnt{D} $. Then from \rn{T-FunDef} we must have that
+    $ j = n $ whereby the configuration can step according to \rn{R-Call}.
+  \end{eqncase}
+\end{proof}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

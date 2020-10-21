@@ -1,0 +1,167 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+%
+\let\oldvec\vec
+\documentclass[runningheads]{llncs}
+%
+\usepackage{bcprules}\typicallabel{T-Hoge}
+\usepackage{booktabs}
+\usepackage{bcpproof}
+\usepackage{graphicx,xcolor}
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following line
+% to display URLs in blue roman font according to Springer's eBook style:
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{parcolumns}
+\usepackage{cases}
+\usepackage{listings}% http://ctan.org/pkg/listings
+\usepackage{etoolbox}
+\usepackage{microtype}
+\usepackage{wrapfig}
+\usepackage{paralist}
+\usepackage[numbers,sectionbib,sort]{natbib}
+\input{local}
+% generate nice pdf index when compiling in draft mode
+\draftCommentsfalse
+\newif\iffullversion
+
+\fullversionfalse
+
+\def\appref#1#2{\iffullversion #1\else#2\fi}
+
+\ifdraftComments\else\linepenalty=1000\fi
+
+\ifdraftComments
+\makeatletter
+\let\llncs@addcontentsline\addcontentsline
+\patchcmd{\maketitle}{\addcontentsline}{\llncs@addcontentsline}{}{}
+\patchcmd{\maketitle}{\addcontentsline}{\llncs@addcontentsline}{}{}
+\patchcmd{\maketitle}{\addcontentsline}{\llncs@addcontentsline}{}{}
+\setcounter{tocdepth}{2}
+\makeatother
+\fi
+
+\iffullversion
+\makeatletter
+\let\llncs@addcontentsline\addcontentsline
+\patchcmd{\maketitle}{\addcontentsline}{\llncs@addcontentsline}{}{}
+\patchcmd{\maketitle}{\addcontentsline}{\llncs@addcontentsline}{}{}
+\patchcmd{\maketitle}{\addcontentsline}{\llncs@addcontentsline}{}{}
+\setcounter{tocdepth}{2}
+\makeatother
+\fi
+
+
+\makeatletter
+\RequirePackage[bookmarks,unicode,colorlinks=true]{hyperref}%
+   \def\@citecolor{blue}%
+   \def\@urlcolor{blue}%
+   \def\@linkcolor{blue}%
+\def\UrlFont{\rmfamily}
+\def\orcidID#1{\smash{\href{http://orcid.org/#1}{\protect\raisebox{-1.25pt}{\protect\includegraphics{orcid_color}}}}}
+\makeatother
+
+\ifdraftComments
+\hypersetup{colorlinks,
+  linkcolor=red,
+  citecolor=red}
+\fi
+\usepackage[noabbrev]{cleveref}
+
+
+% \input{../effgrad/def/ott/coe}
+\input{./lang}
+\input{stats}
+\renewcommand\UrlFont{\color{blue}\rmfamily}
+
+\begin{document}
+%
+\title{\name: Context- and Flow-Sensitive Ownership Refinement Types for Imperative Programs}
+%
+\titlerunning{\name: Context- and Flow-Sensitive Ownership Refinement Types}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{
+  John Toman\inst{1} \and
+  Ren Siqi\inst{1} \and
+  Kohei Suenaga\inst{1}\orcidID{0000-0002-7466-8789} \and \\
+  Atsushi Igarashi\inst{1}\orcidID{0000-0002-5143-9764} \and
+  Naoki Kobayashi\inst{2}\orcidID{0000-0002-0537-0604}
+}
+%
+\authorrunning{J. Toman et al.}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{
+  Kyoto University, Kyoto, Japan, \email{\{jtoman,shiki,ksuenaga,igarashi\}@fos.kuis.kyoto-u.ac.jp}
+  \and
+  The University of Tokyo, Tokyo, Japan, \email{koba@is.s.u-tokyo.ac.jp}
+}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+  We present \name, a type system for safety verification in the
+  presence of mutability and aliasing. Mutability requires
+  \emph{strong updates} to model changing invariants
+  during program execution, but aliasing between pointers
+  makes it difficult
+  to determine which invariants must be updated
+  in response to mutation.
+  Our type system addresses this difficulty with a
+  novel combination of refinement types and
+  fractional ownership types. Fractional ownership types
+  provide flow-sensitive and precise aliasing information
+  for reference variables. \name interprets this ownership information
+  to soundly handle strong updates of potentially aliased references.
+  We have proved \name sound and implemented a prototype,
+  fully automated inference tool. We evaluated our tool
+  and found it verifies non-trivial programs including data structure implementations.
+\keywords{refinement types, mutable references, aliasing, strong updates, fractional ownerships, program verification, type systems}
+\end{abstract}
+%
+%
+%
+%
+\input{intro}
+\input{preliminaries}
+\input{typesystem}
+\input{impl}
+\input{experiments}
+\input{related_work}
+\input{conclusion}
+\paragraph{\footnotesize Acknowledgments}
+{\footnotesize The authors would like to the reviewers for their thoughtful
+feedback and suggestions, and Yosuke Fukuda and Alex Potanin for their feedback on early drafts.
+This work was supported in part by JSPS KAKENHI, grant numbers JP15H05706 and JP19H04084,
+and in part by the JST ERATO MMSD Project.\looseness=-1}
+
+\bibliographystyle{splncs04}
+\bibliography{main}
+
+\vfill
+
+{\small\medskip\noindent{\bf Open Access} This chapter is licensed under the terms of the Creative Commons\break Attribution 4.0 International License (\url{http://creativecommons.org/licenses/by/4.0/}), which permits use, sharing, adaptation, distribution and reproduction in any medium or format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the Creative Commons license and indicate if changes were made.}
+
+{\small \spaceskip .28em plus .1em minus .1em The images or other third party material in this chapter are included in the chapter's Creative Commons license, unless indicated otherwise in a credit line to the material.~If material is not included in the chapter's Creative Commons license and your intended\break use is not permitted by statutory regulation or exceeds the permitted use, you will need to obtain permission directly from the copyright holder.}
+
+\medskip\noindent\includegraphics{cc_by_4-0}
+\newpage
+\iffullversion\input{appendix}\fi
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
+
+%  LocalWords:  ownerships

@@ -1,0 +1,129 @@
+\section{Experiments}
+\label{sec:eval}
+
+We now present the results of preliminary experiments performed with the implementation
+described in \Cref{sec:infr}. The goal of these experiments was to answer the following questions: \begin{inparaenum}[i)]
+\item is the type system (and extensions of \Cref{sec:infr}) expressive enough to type and verify non-trivial programs? and
+\item is type inference feasible?
+\end{inparaenum}\looseness=-1
+
+To answer these questions, we evaluated our prototype implementation
+on two sets of benchmarks.\footnote{Our experiments and the \name source code are available
+  at \url{https://www.fos.kuis.kyoto-u.ac.jp/projects/consort/}.} 
+The first set is adapted from JayHorn \cite{kahsai2017quantified,kahsai2016jayhorn},
+a verification tool for Java.
+This test suite contains a combination of 82 safe and unsafe programs written in
+Java. We chose this benchmark suite as, like \name, JayHorn
+is concerned with the automated verification of
+programs in a language with mutable, aliased memory cells.
+Further, although some of their benchmark programs tested Java
+specific features, most could be adapted
+into our low-level language.
+The tests we could adapt provide a comparison with existing state-of-the-art
+verification techniques.
+A detailed breakdown of the adapted benchmark suite can be found in \Cref{tab:breakdown}.
+
+\begin{table}[t]
+  \caption{Description of benchmark suite adapted from JayHorn. \textbf{Java} are programs
+    that test Java-specific features. \textbf{Inc} are tests that cannot be handled by \name, e.g.,
+    null checking, etc. \textbf{Bug} includes a ``safe'' program
+    we discovered was actually incorrect.}
+  \begin{center}
+    \input{benchmark_table}
+  \end{center}
+  \label{tab:breakdown}
+\end{table}
+
+\begin{remark}
+  The original JayHorn paper includes two additional benchmark sets, Mine Pump and CBMC.
+  Both our tool and recent JayHorn versions time out on the Mine Pump benchmark. Further,
+  the CBMC tests were either subsumed by our own test programs, tested Java specific
+  features, or tested program synthesis functionality. We therefore omitted both of these
+  benchmarks from our evaluation.
+\end{remark}
+
+The second benchmark set consists of data structure
+implementations and microbenchmarks written directly in our low-level
+imperative language. We developed this suite to
+test the expressive power of our type system and inference.
+The programs included in this suite are:
+\begin{itemize}
+\item \textbf{Array-List} Implementation of an unbounded list backed by an array.
+\item \textbf{Sorted-List} Implementation of a mutable, sorted list maintained with an in-place insertion sort algorithm.
+\item \textbf{Shuffle} Multiple live references are used to mutate the same location in program memory as in \Cref{exmp:shuffle-example}.
+\item \textbf{Mut-List} Implementation of general linked lists with a clear operation.
+\item \textbf{Array-Inv} A program which allocates a length $n$ array and writes the value $i$ at every index $i$.
+\item \textbf{Intro2} The motivating program shown in \Cref{fig:hard-loop} in \Cref{sec:intro}.
+\end{itemize}
+We introduced unsafe mutations to these programs to
+check our tool for unsoundness and translated these programs
+into Java for further comparison with JayHorn.\looseness=-1
+
+Our benchmarks and JayHorn's require a small number of trivially identified alias annotations.
+The adapted JayHorn benchmarks contain a total of \jhaliascount{}
+annotations; the most for any individual test was \jhmaxalias.
+The number of annotations required for our benchmark suite are shown in column
+\textbf{Ann.} of \Cref{tab:jh-results}.
+
+We first ran \name on each program in our benchmark suite and ran version 0.7 of
+JayHorn on the corresponding Java version. We recorded the final verification
+result for both our tool and JayHorn. We also collected the
+end-to-end runtime of \name for each test;
+we do not give a performance comparison with
+JayHorn given the many differences in target languages.
+For the JayHorn suite, we first ran our tool on the adapted version of
+each test program and ran JayHorn on the original Java version. We also did not
+collect runtime information for this set of experiments because our goal
+is a comparison of tool precision, not performance.
+All tests were run on a machine with 16 GB RAM and 4 Intel i5 CPUs at 2GHz
+and with a timeout of 60 seconds (the same timeout
+was used in \cite{kahsai2017quantified}). We used \name's parallel backend (\Cref{sec:infr})
+with Z3 version 4.8.4, HoICE version 1.8.1, and Eldarica version 2.0.1 and JayHorn's Eldarica backend.
+
+\begin{table}[t]
+  \caption{Comparison of \name to JayHorn on the benchmark set of \cite{kahsai2017quantified} (top) and our custom benchmark suite (bottom). \emph{T/O}
+  indicates a time out.}
+  \begin{center}
+    \input{jayhorn_table}
+    \input{consort_table}
+  \end{center}
+  \label{tab:jh-results}
+\end{table}
+
+\subsection{Results}
+The results of our experiments are shown in \Cref{tab:jh-results}. On the JayHorn benchmark
+suite \name performs competitively with JayHorn, correctly identifying 29 of the 32 safe programs
+as such. For all 3 tests on which \name timed out after 60 seconds, JayHorn also timed out
+(column \emph{T/O}).
+For the unsafe programs, \name correctly identified all programs as unsafe within 60 seconds;
+JayHorn answered \textsc{Unknown} for 7 tests (column \emph{Imp.}).
+
+On our own benchmark set, \name correctly verifies all safe versions
+of the programs within 60 seconds. For the unsafe variants,
+\name was able to quickly and definitively determine these programs unsafe.
+JayHorn times out on all tests except for \textbf{Shuffle} and \textbf{ShuffleBUG} (column \textbf{JH}).
+We investigated the cause of time outs and discovered that after verification failed
+with an unbounded heap model, JayHorn attempts verification on increasingly
+larger bounded heaps. In every case, JayHorn exceeded the 60 second timeout
+before reaching a preconfigured limit on the heap bound. This result suggests JayHorn struggles in the presence
+of per-object invariants and unbounded allocations; 
+the only two tests JayHorn successfully analyzed contain just a single object allocation.\looseness=-1
+
+We do not believe
+this struggle is indicative of a shortcoming in JayHorn's implementation,
+but stems from the fundamental limitations of JayHorn's memory representation.
+Like many verification tools (see \Cref{sec:rw}), JayHorn uses a single, unchanging
+invariant to for every object allocated at the same syntactic location;
+effectively, all objects allocated at the same location
+are assumed to alias with one another.
+This representation cannot, in general, handle programs with different
+invariants for distinct objects that evolve over time.
+We hypothesize other tools that adopt a similar approach will exhibit
+the same difficulty. 
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
+
+%  LocalWords:  JayHorn JayHorn's

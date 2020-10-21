@@ -1,0 +1,148 @@
+\begin{figure}
+  \leavevmode
+  \infrule[TE-Seq]{
+    \Theta  \mid  \HOLE  \ottsym{:}  \tau  \produces  \Gamma  \mid  \mathcal{L}  \vdash_{\mathit{ectx} }  \ottnt{E}  \ottsym{:}  \tau'  \produces  \Gamma' \andalso
+     \Theta   \mid   \mathcal{L}   \mid   \Gamma'   \vdash   \ottnt{e}  :  \tau''   \produces   \Gamma'' 
+  }{
+    \Theta  \mid  \HOLE  \ottsym{:}  \tau  \produces  \Gamma  \mid  \mathcal{L}  \vdash_{\mathit{ectx} }   \ottnt{E} \SEQ \ottnt{e}   \ottsym{:}  \tau''  \produces  \Gamma''
+  }
+  \infrule[TE-Hole]{}{
+    \Theta  \mid  \HOLE  \ottsym{:}  \tau  \produces  \Gamma  \mid  \mathcal{L}  \vdash_{\mathit{ectx} }  \HOLE  \ottsym{:}  \tau  \produces  \Gamma
+  }
+  \infrule[TE-Stack]{
+    \Theta  \mid  \HOLE  \ottsym{:}  \tau'  \produces  \Gamma'  \mid  \mathcal{L}  \vdash_{\mathit{ectx} }  \ottnt{E}  \ottsym{:}  \tau''  \produces  \Gamma'' \\
+     \Theta   \mid   \mathcal{L}   \mid   \Gamma  \ottsym{,}  \mathit{x}  \ottsym{:}  \tau   \vdash   \ottnt{e}  :  \tau'   \produces   \Gamma'  \\
+     \mathit{x}  \not\in   \DOM( \Gamma' )  
+  }{
+    \Theta  \mid  \HOLE  \ottsym{:}  \tau  \produces  \Gamma  \mid  \mathcal{L}  \vdash_{\mathit{ectx} }   \ottnt{E} [\LET  \mathit{x}  =   \HOLE^ \ell   \IN  \ottnt{e}  ]   \ottsym{:}  \tau''  \produces  \Gamma''
+  }
+
+  \begin{align*}
+    \ottsym{(}   \ottnt{E} \SEQ \ottnt{e}   \ottsym{)}  \ottsym{[}  \ottnt{e'}  \ottsym{]} & =  \ottnt{E}  \ottsym{[}  \ottnt{e'}  \ottsym{]}  \SEQ  \ottnt{e}  \\
+    \HOLE  \ottsym{[}  \ottnt{e'}  \ottsym{]} & = e' \\
+     \ottnt{E} [\LET  \mathit{y}  =   \HOLE^ \ell   \IN  \ottnt{e}  ]   \ottsym{[}  \mathit{x}  \ottsym{]} & = \ottnt{E}  \ottsym{[}   \LET  \mathit{y}  =  \mathit{x}  \IN  \ottnt{e}   \ottsym{]}
+  \end{align*}
+\caption{Context typing and substitution}
+\label{fig:context-typing}
+\end{figure}
+
+\begin{figure}
+  \leavevmode
+  % \infrule[Obsolete?]{
+  %   \oldvec{\ell}  \ottsym{=}  \ottkw{Trace} \, \ottsym{(}  \oldvec{F}  \ottsym{)} \andalso \Theta  \vdash  \ottnt{D} \andalso \forall j \in \set{0..n-1}.\seq{\ell_j} = tail^{n-j+1}(\oldvec{\ell}) \\
+  %   \ottkw{Cons} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)} \andalso
+  %   \forall i\in\set{1..n}.\Theta  \mid  \HOLE  \ottsym{:}  \tau_{\ottmv{i}}  \produces  \Gamma_{\ottmv{i}}  \mid  \oldvec{\ell}_{{\ottmv{i}-1}}  \vdash_{\mathit{ectx} }  \ottnt{E_{{\ottmv{i}-1}}}  \ottsym{:}  \tau_{{\ottmv{i}-1}}  \produces  \Gamma_{{\ottmv{i}-1}} \\
+  %   \Theta  \mid  \HOLE  \ottsym{:}  \tau  \produces  \Gamma'  \mid  \oldvec{\ell}  \vdash_{\mathit{ectx} }  \ottnt{E_{\ottmv{n}}}  \ottsym{:}  \tau_{\ottmv{n}}  \produces  \Gamma_{\ottmv{n}} \\
+  %    \Theta   \mid   \oldvec{\ell}   \mid   \Gamma   \vdash   \ottnt{e}  :  \tau   \produces   \Gamma' 
+  % }{
+  %    \vdash_{\mathit{conf} }^D   \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{E_{\ottmv{n}}}  \ottsym{[}  \ottnt{e}  \ottsym{]} }  
+  % }
+  \infrule{
+    \oldvec{\ell}  \ottsym{=}  \ottkw{Trace} \, \ottsym{(}  \oldvec{F}  \ottsym{)} \andalso n  \ottsym{=}   | \oldvec{\ell} |   \ottsym{=}   | \oldvec{F} |  \andalso \Theta  \vdash  \ottnt{D} \andalso \forall j \in \set{1..n}.\oldvec{\ell}_{\ottmv{j}} = tail^{n-j+1}(\oldvec{\ell}) \\
+    \ottkw{Cons} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)} \andalso
+    \forall i\in\set{1..n}.\Theta  \mid  \HOLE  \ottsym{:}  \tau_{\ottmv{i}}  \produces  \Gamma_{\ottmv{i}}  \mid  \oldvec{\ell}_{\ottmv{i}}  \vdash_{\mathit{ectx} }  F_{\ottmv{i}}  \ottsym{:}  \tau_{{\ottmv{i}-1}}  \produces  \Gamma_{{\ottmv{i}-1}} \\
+    \oldvec{F} = F_{\ottmv{n}} : \cdots : F_{{\mathrm{1}}} : \cdot \andalso
+     \Theta   \mid   \oldvec{\ell}   \mid   \Gamma   \vdash   \ottnt{e}  :  \tau_{\ottmv{n}}   \produces   \Gamma_{\ottmv{n}} 
+  }{
+     \vdash_{\mathit{conf} }^D   \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{e} }  
+  }
+  \infax[]{
+     \vdash_{\mathit{conf} }^D   \mathbf{AliasFail}  
+  }
+  \begin{align*}
+    \ottkw{Trace} \, \ottsym{(}   \cdot   \ottsym{)} &=  \epsilon  \\
+    \ottkw{Trace} \, \ottsym{(}   \ottnt{E} [\LET  \mathit{x}  =   \HOLE^ \ell   \IN  \ottnt{e}  ]   \ottsym{:}  \oldvec{F}  \ottsym{)} &= \ell  \ottsym{:}  \ottkw{Trace} \, \ottsym{(}  \oldvec{F}  \ottsym{)} \\
+   \end{align*}
+% \end{figure}
+% \begin{figure}
+   \begin{align*}
+    \ottkw{Cons} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)} & \stackrel{\textrm{\tiny def}}{\iff} \ottkw{SAT} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)} \wedge \forall \,  \ottmv{a}  \in \DOM( \ottnt{H} )   \ottsym{.}  \ottkw{Own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)}  \ottsym{(}  \ottmv{a}  \ottsym{)} \leq 1 \\
+    \ottkw{SAT} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)} & \stackrel{\textrm{\tiny def}}{\iff} \forall \,  \mathit{x}  \in \DOM( \Gamma )   \ottsym{.}   \mathit{x}  \in \DOM( \ottnt{R} )   \wedge   \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)} , \Gamma  \ottsym{(}  \mathit{x}  \ottsym{)} )  \\
+     \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , v , \tau )  & \stackrel{\textrm{\tiny def}}{\iff} \begin{cases}
+       v  \in  \mathbb{Z}   \wedge  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  v  \ottsym{/}  \nu  \ottsym{]}  \varphi & \tau  \ottsym{=}   \set{  \nu  \COL \TINT \mid  \varphi }  \\
+       \ottmv{a}  \in \DOM( \ottnt{H} )   \wedge   \ottkw{SATv} ( \ottnt{H} , \ottnt{R} , \ottnt{H}  \ottsym{(}  \ottmv{a}  \ottsym{)} , \tau' )  & \tau  \ottsym{=}   \tau'  \TREF^{ r }   \wedge  v \, \ottsym{=} \, \ottmv{a}
+    \end{cases} \\
+    \ottsym{[}   \emptyset   \ottsym{]} \, \varphi & = \varphi \\
+    \ottsym{[}  \ottnt{R}  \ottsym{\{}  \mathit{y}  \mapsto  n  \ottsym{\}}  \ottsym{]} \, \varphi & =  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \ottsym{[}  n  \ottsym{/}  \mathit{y}  \ottsym{]}  \varphi \\
+    \ottsym{[}  \ottnt{R}  \ottsym{\{}  \mathit{y}  \mapsto  \ottmv{a}  \ottsym{\}}  \ottsym{]} \, \varphi & =  \ottsym{[}  \ottnt{R}  \ottsym{]} \, \varphi \\
+    \ottkw{Own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)} & =    \Sigma _{ \mathit{x} \in  \DOM( \Gamma )  }\, \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{,}  \Gamma  \ottsym{(}  \mathit{x}  \ottsym{)}  \ottsym{)}  \\
+    \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{v}  \ottsym{,}  \tau  \ottsym{)} & = \begin{cases}
+      \ottsym{\{}  \ottmv{a}  \mapsto  r  \ottsym{\}}  \ottsym{+}  \ottkw{own} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{H}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{,}  \tau'  \ottsym{)} & \ottnt{v} \, \ottsym{=} \, \ottmv{a}  \wedge   \ottmv{a}  \in \DOM( \ottnt{H} )   \wedge  \tau  \ottsym{=}   \tau'  \TREF^{ r }  \\
+       \emptyset  & o.w.
+    \end{cases} \\
+  \end{align*}
+\caption{Machine state typing}
+\label{fig:state-typing}
+  % \caption{State consistency}
+  % \label{fig:consistency}
+\end{figure}
+
+\section{Proof of Type Soundness (\Cref{thm:soundness})}
+
+We first define a typing relation for machine configurations $ \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{e} } $ as shown in
+\Cref{fig:state-typing}. The critical component of this typing relation is the consistency relation $\ottkw{Cons}$.
+Intuitively, $\ottkw{Cons}$ expresses that the current heap and registers are consistent with the ownership
+and refinement information implied by $\Gamma$. We say triple $( \ottnt{H},\ottnt{R},\Gamma )$ is \emph{consistent},
+and write $\ottkw{Cons} \, \ottsym{(}  \ottnt{H}  \ottsym{,}  \ottnt{R}  \ottsym{,}  \Gamma  \ottsym{)}$. %; the definition of this relation is shown in \Cref{fig:consistency}.
+In the definitions for $\ottkw{own}$ we write $\ottsym{\{}  \ottmv{a}  \mapsto  r  \ottsym{\}}$ to denote a function $\textbf{Addr} \rightarrow [0,1]$
+which returns $r$ for $\ottmv{a}$, and $0$ otherwise. We write $ \emptyset $ to denote a constant
+function $\textbf{Addr} \rightarrow [0,1]$ which always returns $0$. We define the addition between
+two functions $\ottnt{O_{{\mathrm{1}}}}, \ottnt{O_{{\mathrm{2}}}}: \textbf{Addr} \rightarrow [0,1]$ as: $\ottsym{(}  \ottnt{O_{{\mathrm{1}}}}  \ottsym{+}  \ottnt{O_{{\mathrm{2}}}}  \ottsym{)}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{=}  \ottnt{O_{{\mathrm{1}}}}  \ottsym{(}  \ottmv{a}  \ottsym{)}  \ottsym{+}  \ottnt{O_{{\mathrm{2}}}}  \ottsym{(}  \ottmv{a}  \ottsym{)}$.
+Finally, if a summation $ \Sigma $ has no summands, we take its result to be $ \emptyset $.
+
+The proof of \Cref{thm:soundness} requires the following four key lemmas. These lemmas are stated
+with respect to some well-typed program $ \tuple{ \ottnt{D} ,  \ottnt{e} } $, i.e. $\vdash   \tuple{ \ottnt{D} ,  \ottnt{e} } $.
+\begin{lemma}
+  \label{lem:initial}
+  $ \vdash_{\mathit{conf} }^D   \tuple{  \emptyset  ,   \emptyset  ,   \cdot  ,  \ottnt{e} }  $
+\end{lemma}
+\begin{proof}
+  Trivial, taking $\Gamma  \ottsym{=}   \bullet $ and by inversion on $\vdash   \tuple{ \ottnt{D} ,  \ottnt{e} } $.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:assertfail}
+  $ \vdash_{\mathit{conf} }^D  \mathbf{C} $ implies $ \mathbf{C}  \neq   \mathbf{AssertFail}  $
+\end{lemma}
+\begin{proof}
+  Simple proof by contradiction, as the $ \mathbf{AssertFail} $ is not well-typed.
+\end{proof}
+  
+\begin{lemma}
+  \label{lem:preservation}
+  If $ \vdash_{\mathit{conf} }^D   \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{e} }  $ and $  \tuple{ \ottnt{H} ,  \ottnt{R} ,  \oldvec{F} ,  \ottnt{e} }     \longrightarrow _{ \ottnt{D} }    \mathbf{C} $, then $ \vdash_{\mathit{conf} }^D  \mathbf{C} $
+\end{lemma}
+\begin{lemma}
+  \label{lem:progress}
+  If $ \vdash_{\mathit{conf} }^D  \mathbf{C} $, then, one of the following conditions hold:
+  \begin{enumerate}
+  \item $\exists \mathbf{C}', \mathbf{C}    \longrightarrow _{ \ottnt{D} }    \mathbf{C}' $, or
+  \item $\mathbf{C}  \ottsym{=}   \mathbf{AssertFail} $, or
+  \item $\mathbf{C}  \ottsym{=}   \tuple{ \ottnt{H} ,  \ottnt{R} ,   \cdot  ,  \mathit{x} } $
+  \end{enumerate}
+\end{lemma}
+\Cref{lem:preservation,lem:progress} are the heart of proof effort, we give their proofs in \Cref{sec:preservation-proof,sec:progress-proof}
+respectively.
+
+We can now prove \Cref{thm:soundness}:
+\begin{proof}[\Cref{thm:soundness}: Soundness]
+  From \Cref{lem:initial,lem:preservation} and an inductive argument, any configuration
+  reachable from the initial state must be well-typed. Then, by \Cref{lem:assertfail} every
+  configuration reachable from the initial state cannot be $ \mathbf{AssertFail} $, i.e., a well-typed
+  program never experiences an assertion failure. This completes the first part of the proof.
+
+  To prove the second portion of the theorem, it suffices to show that any configuration reachable
+  from the initial state can step or is a final configuration. Again from
+  \Cref{lem:initial,lem:preservation} and a simple inductive argument, we must have that
+  for any state   $\mathbf{C}$ such that $  \tuple{  \emptyset  ,   \emptyset  ,   \cdot  ,  \ottnt{e} }     \longrightarrow^* _{ \ottnt{D} }    \mathbf{C} $ $ \vdash_{\mathit{conf} }^D  \mathbf{C} $.
+  Then by \Cref{lem:progress} we have the configuration may step or is one of the final configurations.
+\end{proof}
+
+The remainder of this appendix proves \Cref{lem:preservation,lem:progress}. We introduce some auxiliary definitions and
+lemmas in \Cref{sec:aux-defn-lem}, give the proof of \Cref{lem:preservation} in \Cref{sec:preservation-proof}, and prove
+\Cref{lem:progress} in \Cref{sec:progress-proof}.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
