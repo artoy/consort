@@ -1,4 +1,4 @@
-.PHONY: all src/all clean
+.PHONY: all clean
 
 OTTNAME=lang
 TEX=intro.tex preliminaries.tex typesystem.tex appendix.tex	\
@@ -6,7 +6,7 @@ TEX=intro.tex preliminaries.tex typesystem.tex appendix.tex	\
 	wf_rules.tex appendix-thm1.tex appendix-aux.tex appendix-preservation.tex \
 	appendix-progress.tex
 
-all: main.pdf src/all
+all: main.pdf
 
 main.pdf: main.tex lang.tex local.tex $(TEX) jayhorn_table.tex benchmark_table.tex consort_table.tex main.bib
 	latexmk $<
@@ -30,10 +30,6 @@ flow.tex: flow.otex flow.ott
 	ott -i flow.ott -tex_wrap false -tex_filter $< $@
 	@chmod -w $@
 
-src/all:
-	+make -C src all
-
 clean:
-	make -C src/ clean
 	latexmk -f -C main.tex
 	@rm -rf main.tex $(TEX)
