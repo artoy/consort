@@ -1,3 +1,7 @@
 *.smt
 /recursive-tests/
 /benchmarks/consort/**/*.class
+
+.DS_Store
+.idea/
+.vscode/
