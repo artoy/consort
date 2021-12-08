@@ -59,7 +59,7 @@ public class TranslatedBasicBlock {
   // 基本ブロックを関数名と関数呼び出し付きで出力するメソッド
   public String print() {
     String parametersString = parameters.stream().collect(Collectors.joining(", "));
-    String BasicBlocksString = translatedBasicBlock.stream().filter(unit -> !unit.istTranslatedUnitEmpty()).map(TranslatedUnitPred::print).collect(Collectors.joining("\n"));
+    String BasicBlocksString = translatedBasicBlock.stream().filter(unit -> !unit.istTranslatedUnitEmpty()).map(TranslatedUnit::print).collect(Collectors.joining("\n"));
 
     StringBuilder builder = new StringBuilder();
     builder

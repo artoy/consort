@@ -2,12 +2,13 @@ package edu.kyoto.fos.regnant.myTranslation.translatedStmt;
 
 import edu.kyoto.fos.regnant.myTranslation.TranslatedUnit;
 import soot.Value;
+import soot.jimple.internal.JReturnStmt;
 
 public class Return implements TranslatedUnit {
   private Value returnValue;
 
-  public Return(Value returnValue) {
-    this.returnValue = returnValue;
+  public Return(JReturnStmt unit) {
+    this.returnValue = unit.getOp();
   }
 
   public boolean isSequencing() {
