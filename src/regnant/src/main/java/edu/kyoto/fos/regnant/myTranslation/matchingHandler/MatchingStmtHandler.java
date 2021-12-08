@@ -4,18 +4,14 @@ import edu.kyoto.fos.regnant.myTranslation.TranslatedUnit;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Argument;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.AssertFail;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.AssignToArray;
+import edu.kyoto.fos.regnant.myTranslation.translatedStmt.AssignToVariable;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.DefineVariable;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NewArray;
+import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NotSupportedAssignStmt;
+import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NotSupportedUnit;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Return;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.ReturnVoid;
 import soot.Unit;
-import soot.jimple.ArrayRef;
-import soot.jimple.AssignStmt;
-import soot.jimple.IdentityStmt;
-import soot.jimple.IntConstant;
-import soot.jimple.NopStmt;
-import soot.jimple.ReturnStmt;
-import soot.jimple.ReturnVoidStmt;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JIdentityStmt;
@@ -57,37 +53,17 @@ public class MatchingStmtHandler {
         return new DefineVariable(assignUnit);
       } else if (assignUnit.getLeftOp() instanceof JimpleLocal) {
         // 定義されている変数に値を代入する場合
-        builder
-          .append(assignUnit.getLeftOp().toString())
-          .append(" := ")
-          .append(assignUnit.getRightOp().toString())
-          .append(";");
-
-          this.isSequencing = true;
+        return new AssignToVariable(assignUnit);
       // TODO: InvokeStmt にも対応する
       } else {
         // throw new RuntimeException("This AssignStmt is not yet supported: " + unit + " ( Left: " + assignUnit.getLeftOp().getClass().toString() + " Right: " + assignUnit.getRightOp().getClass().toString() + ")");
         // デバッグのための, エラーの代わりの標準出力
-        builder
-          .append("This AssignStmt is not yet supported: ")
-          .append(unit.toString())
-          .append(" ( Left: ")
-          .append(assignUnit.getLeftOp().getClass().toString())
-          .append(" Right: ")
-          .append(assignUnit.getRightOp().getClass().toString())
-          .append(")");
+        return new NotSupportedAssignStmt(assignUnit);
       }
     } else {
       // throw new RuntimeException("This unit is not yet supported: " + unit + " (" + unit.getClass() + ")");
       // デバッグのための, エラーのための標準出力
-      builder
-        .append("This unit is not yet supported: ")
-        .append(unit)
-        .append(" (")
-        .append(unit.getClass())
-        .append(")");
+      return new NotSupportedUnit(unit);
     }
-
-    this.translatedUnit = builder.toString();
   }
 }
