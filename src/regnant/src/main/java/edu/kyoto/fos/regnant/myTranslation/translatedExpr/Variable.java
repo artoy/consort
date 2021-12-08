@@ -10,7 +10,7 @@ public class Variable implements TranslatedValue{
     this.variable = variable;
   }
 
-  // TBD: 今の所ポインタが代入の右辺に出現しないので isPointer = true の場合は存在しない
+  // TBD: 変数をポインタのまま扱うときはそのまま toString すれば良いので、 isPointer = true の場合は存在しない
   public String print(boolean isPointer) {
     StringBuilder builder = new StringBuilder();
     if (!isPointer) builder.append("*");
