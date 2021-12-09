@@ -5,7 +5,9 @@ import edu.kyoto.fos.regnant.myTranslation.TranslatedValue;
 import edu.kyoto.fos.regnant.myTranslation.matchingHandler.MatchingExprHandler;
 import soot.jimple.internal.JAssignStmt;
 
+// 変数に値を代入する式を表すクラス
 public class AssignToVariable implements TranslatedUnit{
+  // variable は代入される変数の名前, value は代入する値
   private String variable;
   private TranslatedValue value;
 

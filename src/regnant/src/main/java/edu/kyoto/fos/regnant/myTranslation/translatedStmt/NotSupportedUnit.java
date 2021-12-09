@@ -3,7 +3,9 @@ package edu.kyoto.fos.regnant.myTranslation.translatedStmt;
 import edu.kyoto.fos.regnant.myTranslation.TranslatedUnit;
 import soot.Unit;
 
+// まだ対応していない Unit (Statement) をエラーにする代わりに出力するためのクラス
 public class NotSupportedUnit implements TranslatedUnit{
+  //  unit は変化前の unit
   public Unit unit;
   
   public NotSupportedUnit(Unit unit) {
@@ -14,6 +16,7 @@ public class NotSupportedUnit implements TranslatedUnit{
     return false;
   }
 
+  // 出力の際には変換前の unit を出力する
   public String print() {
     StringBuilder builder = new StringBuilder();
     builder

@@ -12,10 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// TODO: 関数呼び出しを実装する (元々の関数名を残しておいた方がやりやすそう)
+// TODO: if と goto を関数呼び出しで実装する (BasicBlockMapper.java を変更することになるかもしれん)
+// TODO: 変換後のプログラムに main を加える
+// TODO: 前生成したプログラムを消してから出力するようにする
+// TODO: 無駄な Unit を減らす (関数呼び出しの後の Unit とか)
+// TODO: 無駄な基本ブロックを減らす (return 文だけの基本ブロックが大量に生成される. もしかしたら検証器には嬉しかったりするのか？)
+
 // ConSORT プログラムに変換された関数を表すクラス
 public class TranslatedFunction {
   private List<TranslatedBasicBlock> translatedFunction = new ArrayList<>();
-
 
   public TranslatedFunction(CFGReconstructor cfg) {
     // 基本ブロックを出力
@@ -33,7 +39,6 @@ public class TranslatedFunction {
       }
     }
   }
-
 
   // 変換後の関数をファイルに書き込むためのメソッド
   public void print(String path) {

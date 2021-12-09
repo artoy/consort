@@ -5,7 +5,7 @@ import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Argument;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.AssertFail;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.AssignToArray;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.AssignToVariable;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.DefineVariable;
+import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NewVariable;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NewArray;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NotSupportedAssignStmt;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NotSupportedUnit;
@@ -49,8 +49,7 @@ public class MatchingStmtHandler {
         return new AssignToArray(assignUnit);
       } else if (assignUnit.getLeftOp() instanceof JimpleLocal && headOfFunction) {
         // 初めて変数が定義される場合 (関数の中の最初の基本ブロックに変数定義が全て含まれているという仮説による)
-        // TODO: mkref の後に変数が来た場合も対応する
-        return new DefineVariable(assignUnit);
+        return new NewVariable(assignUnit);
       } else if (assignUnit.getLeftOp() instanceof JimpleLocal) {
         // 定義されている変数に値を代入する場合
         return new AssignToVariable(assignUnit);

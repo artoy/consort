@@ -6,7 +6,9 @@ import edu.kyoto.fos.regnant.myTranslation.matchingHandler.MatchingExprHandler;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JAssignStmt;
 
+// 配列に代入する式を表すクラス
 public class AssignToArray implements TranslatedUnit{
+  // arrayName は配列名, index は配列の中の代入されるインデックス, value は代入される値を表す
   private String arrayName;
   private String index;
   private TranslatedValue value;

@@ -5,11 +5,13 @@ import edu.kyoto.fos.regnant.myTranslation.TranslatedValue;
 import edu.kyoto.fos.regnant.myTranslation.matchingHandler.MatchingExprHandler;
 import soot.jimple.internal.JAssignStmt;
 
-public class DefineVariable implements TranslatedUnit{
+// 変数を (ポインタで) 定義する式を表すクラス
+public class NewVariable implements TranslatedUnit{
+  // variable は定義する変数の名前, value は変数を初期化する値
   private String variable;
   private TranslatedValue value;
 
-  public DefineVariable(JAssignStmt unit){
+  public NewVariable(JAssignStmt unit){
     MatchingExprHandler handler = new MatchingExprHandler();
 
     this.variable = unit.getLeftOp().toString();
