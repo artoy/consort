@@ -31,7 +31,7 @@ public class BasicBlockMapper {
         start.add(u);
       }
     }
-    // ここの heads がよく分からん
+    // はじめの unit を worklist に入れる
     LinkedList<Unit> worklist = new LinkedList<>(ug.getHeads());
     Set<Unit> visited = new HashSet<>();
     List<List<Unit>> blocks = new ArrayList<>();

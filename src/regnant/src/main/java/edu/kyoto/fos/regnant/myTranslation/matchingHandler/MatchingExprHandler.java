@@ -5,6 +5,7 @@ import edu.kyoto.fos.regnant.myTranslation.translatedExpr.Add;
 import edu.kyoto.fos.regnant.myTranslation.translatedExpr.Mult;
 import edu.kyoto.fos.regnant.myTranslation.translatedExpr.Other;
 import edu.kyoto.fos.regnant.myTranslation.translatedExpr.Variable;
+
 import soot.Value;
 import soot.jimple.AddExpr;
 import soot.jimple.MulExpr;
