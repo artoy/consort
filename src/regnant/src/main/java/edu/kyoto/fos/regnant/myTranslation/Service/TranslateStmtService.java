@@ -1,4 +1,4 @@
-package edu.kyoto.fos.regnant.myTranslation.matchingHandler;
+package edu.kyoto.fos.regnant.myTranslation.Service;
 
 import edu.kyoto.fos.regnant.myTranslation.TranslatedUnit;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Argument;
@@ -23,7 +23,7 @@ import soot.jimple.internal.JReturnVoidStmt;
 import soot.jimple.internal.JimpleLocal;
 
 // Stmt を場合分けして変換するためのクラス
-public class MatchingStmtHandler {
+public class TranslateStmtService {
   // Stmt を場合分けして変換するメソッド
   public TranslatedUnit translate(Unit unit, boolean headOfFunction) {
     // Java SE 12 以降も使えるようにしたら switch 文に書き換える

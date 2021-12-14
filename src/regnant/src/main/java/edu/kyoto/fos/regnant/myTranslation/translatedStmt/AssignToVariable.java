@@ -2,7 +2,7 @@ package edu.kyoto.fos.regnant.myTranslation.translatedStmt;
 
 import edu.kyoto.fos.regnant.myTranslation.TranslatedUnit;
 import edu.kyoto.fos.regnant.myTranslation.TranslatedValue;
-import edu.kyoto.fos.regnant.myTranslation.matchingHandler.MatchingExprHandler;
+import edu.kyoto.fos.regnant.myTranslation.Service.TranslateExprService;
 import soot.jimple.internal.JAssignStmt;
 
 // 変数に値を代入する式を表すクラス
@@ -12,7 +12,7 @@ public class AssignToVariable implements TranslatedUnit{
   private TranslatedValue value;
 
   public AssignToVariable(JAssignStmt unit){
-    MatchingExprHandler handler = new MatchingExprHandler();
+    TranslateExprService handler = new TranslateExprService();
 
     this.variable = unit.getLeftOp().toString();
     this.value = handler.translate(unit.getRightOp());

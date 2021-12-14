@@ -1,7 +1,7 @@
 package edu.kyoto.fos.regnant.myTranslation;
 
 import edu.kyoto.fos.regnant.cfg.BasicBlock;
-import edu.kyoto.fos.regnant.myTranslation.matchingHandler.MatchingStmtHandler;
+import edu.kyoto.fos.regnant.myTranslation.Service.TranslateStmtService;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Argument;
 
 import java.util.ArrayList;
@@ -16,17 +16,17 @@ public class TranslatedBasicBlock {
   private List<String> arguments = new ArrayList<>();
 
   public TranslatedBasicBlock(BasicBlock basicBlock, boolean headOfFunction) {
-    MatchingStmtHandler handler = new MatchingStmtHandler();
+    TranslateStmtService service = new TranslateStmtService();
 
     this.id = basicBlock.id;
 
     for (int i = 0; i < basicBlock.units.size(); i++) {
       if (i == basicBlock.units.size() - 1){
         // TODO: 関数呼び出しへの変換方法を考える
-        TranslatedUnit tailTranslatedUnit = handler.translate(basicBlock.units.get(i), headOfFunction);
+        TranslatedUnit tailTranslatedUnit = service.translate(basicBlock.units.get(i), headOfFunction);
         translatedBasicBlock.add(tailTranslatedUnit);
       } else {
-        TranslatedUnit translatedUnit = handler.translate(basicBlock.units.get(i), headOfFunction);
+        TranslatedUnit translatedUnit = service.translate(basicBlock.units.get(i), headOfFunction);
 
         // もし変換後の unit が Argument だった場合, 引数になる変数があるので, それを parameters フィールドに入れる
         if (translatedUnit instanceof Argument) arguments.add(((Argument)translatedUnit).getArgumentVariable());

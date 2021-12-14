@@ -1,4 +1,4 @@
-package edu.kyoto.fos.regnant.myTranslation.matchingHandler;
+package edu.kyoto.fos.regnant.myTranslation.Service;
 
 import edu.kyoto.fos.regnant.myTranslation.TranslatedValue;
 import edu.kyoto.fos.regnant.myTranslation.translatedExpr.Add;
@@ -12,7 +12,7 @@ import soot.jimple.MulExpr;
 import soot.jimple.internal.JimpleLocal;
 
 // Expr を場合分けするためのクラス
-public class MatchingExprHandler {
+public class TranslateExprService {
   // Expr を場合分けして変換するメソッド
   public TranslatedValue translate(Value value) {
     if (value instanceof AddExpr) {

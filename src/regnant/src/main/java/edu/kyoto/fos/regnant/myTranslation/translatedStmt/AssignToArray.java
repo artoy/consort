@@ -2,7 +2,7 @@ package edu.kyoto.fos.regnant.myTranslation.translatedStmt;
 
 import edu.kyoto.fos.regnant.myTranslation.TranslatedUnit;
 import edu.kyoto.fos.regnant.myTranslation.TranslatedValue;
-import edu.kyoto.fos.regnant.myTranslation.matchingHandler.MatchingExprHandler;
+import edu.kyoto.fos.regnant.myTranslation.Service.TranslateExprService;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JAssignStmt;
 
@@ -14,7 +14,7 @@ public class AssignToArray implements TranslatedUnit{
   private TranslatedValue value;
 
   public AssignToArray(JAssignStmt unit) {
-    MatchingExprHandler handler = new MatchingExprHandler();
+    TranslateExprService handler = new TranslateExprService();
 
     this.arrayName = ((JArrayRef)(unit.getLeftOp())).getBase().toString();
     this.index = ((JArrayRef)(unit.getLeftOp())).getIndex().toString();

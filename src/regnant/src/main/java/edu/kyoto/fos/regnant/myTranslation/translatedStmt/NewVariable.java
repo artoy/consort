@@ -2,7 +2,7 @@ package edu.kyoto.fos.regnant.myTranslation.translatedStmt;
 
 import edu.kyoto.fos.regnant.myTranslation.TranslatedUnit;
 import edu.kyoto.fos.regnant.myTranslation.TranslatedValue;
-import edu.kyoto.fos.regnant.myTranslation.matchingHandler.MatchingExprHandler;
+import edu.kyoto.fos.regnant.myTranslation.Service.TranslateExprService;
 import soot.jimple.internal.JAssignStmt;
 
 // 変数を (ポインタで) 定義する式を表すクラス
@@ -12,10 +12,10 @@ public class NewVariable implements TranslatedUnit{
   private TranslatedValue value;
 
   public NewVariable(JAssignStmt unit){
-    MatchingExprHandler handler = new MatchingExprHandler();
+    TranslateExprService service = new TranslateExprService();
 
     this.variable = unit.getLeftOp().toString();
-    this.value = handler.translate(unit.getRightOp());
+    this.value = service.translate(unit.getRightOp());
   }
 
   public boolean isSequencing() {

@@ -1,8 +1,7 @@
 package edu.kyoto.fos.regnant.myTranslation.translatedExpr;
 
 import edu.kyoto.fos.regnant.myTranslation.TranslatedValue;
-import edu.kyoto.fos.regnant.myTranslation.matchingHandler.MatchingExprHandler;
-
+import edu.kyoto.fos.regnant.myTranslation.Service.TranslateExprService;
 import soot.jimple.MulExpr;
 
 // 変換された MulExpr を表すクラス
@@ -12,10 +11,10 @@ public class Mult implements TranslatedValue{
   private TranslatedValue rightOp;
 
   public Mult(MulExpr e) {
-    MatchingExprHandler handler = new MatchingExprHandler();
+    TranslateExprService service = new TranslateExprService();
 
-    this.leftOp = handler.translate(e.getOp1());
-    this.rightOp = handler.translate(e.getOp2());
+    this.leftOp = service.translate(e.getOp1());
+    this.rightOp = service.translate(e.getOp2());
   }
 
   public String print(boolean isPointer) {
