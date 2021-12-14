@@ -11,6 +11,7 @@ import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NotSupportedAssignStmt
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NotSupportedUnit;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Return;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.ReturnVoid;
+
 import soot.Unit;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JAssignStmt;
@@ -21,8 +22,9 @@ import soot.jimple.internal.JReturnStmt;
 import soot.jimple.internal.JReturnVoidStmt;
 import soot.jimple.internal.JimpleLocal;
 
+// Stmt を場合分けして変換するためのクラス
 public class MatchingStmtHandler {
-  
+  // Stmt を場合分けして変換するメソッド
   public TranslatedUnit translate(Unit unit, boolean headOfFunction) {
     // Java SE 12 以降も使えるようにしたら switch 文に書き換える
     if (unit instanceof JNopStmt) {

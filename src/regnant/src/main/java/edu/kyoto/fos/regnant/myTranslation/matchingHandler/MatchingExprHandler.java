@@ -11,8 +11,9 @@ import soot.jimple.AddExpr;
 import soot.jimple.MulExpr;
 import soot.jimple.internal.JimpleLocal;
 
+// Expr を場合分けするためのクラス
 public class MatchingExprHandler {
-  
+  // Expr を場合分けして変換するメソッド
   public TranslatedValue translate(Value value) {
     if (value instanceof AddExpr) {
       return new Add((AddExpr)value);

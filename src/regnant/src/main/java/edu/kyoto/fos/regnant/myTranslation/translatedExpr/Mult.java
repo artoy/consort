@@ -2,9 +2,12 @@ package edu.kyoto.fos.regnant.myTranslation.translatedExpr;
 
 import edu.kyoto.fos.regnant.myTranslation.TranslatedValue;
 import edu.kyoto.fos.regnant.myTranslation.matchingHandler.MatchingExprHandler;
+
 import soot.jimple.MulExpr;
 
+// 変換された MulExpr を表すクラス
 public class Mult implements TranslatedValue{
+  // leftOp は1つ目のオペランド, rightOp は2つ目のオペランドを表す
   private TranslatedValue leftOp;
   private TranslatedValue rightOp;
 
