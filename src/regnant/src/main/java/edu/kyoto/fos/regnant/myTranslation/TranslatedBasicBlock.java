@@ -73,7 +73,7 @@ public class TranslatedBasicBlock {
     // 引数部分の作成
     String parametersString = arguments.stream().collect(Collectors.joining(", "));
 
-    // 関数の中身の作成
+    // 関数の中身の作成. ただし右の波括弧は末尾の関数呼び出しの後に入れたいので最後に回している
     boolean prevSequence = true;
     int indentLevel = 1;
     StringBuilder basicBlocksBuilder = new StringBuilder();
@@ -99,8 +99,6 @@ public class TranslatedBasicBlock {
       prevSequence = translatedUnit.isSequencing();
     }
 
-    basicBlocksBuilder.append(printRightBraces(indentLevel - 1));
-
     String basicBlocksString = basicBlocksBuilder.toString();
 
     // 次の基本ブロックを呼び出す部分の作成
@@ -114,6 +112,7 @@ public class TranslatedBasicBlock {
       assert(nextBasicBlocks.size() == 1);
 
       nextBasicBlockBuilder
+        .append("return ")
         .append("function")
         .append(nextBasicBlocks.get(0).id)
         .append("(")
@@ -132,6 +131,7 @@ public class TranslatedBasicBlock {
       .append(") { \n")
       .append(basicBlocksString)
       .append(nextBasicBlock)
+      .append(printRightBraces(indentLevel - 1))
       .append("}\n");
 
     return builder.toString();
