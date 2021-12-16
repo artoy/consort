@@ -3,6 +3,7 @@ package edu.kyoto.fos.regnant.myTranslation;
 import edu.kyoto.fos.regnant.cfg.BasicBlock;
 import edu.kyoto.fos.regnant.myTranslation.Service.TranslateStmtService;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Argument;
+import edu.kyoto.fos.regnant.myTranslation.translatedStmt.If;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,25 +15,21 @@ public class TranslatedBasicBlock {
   private int id;
   private List<TranslatedUnit> translatedBasicBlock = new ArrayList<>();
   private List<String> arguments = new ArrayList<>();
+  private List<BasicBlock> nextBasicBlocks;
 
-  public TranslatedBasicBlock(BasicBlock basicBlock, boolean headOfFunction) {
+  public TranslatedBasicBlock(BasicBlock basicBlock, boolean headOfFunction, List<BasicBlock> nextBasicBlocks) {
     TranslateStmtService service = new TranslateStmtService();
 
     this.id = basicBlock.id;
+    this.nextBasicBlocks = nextBasicBlocks;
 
     for (int i = 0; i < basicBlock.units.size(); i++) {
-      if (i == basicBlock.units.size() - 1){
-        // TODO: 関数呼び出しへの変換方法を考える
-        TranslatedUnit tailTranslatedUnit = service.translate(basicBlock.units.get(i), headOfFunction);
-        translatedBasicBlock.add(tailTranslatedUnit);
-      } else {
-        TranslatedUnit translatedUnit = service.translate(basicBlock.units.get(i), headOfFunction);
+      TranslatedUnit translatedUnit = service.translate(basicBlock.units.get(i), headOfFunction);
 
-        // もし変換後の unit が Argument だった場合, 引数になる変数があるので, それを parameters フィールドに入れる
-        if (translatedUnit instanceof Argument) arguments.add(((Argument)translatedUnit).getArgumentVariable());
+      // もし変換後の unit が Argument だった場合, 引数になる変数があるので, それを parameters フィールドに入れる
+      if (translatedUnit instanceof Argument) arguments.add(((Argument)translatedUnit).getArgumentVariable());
 
-        translatedBasicBlock.add(translatedUnit);
-      }
+      translatedBasicBlock.add(translatedUnit);
     }
   }
 
@@ -63,6 +60,11 @@ public class TranslatedBasicBlock {
     }
 
     return builder.toString();
+  }
+
+  // 基本ブロックの最後の Unit を得るメソッド
+  private TranslatedUnit getTail() {
+    return translatedBasicBlock.get(translatedBasicBlock.size() - 1);
   }
 
   // 基本ブロックを関数名と関数呼び出し付きで出力するメソッド
@@ -100,6 +102,24 @@ public class TranslatedBasicBlock {
 
     String basicBlocksString = basicBlocksBuilder.toString();
 
+    // TODO: 次の基本ブロックを呼び出す部分の作成
+    StringBuilder nextBasicBlockBuilder = new StringBuilder();
+
+    // TODO: goto も
+    if (!(getTail() instanceof If) && nextBasicBlocks.size() > 0) {
+      for (int i = 0; i < indentLevel; i++) {
+        nextBasicBlockBuilder.append("  ");
+      }
+
+      nextBasicBlockBuilder
+        .append("function")
+        .append(nextBasicBlocks.get(0).id)
+        .append("(")
+        .append(")\n");
+    }
+
+    String nextBasicBlock = nextBasicBlockBuilder.toString();
+
     // 結合
     StringBuilder builder = new StringBuilder();
     builder
@@ -109,6 +129,7 @@ public class TranslatedBasicBlock {
       .append(parametersString)
       .append(") { \n")
       .append(basicBlocksString)
+      .append(nextBasicBlock)
       .append("}\n");
 
     return builder.toString();

@@ -122,11 +122,12 @@ public class CFGReconstructor {
   private GraphElem cfgRoot;
   private BlockTree<BasicBlock> bt;
   private Set<Coord> recurseJumps = new TreeSet<>();
+  private BasicBlockGraph bbg;
 
   public CFGReconstructor(Body b) {
     this.bbm = new BasicBlockMapper(b);
     this.unitChain = b.getUnits();
-    BasicBlockGraph bbg = new BasicBlockGraph(new BriefUnitGraph(b), bbm);
+    this.bbg = new BasicBlockGraph(new BriefUnitGraph(b), bbm);
     this.lt = new LoopFinder(bbg).getTree();
     this.graph = new AnnotatedBasicBlockGraph(bbg,lt);
     computeCFG();
@@ -402,5 +403,9 @@ public class CFGReconstructor {
   // 追加
   public BasicBlockMapper getBbm() {
     return bbm;
+  }
+
+  public BasicBlockGraph getBbg() {
+    return bbg;
   }
 }

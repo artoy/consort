@@ -35,12 +35,14 @@ public class TranslatedFunction {
 
     List<BasicBlock> basicBlocks = new ArrayList<>(cfg.getBbm().getHdMap().values());
     for (int i = 0; i < basicBlocks.size(); i++) {
+      List<BasicBlock> nextBasicBlocks = cfg.getBbg().getSuccsOf(basicBlocks.get(i));
+
       if (i == 0) { 
         // 関数のはじめの基本ブロックだけ headOfFunction を true にする
-        TranslatedBasicBlock headBasicBlock = new TranslatedBasicBlock(basicBlocks.get(i), true);
+        TranslatedBasicBlock headBasicBlock = new TranslatedBasicBlock(basicBlocks.get(i), true, nextBasicBlocks);
         this.translatedFunction.add(headBasicBlock);
       } else {
-        TranslatedBasicBlock basicBlock = new TranslatedBasicBlock(basicBlocks.get(i), false);
+        TranslatedBasicBlock basicBlock = new TranslatedBasicBlock(basicBlocks.get(i), false, nextBasicBlocks);
         this.translatedFunction.add(basicBlock);
       }
     }

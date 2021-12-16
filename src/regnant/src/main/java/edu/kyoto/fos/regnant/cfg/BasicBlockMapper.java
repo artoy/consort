@@ -61,7 +61,7 @@ public class BasicBlockMapper {
       blocks.add(currChain);
     }
     // now, collapse "fall through" blocks
-    // Goto 命令だけの場合は
+    // Goto 命令だけの場合はそれを消して前の Unit を指す RevMapTag と後の Unit を指す RemapTag を付ける. このタグは BasicBlockGraph の getSuccsOf や getPredsOf に使われる 
     blocks.stream().flatMap(uList -> {
       if(uList.size() == 1) {
         Unit u = uList.get(0);
