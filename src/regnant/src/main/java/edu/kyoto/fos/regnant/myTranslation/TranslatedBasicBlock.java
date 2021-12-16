@@ -3,6 +3,7 @@ package edu.kyoto.fos.regnant.myTranslation;
 import edu.kyoto.fos.regnant.cfg.BasicBlock;
 import edu.kyoto.fos.regnant.myTranslation.Service.TranslateStmtService;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Argument;
+import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Goto;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.If;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class TranslatedBasicBlock {
     this.nextBasicBlocks = nextBasicBlocks;
 
     for (int i = 0; i < basicBlock.units.size(); i++) {
-      TranslatedUnit translatedUnit = service.translate(basicBlock.units.get(i), headOfFunction);
+      TranslatedUnit translatedUnit = service.translate(basicBlock.units.get(i), headOfFunction, nextBasicBlocks);
 
       // もし変換後の unit が Argument だった場合, 引数になる変数があるので, それを parameters フィールドに入れる
       if (translatedUnit instanceof Argument) arguments.add(((Argument)translatedUnit).getArgumentVariable());
@@ -102,14 +103,15 @@ public class TranslatedBasicBlock {
 
     String basicBlocksString = basicBlocksBuilder.toString();
 
-    // TODO: 次の基本ブロックを呼び出す部分の作成
+    // 次の基本ブロックを呼び出す部分の作成
     StringBuilder nextBasicBlockBuilder = new StringBuilder();
 
-    // TODO: goto も
-    if (!(getTail() instanceof If) && nextBasicBlocks.size() > 0) {
+    if (!(getTail() instanceof If || getTail() instanceof Goto || nextBasicBlocks.size() == 0)) {
       for (int i = 0; i < indentLevel; i++) {
         nextBasicBlockBuilder.append("  ");
       }
+
+      assert(nextBasicBlocks.size() == 1);
 
       nextBasicBlockBuilder
         .append("function")

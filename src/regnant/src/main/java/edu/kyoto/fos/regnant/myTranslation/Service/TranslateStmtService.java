@@ -1,31 +1,37 @@
 package edu.kyoto.fos.regnant.myTranslation.Service;
 
+import edu.kyoto.fos.regnant.cfg.BasicBlock;
 import edu.kyoto.fos.regnant.myTranslation.TranslatedUnit;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Argument;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.AssertFail;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.AssignToArray;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.AssignToVariable;
+import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Goto;
+import edu.kyoto.fos.regnant.myTranslation.translatedStmt.If;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NewVariable;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NewArray;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NotSupportedAssignStmt;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NotSupportedUnit;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Return;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.ReturnVoid;
-
 import soot.Unit;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JAssignStmt;
+import soot.jimple.internal.JGotoStmt;
 import soot.jimple.internal.JIdentityStmt;
+import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JNewArrayExpr;
 import soot.jimple.internal.JNopStmt;
 import soot.jimple.internal.JReturnStmt;
 import soot.jimple.internal.JReturnVoidStmt;
 import soot.jimple.internal.JimpleLocal;
 
+import java.util.List;
+
 // Stmt を場合分けして変換するためのクラス
 public class TranslateStmtService {
   // Stmt を場合分けして変換するメソッド
-  public TranslatedUnit translate(Unit unit, boolean headOfFunction) {
+  public TranslatedUnit translate(Unit unit, boolean headOfFunction, List<BasicBlock> nextTranslateBlock) {
     // Java SE 12 以降も使えるようにしたら switch 文に書き換える
     if (unit instanceof JNopStmt) {
       // nop の場合 (assert が失敗した場合)
@@ -55,13 +61,19 @@ public class TranslateStmtService {
       } else if (assignUnit.getLeftOp() instanceof JimpleLocal) {
         // 定義されている変数に値を代入する場合
         return new AssignToVariable(assignUnit);
-      // TODO: InvokeStmt にも対応する
       } else {
         // throw new RuntimeException("This AssignStmt is not yet supported: " + unit + " ( Left: " + assignUnit.getLeftOp().getClass().toString() + " Right: " + assignUnit.getRightOp().getClass().toString() + ")");
         // デバッグのための, エラーの代わりの標準出力
         return new NotSupportedAssignStmt(assignUnit);
       }
+    } else if (unit instanceof JIfStmt) {
+      // if 文の場合
+      return new If((JIfStmt)unit, nextTranslateBlock);
+    } else if (unit instanceof JGotoStmt) {
+      // Goto 文の場合
+      return new Goto((JGotoStmt)unit, nextTranslateBlock);
     } else {
+      // TODO: InvokeStmt にも対応する
       // throw new RuntimeException("This unit is not yet supported: " + unit + " (" + unit.getClass() + ")");
       // デバッグのための, エラーのための標準出力
       return new NotSupportedUnit(unit);
