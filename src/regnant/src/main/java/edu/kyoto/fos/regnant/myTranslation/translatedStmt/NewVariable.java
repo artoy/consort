@@ -5,11 +5,13 @@ import edu.kyoto.fos.regnant.myTranslation.TranslatedValue;
 import edu.kyoto.fos.regnant.myTranslation.Service.TranslateExprService;
 import soot.jimple.internal.JAssignStmt;
 
+import java.util.List;
+
 // 変数を (ポインタで) 定義する式を表すクラス
 public class NewVariable implements TranslatedUnit{
   // variable は定義する変数の名前, value は変数を初期化する値
-  private String variable;
-  private TranslatedValue value;
+  private final String variable;
+  private final TranslatedValue value;
 
   public NewVariable(JAssignStmt unit){
     TranslateExprService service = new TranslateExprService();
@@ -22,7 +24,11 @@ public class NewVariable implements TranslatedUnit{
     return false;
   }
 
-  public String print() {
+  public boolean istTranslatedUnitEmpty() {
+    return false;
+  }
+
+  public String print(List<String> arguments) {
     StringBuilder builder = new StringBuilder();
     builder
       .append("let ")
@@ -32,5 +38,10 @@ public class NewVariable implements TranslatedUnit{
       .append(" in");
 
     return builder.toString();
+  }
+
+  // 束縛された変数を外に伝えるためのメソッド
+  public String getBoundVariable() {
+    return variable;
   }
 }

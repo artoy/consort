@@ -4,6 +4,8 @@ import edu.kyoto.fos.regnant.myTranslation.TranslatedUnit;
 import soot.Value;
 import soot.jimple.internal.JIdentityStmt;
 
+import java.util.List;
+
 // 基本ブロックを関数にした際に引数を設定するためのクラス
 // 変換後は式としては残らない
 public class Argument implements TranslatedUnit{
@@ -18,7 +20,11 @@ public class Argument implements TranslatedUnit{
     return false;
   }
 
-  public String print() {
+  public boolean istTranslatedUnitEmpty() {
+    return true;
+  }
+
+  public String print(List<String> arguments) {
     return "";
   }
 

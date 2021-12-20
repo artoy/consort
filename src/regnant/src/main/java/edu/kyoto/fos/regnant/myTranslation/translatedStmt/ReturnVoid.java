@@ -2,6 +2,8 @@ package edu.kyoto.fos.regnant.myTranslation.translatedStmt;
 
 import edu.kyoto.fos.regnant.myTranslation.TranslatedUnit;
 
+import java.util.List;
+
 // 何の値も返さない return 文を表すクラス
 public class ReturnVoid implements TranslatedUnit{
 
@@ -9,8 +11,12 @@ public class ReturnVoid implements TranslatedUnit{
     return false;
   }
 
+  public boolean istTranslatedUnitEmpty() {
+    return false;
+  }
+
   // 出力する際には0を返すようにする
-  public String print() {
+  public String print(List<String> arguments) {
     return "return 0";
   }
 }

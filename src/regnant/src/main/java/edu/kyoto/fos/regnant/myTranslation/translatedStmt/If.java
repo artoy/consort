@@ -9,9 +9,9 @@ import java.util.List;
 // 変換後の if 式を表すクラス
 public class If implements TranslatedUnit {
   // condition は条件式, thenBasicBlock は条件が成り立つ場合, elseBasicBlock は条件式が成田立たない場合を表す
-  private String condition;
-  private BasicBlock thenBasicBlock;
-  private BasicBlock elseBasicBlock;
+  private final String condition;
+  private final BasicBlock thenBasicBlock;
+  private final BasicBlock elseBasicBlock;
 
   public If(JIfStmt unit, List<BasicBlock> nextBasicBlocks) {
     this.condition = unit.getCondition().toString();
@@ -30,15 +30,19 @@ public class If implements TranslatedUnit {
     return false;
   }
 
-  public String print() {
+  public boolean istTranslatedUnitEmpty() {
+    return false;
+  }
+
+  public String print(List<String> arguments) {
     StringBuilder builder = new StringBuilder();
     builder
       .append("if ")
       .append(condition)
       .append(" then ")
-      .append(toFunctionCall(thenBasicBlock))
+      .append(toFunctionCall(thenBasicBlock, arguments))
       .append(" else ")
-      .append(toFunctionCall(elseBasicBlock));
+      .append(toFunctionCall(elseBasicBlock, arguments));
 
     return builder.toString();
   }

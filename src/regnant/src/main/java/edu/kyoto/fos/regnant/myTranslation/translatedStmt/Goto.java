@@ -7,7 +7,7 @@ import soot.jimple.internal.JGotoStmt;
 import java.util.List;
 
 public class Goto implements TranslatedUnit {
-  private BasicBlock target;
+  private final BasicBlock target;
 
   public Goto(JGotoStmt unit, List<BasicBlock> nextBasicBlocks) {
     assert(nextBasicBlocks.size() == 1);
@@ -18,7 +18,11 @@ public class Goto implements TranslatedUnit {
     return false;
   }
 
-  public String print() {
-    return toFunctionCall(target);
+  public boolean istTranslatedUnitEmpty() {
+    return false;
+  }
+
+  public String print(List<String> arguments) {
+    return toFunctionCall(target, arguments);
   }
 }

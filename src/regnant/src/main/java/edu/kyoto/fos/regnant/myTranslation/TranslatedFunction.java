@@ -8,9 +8,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // TODO: 関数呼び出しを return にする, あと配列を代入するのに * を消す, あと括弧の有無を考える (ConSORT の書き方を見る)
 // TODO: 引数部分を作る
@@ -28,23 +30,34 @@ import java.util.stream.Collectors;
 
 // ConSORT プログラムに変換された関数を表すクラス
 public class TranslatedFunction {
-  private List<TranslatedBasicBlock> translatedFunction = new ArrayList<>();
+  private final List<TranslatedBasicBlock> translatedFunction = new ArrayList<>();
+  private List<String> allArguments = new ArrayList<>();
+  private List<String> allBound = new ArrayList<>();
 
   public TranslatedFunction(CFGReconstructor cfg) {
     // 基本ブロックを出力
     System.out.println(cfg.dump());
 
     List<BasicBlock> basicBlocks = new ArrayList<>(cfg.getBbm().getHdMap().values());
-    for (int i = 0; i < basicBlocks.size(); i++) {
-      List<BasicBlock> nextBasicBlocks = cfg.getBbg().getSuccsOf(basicBlocks.get(i));
+    for (BasicBlock block : basicBlocks) {
+      List<BasicBlock> nextBasicBlocks = cfg.getBbg().getSuccsOf(block);
 
-      if (i == 0) {
-        // 関数のはじめの基本ブロックだけ headOfFunction を true にする
-        TranslatedBasicBlock headBasicBlock = new TranslatedBasicBlock(basicBlocks.get(i), true, nextBasicBlocks);
+      if (cfg.getBbg().getHeads().contains(block)) {
+        // 関数のはじめの基本ブロックだけ headOfFunction を true にし, arguments を TranslatedFunction に返す
+        TranslatedBasicBlock headBasicBlock = new TranslatedBasicBlock(block, true, nextBasicBlocks);
         this.translatedFunction.add(headBasicBlock);
+        this.allArguments = Stream.concat(allArguments.stream(), headBasicBlock.getArguments().stream())
+                .collect(Collectors.toList());
+        this.allBound = Stream.concat(allBound.stream(), headBasicBlock.getBound().stream())
+                .collect(Collectors.toList());
       } else {
-        TranslatedBasicBlock basicBlock = new TranslatedBasicBlock(basicBlocks.get(i), false, nextBasicBlocks);
+        // 返ってきた arguments を他の基本ブロックに渡す
+        TranslatedBasicBlock basicBlock = new TranslatedBasicBlock(block, false, nextBasicBlocks);
         this.translatedFunction.add(basicBlock);
+        this.allArguments = Stream.concat(allArguments.stream(), basicBlock.getArguments().stream())
+                .collect(Collectors.toList());
+        this.allBound = Stream.concat(allBound.stream(), basicBlock.getBound().stream())
+                .collect(Collectors.toList());
       }
     }
   }
@@ -52,9 +65,9 @@ public class TranslatedFunction {
   // 変換後の関数をファイルに書き込むためのメソッド
   public void print(String path) {
     // 変換後の関数を文字列にする
-    String functionString = translatedFunction.stream().map(TranslatedBasicBlock::print).collect(Collectors.joining("\n"));
+    String functionString = translatedFunction.stream().map(bb -> bb.print(allArguments, allBound)).collect(Collectors.joining("\n"));
 
-    try (PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path, true),"utf-8")));) {
+    try (PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path, true), StandardCharsets.UTF_8)))) {
       // ファイルへの書き込み
       pw.println(functionString);
     } catch (IOException ex) {
