@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 // ConSORT プログラムに変換された関数を表すクラス
 public class TranslatedFunction {
+  // translatedFunction は変換後の関数, allArguments はメソッドの引数のリスト, allBound は宣言された変数のリストを表す
   private final List<TranslatedBasicBlock> translatedFunction = new ArrayList<>();
   private List<String> allArguments = new ArrayList<>();
   private List<String> allBound = new ArrayList<>();
