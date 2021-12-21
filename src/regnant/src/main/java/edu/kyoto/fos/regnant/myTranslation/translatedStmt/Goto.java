@@ -7,22 +7,22 @@ import soot.jimple.internal.JGotoStmt;
 import java.util.List;
 
 public class Goto implements TranslatedUnit {
-  private final BasicBlock target;
+	private final BasicBlock target;
 
-  public Goto(JGotoStmt unit, List<BasicBlock> nextBasicBlocks) {
-    assert(nextBasicBlocks.size() == 1);
-    this.target = nextBasicBlocks.get(0);
-  }
+	public Goto(JGotoStmt unit, List<BasicBlock> nextBasicBlocks) {
+		assert (nextBasicBlocks.size() == 1);
+		this.target = nextBasicBlocks.get(0);
+	}
 
-  public boolean isSequencing() {
-    return false;
-  }
+	public boolean isSequencing() {
+		return false;
+	}
 
-  public boolean istTranslatedUnitEmpty() {
-    return false;
-  }
+	public boolean istTranslatedUnitEmpty() {
+		return false;
+	}
 
-  public String print(List<String> arguments) {
-    return toFunctionCall(target, arguments);
-  }
+	public String print(List<String> arguments) {
+		return "return " + toFunctionCall(target, arguments);
+	}
 }

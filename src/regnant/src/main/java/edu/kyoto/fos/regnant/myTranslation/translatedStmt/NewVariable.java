@@ -8,40 +8,40 @@ import soot.jimple.internal.JAssignStmt;
 import java.util.List;
 
 // 変数を (ポインタで) 定義する式を表すクラス
-public class NewVariable implements TranslatedUnit{
-  // variable は定義する変数の名前, value は変数を初期化する値
-  private final String variable;
-  private final TranslatedValue value;
+public class NewVariable implements TranslatedUnit {
+	// variable は定義する変数の名前, value は変数を初期化する値
+	private final String variable;
+	private final TranslatedValue value;
 
-  public NewVariable(JAssignStmt unit){
-    TranslateExprService service = new TranslateExprService();
+	public NewVariable(JAssignStmt unit) {
+		TranslateExprService service = new TranslateExprService();
 
-    this.variable = unit.getLeftOp().toString();
-    this.value = service.translate(unit.getRightOp());
-  }
+		this.variable = unit.getLeftOp().toString();
+		this.value = service.translate(unit.getRightOp());
+	}
 
-  public boolean isSequencing() {
-    return false;
-  }
+	public boolean isSequencing() {
+		return false;
+	}
 
-  public boolean istTranslatedUnitEmpty() {
-    return false;
-  }
+	public boolean istTranslatedUnitEmpty() {
+		return false;
+	}
 
-  public String print(List<String> arguments) {
-    StringBuilder builder = new StringBuilder();
-    builder
-      .append("let ")
-      .append(variable)
-      .append(" = mkref ")
-      .append(value.print(false))
-      .append(" in");
+	public String print(List<String> arguments) {
+		StringBuilder builder = new StringBuilder();
+		builder
+						.append("let ")
+						.append(variable)
+						.append(" = mkref ")
+						.append(value.print(false))
+						.append(" in");
 
-    return builder.toString();
-  }
+		return builder.toString();
+	}
 
-  // 束縛された変数を外に伝えるためのメソッド
-  public String getBoundVariable() {
-    return variable;
-  }
+	// 束縛された変数を外に伝えるためのメソッド
+	public String getBoundVariable() {
+		return variable;
+	}
 }

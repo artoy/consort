@@ -5,16 +5,16 @@ import edu.kyoto.fos.regnant.myTranslation.TranslatedUnit;
 import java.util.List;
 
 // assert 文が失敗する場合に到達する式を表すクラス
-public class AssertFail implements TranslatedUnit{
-  public boolean isSequencing() {
-    return true;
-  }
+public class AssertFail implements TranslatedUnit {
+	public boolean isSequencing() {
+		return true;
+	}
 
-  public boolean istTranslatedUnitEmpty() {
-    return false;
-  }
-  
-  public String print(List<String> arguments) {
-    return("fail;");
-  }
+	public boolean istTranslatedUnitEmpty() {
+		return false;
+	}
+
+	public String print(List<String> arguments) {
+		return ("fail;");
+	}
 }

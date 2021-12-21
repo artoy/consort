@@ -84,7 +84,7 @@ def main(this_dir, args):
 
     run_script = os.path.join(this_dir, "build/install/regnant/bin/regnant")
 
-    rt_path = os.path.join(args.jdk8, "jre/lib/rt.jar")
+    rt_path = os.path.join(args.jdk8, "Contents/Home/lib/rt.jar")
 
     regnant_command = [
         run_script,
@@ -105,7 +105,7 @@ def main(this_dir, args):
     sys.stdout.flush()
     el = run_silently(regnant_command)
     print_done(args, el)
-    
+
     print("Generating control flags...", end=' ')
     sys.stdout.flush()
     intr_loc = os.path.join(work_dir, "java.intr")
@@ -120,7 +120,7 @@ def main(this_dir, args):
     log_command(args, intr_command)
     el = run_silently(intr_command)
     print_done(args, el)
-    
+
     print("Running ConSORT on translated program:")
     yaml_flg = ["-yaml"] if args.yaml is not None else []
     consort_cmd = [

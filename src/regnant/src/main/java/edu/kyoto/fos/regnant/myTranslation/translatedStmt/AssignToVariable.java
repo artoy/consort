@@ -8,34 +8,34 @@ import soot.jimple.internal.JAssignStmt;
 import java.util.List;
 
 // 変数に値を代入する式を表すクラス
-public class AssignToVariable implements TranslatedUnit{
-  // variable は代入される変数の名前, value は代入する値
-  private final String variable;
-  private final TranslatedValue value;
+public class AssignToVariable implements TranslatedUnit {
+	// variable は代入される変数の名前, value は代入する値
+	private final String variable;
+	private final TranslatedValue value;
 
-  public AssignToVariable(JAssignStmt unit){
-    TranslateExprService handler = new TranslateExprService();
+	public AssignToVariable(JAssignStmt unit) {
+		TranslateExprService handler = new TranslateExprService();
 
-    this.variable = unit.getLeftOp().toString();
-    this.value = handler.translate(unit.getRightOp());
-  }
+		this.variable = unit.getLeftOp().toString();
+		this.value = handler.translate(unit.getRightOp());
+	}
 
-  public boolean isSequencing() {
-    return true;
-  }
+	public boolean isSequencing() {
+		return true;
+	}
 
-  public boolean istTranslatedUnitEmpty() {
-    return false;
-  }
+	public boolean istTranslatedUnitEmpty() {
+		return false;
+	}
 
-  public String print(List<String> arguments) {
-    StringBuilder builder = new StringBuilder();
-    builder
-      .append(variable)
-      .append(" := ")
-      .append(value.print(false))
-      .append(";");
+	public String print(List<String> arguments) {
+		StringBuilder builder = new StringBuilder();
+		builder
+						.append(variable)
+						.append(" := ")
+						.append(value.print(false))
+						.append(";");
 
-    return builder.toString();
-  }
+		return builder.toString();
+	}
 }

@@ -8,28 +8,28 @@ import java.util.List;
 
 // 基本ブロックを関数にした際に引数を設定するためのクラス
 // 変換後は式としては残らない
-public class Argument implements TranslatedUnit{
-  // argumentVariable は引数の変数名を表す
-  private final Value argumentVariable;
+public class Argument implements TranslatedUnit {
+	// argumentVariable は引数の変数名を表す
+	private final Value argumentVariable;
 
-  public Argument(JIdentityStmt unit) {
-    this.argumentVariable = unit.getLeftOp();
-  }
+	public Argument(JIdentityStmt unit) {
+		this.argumentVariable = unit.getLeftOp();
+	}
 
-  public boolean isSequencing() {
-    return false;
-  }
+	public boolean isSequencing() {
+		return false;
+	}
 
-  public boolean istTranslatedUnitEmpty() {
-    return true;
-  }
+	public boolean istTranslatedUnitEmpty() {
+		return true;
+	}
 
-  public String print(List<String> arguments) {
-    return "";
-  }
+	public String print(List<String> arguments) {
+		return "";
+	}
 
-  // 引数を外に伝えるためのメソッド
-  public String getArgumentVariable() {
-    return argumentVariable.toString();
-  }
+	// 引数を外に伝えるためのメソッド
+	public String getArgumentVariable() {
+		return argumentVariable.toString();
+	}
 }
