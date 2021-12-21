@@ -13,16 +13,16 @@ import soot.jimple.internal.JimpleLocal;
 
 // Expr を場合分けするためのクラス
 public class TranslateExprService {
-  // Expr を場合分けして変換するメソッド
-  public TranslatedValue translate(Value value) {
-    if (value instanceof AddExpr) {
-      return new Add((AddExpr)value);
-    } else if (value instanceof MulExpr) {
-      return new Mult((MulExpr)value);
-    } else if (value instanceof JimpleLocal) {
-      return new Variable((JimpleLocal)value);
-    } else {
-      return new Other(value);
-    }
-  }
+	// Expr を場合分けして変換するメソッド
+	public TranslatedValue translate(Value value) {
+		if (value instanceof AddExpr) {
+			return new Add((AddExpr) value);
+		} else if (value instanceof MulExpr) {
+			return new Mult((MulExpr) value);
+		} else if (value instanceof JimpleLocal) {
+			return new Variable((JimpleLocal) value);
+		} else {
+			return new Other(value);
+		}
+	}
 }
