@@ -12,15 +12,8 @@ def log_command(args, cmd):
         import pipes
         print("executing:"," ".join([ pipes.quote(s) for s in cmd ]))
 
-# def run_silently(cmd, **kwargs):
-#     with open("/dev/null", "w") as out:
-#         s = time.time()
-#         subprocess.check_call(cmd, stdout = out, stderr = subprocess.STDOUT, **kwargs)
-#         e = time.time()
-#         return e - s
-
 def run_silently(cmd, **kwargs):
-    with open("./output/regnant_output", "w") as out:
+    with open("/dev/null", "w") as out:
         s = time.time()
         subprocess.check_call(cmd, stdout = out, stderr = subprocess.STDOUT, **kwargs)
         e = time.time()
@@ -91,11 +84,11 @@ def main(this_dir, args):
 
     run_script = os.path.join(this_dir, "build/install/regnant/bin/regnant")
 
-    rt_path = os.path.join(args.jdk8, "Contents/Home/lib/rt.jar")
+    rt_path = os.path.join(args.jdk8, "jre/lib/rt.jar")
 
     regnant_command = [
         run_script,
-        # "-f", "n", # no output
+        "-f", "n", # no output
         "-no-bodies-for-excluded", # don't load the JCL (for now)
         "-w", # whole program mode
         "-p", "cg.spark", "on", # run points to analysis
@@ -128,28 +121,28 @@ def main(this_dir, args):
     el = run_silently(intr_command)
     print_done(args, el)
     
-    # print("Running ConSORT on translated program:")
-    # yaml_flg = ["-yaml"] if args.yaml is not None else []
-    # consort_cmd = [
-    #     os.path.join(this_dir, "../_build/default/test.exe"),
-    #     "-intrinsics", intr_loc,
-    #     "-exit-status",
-    # ] + args.consort_args + yaml_flg + [
-    #     data
-    # ]
-    # log_command(args, consort_cmd)
-    # s = time.time()
-    # ret = subprocess.run(consort_cmd, stdout = subprocess.PIPE)
-    # e = time.time()
-    # if args.yaml:
-    #     with open(args.yaml, 'w') as out:
-    #         print(ret.stdout.decode("utf-8"), file=out)
-    #     print("Done")
-    # else:
-    #     print(ret.stdout.decode("utf-8").strip())
-    # if args.timing:
-    #     print("(ConSORT ran for %.02f seconds)" % (e - s))
-    # return ret.returncode
+    print("Running ConSORT on translated program:")
+    yaml_flg = ["-yaml"] if args.yaml is not None else []
+    consort_cmd = [
+        os.path.join(this_dir, "../_build/default/test.exe"),
+        "-intrinsics", intr_loc,
+        "-exit-status",
+    ] + args.consort_args + yaml_flg + [
+        data
+    ]
+    log_command(args, consort_cmd)
+    s = time.time()
+    ret = subprocess.run(consort_cmd, stdout = subprocess.PIPE)
+    e = time.time()
+    if args.yaml:
+        with open(args.yaml, 'w') as out:
+            print(ret.stdout.decode("utf-8"), file=out)
+        print("Done")
+    else:
+        print(ret.stdout.decode("utf-8").strip())
+    if args.timing:
+        print("(ConSORT ran for %.02f seconds)" % (e - s))
+    return ret.returncode
 
 if __name__ == "__main__":
     sys.exit(main(os.path.realpath(os.path.dirname(sys.argv[0])), sys.argv[1:]))
