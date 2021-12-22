@@ -4,7 +4,7 @@ import edu.kyoto.fos.regnant.myTranslation.Service.TranslateExprService;
 import edu.kyoto.fos.regnant.myTranslation.TranslatedValue;
 import soot.jimple.internal.JGeExpr;
 
-public class Ge implements TranslatedValue{
+public class Ge implements TranslatedValue {
 	// leftOp は1つ目のオペランド, rightOp は2つ目のオペランドを表す
 	private final TranslatedValue leftOp;
 	private final TranslatedValue rightOp;
@@ -19,9 +19,9 @@ public class Ge implements TranslatedValue{
 	public String print(boolean isDereference) {
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append(leftOp.print(true))
-						.append(" >= ")
-						.append(rightOp.print(true));
+				.append(leftOp.print(true))
+				.append(" >= ")
+				.append(rightOp.print(true));
 
 		return builder.toString();
 	}

@@ -31,10 +31,10 @@ public class AssignToVariable implements TranslatedUnit {
 	public String print(List<String> arguments) {
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append(variable)
-						.append(" := ")
-						.append(value.print(true))
-						.append(";");
+				.append(variable)
+				.append(" := ")
+				.append(value.print(true))
+				.append(";");
 
 		return builder.toString();
 	}

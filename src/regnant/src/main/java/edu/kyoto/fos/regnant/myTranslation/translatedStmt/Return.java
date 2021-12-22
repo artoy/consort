@@ -26,8 +26,8 @@ public class Return implements TranslatedUnit {
 	public String print(List<String> arguments) {
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append("return ")
-						.append(returnValue.toString());
+				.append("return ")
+				.append(returnValue.toString());
 
 		return builder.toString();
 	}

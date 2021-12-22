@@ -31,11 +31,11 @@ public interface TranslatedUnit {
 
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append("f")
-						.append(basicBlock.id)
-						.append("(")
-						.append(parametersString)
-						.append(")");
+				.append("f")
+				.append(basicBlock.id)
+				.append("(")
+				.append(parametersString)
+				.append(")");
 
 		return builder.toString();
 	}

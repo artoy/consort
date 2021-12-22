@@ -20,9 +20,9 @@ public class Add implements TranslatedValue {
 	public String print(boolean isDereference) {
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append(leftOp.print(true))
-						.append(" + ")
-						.append(rightOp.print(true));
+				.append(leftOp.print(true))
+				.append(" + ")
+				.append(rightOp.print(true));
 
 		return builder.toString();
 	}

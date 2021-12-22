@@ -34,12 +34,12 @@ public class AssignToArray implements TranslatedUnit {
 	public String print(List<String> arguments) {
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append(arrayName)
-						.append("[")
-						.append(index)
-						.append("] <- ")
-						.append(value.print(true))
-						.append(";");
+				.append(arrayName)
+				.append("[")
+				.append(index)
+				.append("] <- ")
+				.append(value.print(true))
+				.append(";");
 
 		return builder.toString();
 	}

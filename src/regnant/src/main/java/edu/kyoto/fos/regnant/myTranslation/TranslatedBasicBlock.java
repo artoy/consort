@@ -33,7 +33,8 @@ public class TranslatedBasicBlock {
 			if (translatedUnit instanceof Argument) arguments.add(((Argument) translatedUnit).getArgumentVariable());
 			// もし変換後の unit が NewVariable か NEwPrimitiveVariable だった場合, 基本ブロックの引数になる変数があるので, それを bound フィールドに入れる
 			if (translatedUnit instanceof NewRef) bound.add(((NewRef) translatedUnit).getBoundVariable());
-			if (translatedUnit instanceof NewPrimitiveVariable) bound.add(((NewPrimitiveVariable) translatedUnit).getBoundVariable());
+			if (translatedUnit instanceof NewPrimitiveVariable)
+				bound.add(((NewPrimitiveVariable) translatedUnit).getBoundVariable());
 
 			translatedBasicBlock.add(translatedUnit);
 		}
@@ -80,7 +81,7 @@ public class TranslatedBasicBlock {
 
 		// 引数のための, allArguments と allBound を合わせたリスト
 		List<String> restArguments = Stream.concat(allArguments.stream(), allBound.stream())
-						.collect(Collectors.toList());
+				.collect(Collectors.toList());
 
 		// 引数部分の作成. 初めの基本ブロックはパラメータのみ, 以降の基本ブロックはパラメータと宣言された変数を引数にとる
 		String parametersString = (headOfFunction ? allArguments : restArguments).stream().collect(Collectors.joining(", "));
@@ -95,14 +96,14 @@ public class TranslatedBasicBlock {
 					indentLevel++;
 
 					basicBlocksBuilder
-									.append(printLeftBraces(indentLevel - 1))
-									.append("\n")
-									.append(translatedUnit.printWithIndent(indentLevel, restArguments))
-									.append("\n");
+							.append(printLeftBraces(indentLevel - 1))
+							.append("\n")
+							.append(translatedUnit.printWithIndent(indentLevel, restArguments))
+							.append("\n");
 				} else {
 					basicBlocksBuilder
-									.append(translatedUnit.printWithIndent(indentLevel, restArguments))
-									.append("\n");
+							.append(translatedUnit.printWithIndent(indentLevel, restArguments))
+							.append("\n");
 				}
 			}
 
@@ -114,7 +115,7 @@ public class TranslatedBasicBlock {
 		// 次の基本ブロックを呼び出す部分の作成
 		StringBuilder nextBasicBlockBuilder = new StringBuilder();
 
-			// 次の基本ブロックの引数部分の作成
+		// 次の基本ブロックの引数部分の作成
 		String callArgumentsString = restArguments.stream().collect(Collectors.joining(", "));
 
 		if (!(getTail() instanceof If || getTail() instanceof Goto || nextBasicBlocks.size() == 0)) {
@@ -123,11 +124,11 @@ public class TranslatedBasicBlock {
 			assert (nextBasicBlocks.size() == 1);
 
 			nextBasicBlockBuilder
-							.append("f")
-							.append(nextBasicBlocks.get(0).id)
-							.append("(")
-							.append(callArgumentsString)
-							.append(")\n");
+					.append("f")
+					.append(nextBasicBlocks.get(0).id)
+					.append("(")
+					.append(callArgumentsString)
+					.append(")\n");
 		}
 
 		String nextBasicBlock = nextBasicBlockBuilder.toString();
@@ -135,15 +136,15 @@ public class TranslatedBasicBlock {
 		// 結合
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append("f")
-						.append(id)
-						.append("(")
-						.append(parametersString)
-						.append(") { \n")
-						.append(basicBlocksString)
-						.append(nextBasicBlock)
-						.append(printRightBraces(indentLevel - 1))
-						.append("}\n");
+				.append("f")
+				.append(id)
+				.append("(")
+				.append(parametersString)
+				.append(") { \n")
+				.append(basicBlocksString)
+				.append(nextBasicBlock)
+				.append(printRightBraces(indentLevel - 1))
+				.append("}\n");
 
 		return builder.toString();
 	}

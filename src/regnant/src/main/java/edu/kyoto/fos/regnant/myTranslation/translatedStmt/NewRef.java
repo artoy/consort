@@ -31,11 +31,11 @@ public class NewRef implements TranslatedUnit {
 	public String print(List<String> arguments) {
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append("let ")
-						.append(variable)
-						.append(" = mkref ")
-						.append(value.print(true))
-						.append(" in");
+				.append("let ")
+				.append(variable)
+				.append(" = mkref ")
+				.append(value.print(true))
+				.append(" in");
 
 		return builder.toString();
 	}

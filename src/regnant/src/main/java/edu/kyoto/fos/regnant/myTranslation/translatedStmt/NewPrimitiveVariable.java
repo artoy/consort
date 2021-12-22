@@ -30,11 +30,11 @@ public class NewPrimitiveVariable implements TranslatedUnit {
 	public String print(List<String> arguments) {
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append("let ")
-						.append(variable)
-						.append(" = ")
-						.append(value.print(false))
-						.append(" in");
+				.append("let ")
+				.append(variable)
+				.append(" = ")
+				.append(value.print(false))
+				.append(" in");
 
 		return builder.toString();
 	}

@@ -28,11 +28,11 @@ public class NewArray implements TranslatedUnit {
 	public String print(List<String> arguments) {
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append("let ")
-						.append(arrayName)
-						.append(" = mkarray ")
-						.append(arraySize)
-						.append(" in");
+				.append("let ")
+				.append(arrayName)
+				.append(" = mkarray ")
+				.append(arraySize)
+				.append(" in");
 
 		return builder.toString();
 	}

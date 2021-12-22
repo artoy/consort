@@ -31,13 +31,13 @@ public class NotSupportedAssignStmt implements TranslatedUnit {
 	public String print(List<String> arguments) {
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append("This AssignStmt is not yet supported: ")
-						.append(unit.toString())
-						.append(" ( Left: ")
-						.append(leftOp.getClass().toString())
-						.append(" Right: ")
-						.append(rightOp.getClass().toString())
-						.append(")");
+				.append("This AssignStmt is not yet supported: ")
+				.append(unit.toString())
+				.append(" ( Left: ")
+				.append(leftOp.getClass().toString())
+				.append(" Right: ")
+				.append(rightOp.getClass().toString())
+				.append(")");
 
 		return builder.toString();
 	}

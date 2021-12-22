@@ -41,12 +41,12 @@ public class If implements TranslatedUnit {
 	public String print(List<String> arguments) {
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append("if ")
-						.append(condition.print(true))
-						.append(" then ")
-						.append(toFunctionCall(thenBasicBlock, arguments))
-						.append(" else ")
-						.append(toFunctionCall(elseBasicBlock, arguments));
+				.append("if ")
+				.append(condition.print(true))
+				.append(" then ")
+				.append(toFunctionCall(thenBasicBlock, arguments))
+				.append(" else ")
+				.append(toFunctionCall(elseBasicBlock, arguments));
 
 		return builder.toString();
 	}

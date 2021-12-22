@@ -26,11 +26,11 @@ public class NotSupportedUnit implements TranslatedUnit {
 	public String print(List<String> arguments) {
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append("This unit is not yet supported: ")
-						.append(unit.toString())
-						.append(" (")
-						.append(unit.getClass().toString())
-						.append(")");
+				.append("This unit is not yet supported: ")
+				.append(unit.toString())
+				.append(" (")
+				.append(unit.getClass().toString())
+				.append(")");
 
 		return builder.toString();
 	}
