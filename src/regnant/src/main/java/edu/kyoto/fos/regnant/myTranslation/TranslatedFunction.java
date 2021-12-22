@@ -14,17 +14,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// TODO: 関数呼び出しを return にする, あと配列を代入するのに * を消す, あと括弧の有無を考える (ConSORT の書き方を見る)
-// TODO: 引数部分を作る
-// TODO: 変換する JAVA プログラムによっては function3 とかが最初に来てしまって基本ブロックの最初に変数定義が来なくなってしまう場合がある. Regnant のプログラムを見てどの順番で来るかを理解しなければならない
-// TODO: headOfFunction を BasicBlockGraph のメソッドに置き換えられないか
-// TODO: 変換後のプログラムに main を加える
-// TODO: 前生成したプログラムを消してから出力するようにする
+// TODO: 配列を代入するのに * を消す, あと括弧の有無を考える (ConSORT の書き方を見る)
+// TODO: 配列の大きさを lengthof から .length にする
 // TODO: 無駄な Unit を減らす (関数呼び出しの後の Unit とか)
 // TODO: 無駄な基本ブロックを減らす (return 文だけの基本ブロックが大量に生成される. もしかしたら検証器には嬉しかったりするのか？)
 // TODO: オブジェクト指向の部分を big tuple で命令型言語に置き換えるようにする (もしかしたら CFGReconstructor の時点でできているのかも)
 // TODO: alias 文を自動で挿入するようにする
-// TODO: 基本ブロックの初めのところ (変換後は関数になる) 以外にも引数を入れる
 // TODO: もしかしたら関数の返り値を伝える必要があるかも
 // TODO: GotoStmt は基本ブロックとして分けないようにする
 

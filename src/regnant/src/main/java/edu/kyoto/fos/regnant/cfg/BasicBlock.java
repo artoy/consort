@@ -54,7 +54,7 @@ public final class BasicBlock implements Comparable<BasicBlock> {
   @Override public String toString() {
     String basicBlockCode;
     basicBlockCode = this.units.stream()
-                    .map(unit -> unit.toString() + " (" + unit.getClass() + ((unit instanceof AssignStmt) ? (" Left: " + ((AssignStmt)unit).getLeftOp().getClass().toString() + " Right: " + ((AssignStmt)unit).getRightOp().getClass().toString()) : "") + ")")
+                    .map(unit -> unit.toString() + " (" + unit.getClass() + ((unit instanceof AssignStmt) ? (" Left: " + ((AssignStmt)unit).getLeftOp().getClass().toString() + " Right: " + ((AssignStmt)unit).getRightOp().getClass().toString()) + " " + ((AssignStmt) unit).getRightOp().getType().getClass() : "") + ")")
                     .collect(Collectors.joining("\n     "));
     return "f" + id + "(){" + basicBlockCode + "}\n";
   }

@@ -31,7 +31,7 @@ public interface TranslatedUnit {
 
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append("function")
+						.append("f")
 						.append(basicBlock.id)
 						.append("(")
 						.append(parametersString)

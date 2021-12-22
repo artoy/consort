@@ -2,7 +2,7 @@ package edu.kyoto.fos.regnant.myTranslation.translatedExpr;
 
 import edu.kyoto.fos.regnant.myTranslation.TranslatedValue;
 import edu.kyoto.fos.regnant.myTranslation.Service.TranslateExprService;
-import soot.jimple.AddExpr;
+import soot.jimple.internal.JAddExpr;
 
 // 変換された AddExpr を表すクラス
 public class Add implements TranslatedValue {
@@ -10,7 +10,7 @@ public class Add implements TranslatedValue {
 	private final TranslatedValue leftOp;
 	private final TranslatedValue rightOp;
 
-	public Add(AddExpr e) {
+	public Add(JAddExpr e) {
 		TranslateExprService service = new TranslateExprService();
 
 		this.leftOp = service.translate(e.getOp1());

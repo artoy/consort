@@ -126,7 +126,7 @@ public class TranslatedBasicBlock {
 
 			nextBasicBlockBuilder
 							.append("return ")
-							.append("function")
+							.append("f")
 							.append(nextBasicBlocks.get(0).id)
 							.append("(")
 							.append(callArgumentsString)
@@ -138,7 +138,7 @@ public class TranslatedBasicBlock {
 		// 結合
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append("function")
+						.append("f")
 						.append(id)
 						.append("(")
 						.append(parametersString)

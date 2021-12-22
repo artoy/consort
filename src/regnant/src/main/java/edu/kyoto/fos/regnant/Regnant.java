@@ -132,7 +132,10 @@ public class Regnant extends Transform {
       toReturn.add(t);
 
       TranslatedFunction translatedFunction = new TranslatedFunction(cfg);
-      translatedFunction.print("./src/main/java/edu/kyoto/fos/regnant/myTranslation/output/output.imp");
+
+      // myTranslation に渡す
+      String path = "./src/main/java/edu/kyoto/fos/regnant/myTranslation/output/output.imp";
+      translatedFunction.print(path);
     }
     return toReturn;
   }
