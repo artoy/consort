@@ -144,7 +144,7 @@ def main(this_dir, args):
     e = time.time()
 
     # 出力先のファイルにエントリーポイントを追加
-    f.write("{ function0() }")
+    f.write("{ f0() }")
     f.close()
 
     if args.yaml:

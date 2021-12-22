@@ -2,10 +2,7 @@ package edu.kyoto.fos.regnant.myTranslation;
 
 import edu.kyoto.fos.regnant.cfg.BasicBlock;
 import edu.kyoto.fos.regnant.myTranslation.Service.TranslateStmtService;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Argument;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Goto;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.If;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NewVariable;
+import edu.kyoto.fos.regnant.myTranslation.translatedStmt.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +31,9 @@ public class TranslatedBasicBlock {
 
 			// もし変換後の unit が Argument だった場合, 関数の引数になる変数があるので, それを arguments フィールドに入れる
 			if (translatedUnit instanceof Argument) arguments.add(((Argument) translatedUnit).getArgumentVariable());
-			// もし変換後の unit が NewVariable だった場合, 基本ブロックの引数になる変数があるので, それを bound フィールドに入れる
-			if (translatedUnit instanceof NewVariable) bound.add(((NewVariable) translatedUnit).getBoundVariable());
+			// もし変換後の unit が NewVariable か NEwPrimitiveVariable だった場合, 基本ブロックの引数になる変数があるので, それを bound フィールドに入れる
+			if (translatedUnit instanceof NewRef) bound.add(((NewRef) translatedUnit).getBoundVariable());
+			if (translatedUnit instanceof NewPrimitiveVariable) bound.add(((NewPrimitiveVariable) translatedUnit).getBoundVariable());
 
 			translatedBasicBlock.add(translatedUnit);
 		}
@@ -116,7 +114,7 @@ public class TranslatedBasicBlock {
 		// 次の基本ブロックを呼び出す部分の作成
 		StringBuilder nextBasicBlockBuilder = new StringBuilder();
 
-		// 次の基本ブロックの引数部分の作成
+			// 次の基本ブロックの引数部分の作成
 		String callArgumentsString = restArguments.stream().collect(Collectors.joining(", "));
 
 		if (!(getTail() instanceof If || getTail() instanceof Goto || nextBasicBlocks.size() == 0)) {
@@ -125,7 +123,6 @@ public class TranslatedBasicBlock {
 			assert (nextBasicBlocks.size() == 1);
 
 			nextBasicBlockBuilder
-							.append("return ")
 							.append("f")
 							.append(nextBasicBlocks.get(0).id)
 							.append("(")

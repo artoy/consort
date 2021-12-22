@@ -23,6 +23,6 @@ public class Goto implements TranslatedUnit {
 	}
 
 	public String print(List<String> arguments) {
-		return "return " + toFunctionCall(target, arguments);
+		return toFunctionCall(target, arguments);
 	}
 }

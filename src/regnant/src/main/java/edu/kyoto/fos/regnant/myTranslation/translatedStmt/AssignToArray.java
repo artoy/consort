@@ -38,7 +38,7 @@ public class AssignToArray implements TranslatedUnit {
 						.append("[")
 						.append(index)
 						.append("] <- ")
-						.append(value.print(false))
+						.append(value.print(true))
 						.append(";");
 
 		return builder.toString();

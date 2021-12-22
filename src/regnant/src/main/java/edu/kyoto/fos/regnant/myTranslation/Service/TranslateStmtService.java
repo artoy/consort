@@ -2,18 +2,8 @@ package edu.kyoto.fos.regnant.myTranslation.Service;
 
 import edu.kyoto.fos.regnant.cfg.BasicBlock;
 import edu.kyoto.fos.regnant.myTranslation.TranslatedUnit;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Argument;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.AssertFail;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.AssignToArray;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.AssignToVariable;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Goto;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.If;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NewVariable;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NewArray;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NotSupportedAssignStmt;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.NotSupportedUnit;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.Return;
-import edu.kyoto.fos.regnant.myTranslation.translatedStmt.ReturnVoid;
+import edu.kyoto.fos.regnant.myTranslation.translatedStmt.*;
+import soot.ArrayType;
 import soot.Unit;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JAssignStmt;
@@ -57,7 +47,11 @@ public class TranslateStmtService {
 				return new AssignToArray(assignUnit);
 			} else if (assignUnit.getLeftOp() instanceof JimpleLocal && headOfFunction) {
 				// 初めて変数が定義される場合 (関数の中の最初の基本ブロックに変数定義が全て含まれているという仮説による)
-				return new NewVariable(assignUnit);
+				if (assignUnit.getRightOp().getType() instanceof ArrayType) {
+					return new NewPrimitiveVariable(assignUnit);
+				} else {
+					return new NewRef(assignUnit);
+				}
 			} else if (assignUnit.getLeftOp() instanceof JimpleLocal) {
 				// 定義されている変数に値を代入する場合
 				return new AssignToVariable(assignUnit);

@@ -3,7 +3,6 @@ package edu.kyoto.fos.regnant.myTranslation.translatedExpr;
 import edu.kyoto.fos.regnant.myTranslation.Service.TranslateExprService;
 import edu.kyoto.fos.regnant.myTranslation.TranslatedValue;
 import soot.jimple.internal.JGeExpr;
-import soot.jimple.internal.JLtExpr;
 
 public class Ge implements TranslatedValue{
 	// leftOp は1つ目のオペランド, rightOp は2つ目のオペランドを表す
@@ -17,12 +16,12 @@ public class Ge implements TranslatedValue{
 		this.rightOp = service.translate(e.getOp2());
 	}
 
-	public String print(boolean isPointer) {
+	public String print(boolean isDereference) {
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append(leftOp.print(false))
+						.append(leftOp.print(true))
 						.append(" >= ")
-						.append(rightOp.print(false));
+						.append(rightOp.print(true));
 
 		return builder.toString();
 	}

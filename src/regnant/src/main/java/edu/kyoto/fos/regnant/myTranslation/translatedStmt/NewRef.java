@@ -8,12 +8,12 @@ import soot.jimple.internal.JAssignStmt;
 import java.util.List;
 
 // 変数を (ポインタで) 定義する式を表すクラス
-public class NewVariable implements TranslatedUnit {
+public class NewRef implements TranslatedUnit {
 	// variable は定義する変数の名前, value は変数を初期化する値
 	private final String variable;
 	private final TranslatedValue value;
 
-	public NewVariable(JAssignStmt unit) {
+	public NewRef(JAssignStmt unit) {
 		TranslateExprService service = new TranslateExprService();
 
 		this.variable = unit.getLeftOp().toString();
@@ -34,7 +34,7 @@ public class NewVariable implements TranslatedUnit {
 						.append("let ")
 						.append(variable)
 						.append(" = mkref ")
-						.append(value.print(false))
+						.append(value.print(true))
 						.append(" in");
 
 		return builder.toString();

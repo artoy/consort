@@ -16,12 +16,12 @@ public class Gt implements TranslatedValue{
 		this.rightOp = service.translate(e.getOp2());
 	}
 
-	public String print(boolean isPointer) {
+	public String print(boolean isDereference) {
 		StringBuilder builder = new StringBuilder();
 		builder
-						.append(leftOp.print(false))
+						.append(leftOp.print(true))
 						.append(" > ")
-						.append(rightOp.print(false));
+						.append(rightOp.print(true));
 
 		return builder.toString();
 	}

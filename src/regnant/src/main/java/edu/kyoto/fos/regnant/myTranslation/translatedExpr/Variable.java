@@ -12,10 +12,9 @@ public class Variable implements TranslatedValue {
 		this.variable = variable;
 	}
 
-	// TBD: 変数をポインタのまま扱うときはそのまま toString すれば良いので、 isPointer = true の場合は存在しない
-	public String print(boolean isPointer) {
+	public String print(boolean isDereference) {
 		StringBuilder builder = new StringBuilder();
-		if (!isPointer) builder.append("*");
+		if (isDereference) builder.append("*");
 		builder.append(variable.toString());
 
 		return builder.toString();

@@ -28,6 +28,8 @@ public class TranslateExprService {
 			return new Lt((JLtExpr) value);
 		} else if (value instanceof JimpleLocal) {
 			return new Variable((JimpleLocal) value);
+		} else if (value instanceof JLengthExpr) {
+			return new ArrayLength((JLengthExpr) value);
 		} else {
 			return new Other(value);
 		}
