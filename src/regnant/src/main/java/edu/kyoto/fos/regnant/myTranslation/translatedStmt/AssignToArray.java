@@ -12,15 +12,15 @@ import java.util.List;
 public class AssignToArray implements TranslatedUnit {
 	// arrayName は配列名, index は配列の中の代入されるインデックス, value は代入される値を表す
 	private final String arrayName;
-	private final String index;
+	private final TranslatedValue index;
 	private final TranslatedValue value;
 
 	public AssignToArray(JAssignStmt unit) {
-		TranslateExprService handler = new TranslateExprService();
+		TranslateExprService service = new TranslateExprService();
 
 		this.arrayName = ((JArrayRef) (unit.getLeftOp())).getBase().toString();
-		this.index = ((JArrayRef) (unit.getLeftOp())).getIndex().toString();
-		this.value = handler.translate(unit.getRightOp());
+		this.index = service.translate(((JArrayRef) (unit.getLeftOp())).getIndex());
+		this.value = service.translate(unit.getRightOp());
 	}
 
 	public boolean isSequencing() {
@@ -36,7 +36,7 @@ public class AssignToArray implements TranslatedUnit {
 		builder
 				.append(arrayName)
 				.append("[")
-				.append(index)
+				.append(index.print(true))
 				.append("] <- ")
 				.append(value.print(true))
 				.append(";");

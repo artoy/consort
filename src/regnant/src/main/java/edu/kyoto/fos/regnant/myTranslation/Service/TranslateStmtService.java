@@ -38,23 +38,29 @@ public class TranslateStmtService {
 		} else if (unit instanceof JAssignStmt) {
 			// 代入文の場合
 			JAssignStmt assignUnit = (JAssignStmt) unit;
-
 			if (assignUnit.getRightOp() instanceof JNewArrayExpr) {
 				// 配列を新しく作る場合
 				return new NewArray(assignUnit);
 			} else if (assignUnit.getLeftOp() instanceof JArrayRef) {
 				// 配列の要素を更新する場合 (もし初期化の場合のみ <- を使うとかだったら要修正)
 				return new AssignToArray(assignUnit);
-			} else if (assignUnit.getLeftOp() instanceof JimpleLocal && headOfFunction) {
-				// 初めて変数が定義される場合 (関数の中の最初の基本ブロックに変数定義が全て含まれているという仮説による)
-				if (assignUnit.getRightOp().getType() instanceof ArrayType) {
-					return new NewPrimitiveVariable(assignUnit);
-				} else {
-					return new NewRef(assignUnit);
-				}
 			} else if (assignUnit.getLeftOp() instanceof JimpleLocal) {
-				// 定義されている変数に値を代入する場合
-				return new AssignToVariable(assignUnit);
+				// tmp 変数は最初の基本ブロックでなくても初めて定義される
+				if (headOfFunction) {
+					// 初めて変数が定義される場合 (関数の中の最初の基本ブロックに変数定義が全て含まれているという仮説による)
+					if (assignUnit.getRightOp().getType() instanceof ArrayType) {
+						// 右辺が配列の場合
+						return new NewPrimitiveVariable(assignUnit);
+					} else {
+						return new NewRef(assignUnit);
+					}
+				} else if (assignUnit.getLeftOp().toString().contains("tmp")) {
+					// 定義する変数が tmp 変数の場合
+					return new NewTmpVariable(assignUnit);
+				} else {
+					// 定義されている変数に値を代入する場合
+					return new AssignToVariable(assignUnit);
+				}
 			} else {
 				// throw new RuntimeException("This AssignStmt is not yet supported: " + unit + " ( Left: " + assignUnit.getLeftOp().getClass().toString() + " Right: " + assignUnit.getRightOp().getClass().toString() + ")");
 				// デバッグのための, エラーの代わりの標準出力

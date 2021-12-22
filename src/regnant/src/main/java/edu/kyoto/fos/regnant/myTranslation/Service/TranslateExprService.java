@@ -27,9 +27,15 @@ public class TranslateExprService {
 		} else if (value instanceof JLtExpr) {
 			return new Lt((JLtExpr) value);
 		} else if (value instanceof JimpleLocal) {
-			return new Variable((JimpleLocal) value);
+			if (value.toString().contains("tmp")) {
+				return new TmpVariable((JimpleLocal) value);
+			} else {
+				return new Variable((JimpleLocal) value);
+			}
 		} else if (value instanceof JLengthExpr) {
 			return new ArrayLength((JLengthExpr) value);
+		} else if (value instanceof JArrayRef) {
+			return new ArrayRef((JArrayRef) value);
 		} else {
 			return new Other(value);
 		}
