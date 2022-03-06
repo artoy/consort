@@ -3,8 +3,6 @@ package edu.kyoto.fos.regnant.myTranslation.translatedStmt;
 import edu.kyoto.fos.regnant.myTranslation.TranslatedUnit;
 import edu.kyoto.fos.regnant.myTranslation.TranslatedValue;
 import edu.kyoto.fos.regnant.myTranslation.Service.TranslateExprService;
-import edu.kyoto.fos.regnant.myTranslation.translatedExpr.IntConst;
-import soot.jimple.IntConstant;
 import soot.jimple.internal.JAssignStmt;
 
 import java.util.HashMap;
@@ -22,13 +20,9 @@ public class AssignToVariable implements TranslatedUnit {
 		this.variable = unit.getLeftOp().toString();
 		this.value = handler.translate(unit.getRightOp());
 	}
-
+	
 	public boolean isSequencing() {
 		return true;
-	}
-
-	public boolean istTranslatedUnitEmpty() {
-		return false;
 	}
 
 	public String print(List<String> arguments, HashMap<String, Integer> headIDs) {
@@ -40,9 +34,5 @@ public class AssignToVariable implements TranslatedUnit {
 				.append(";");
 
 		return builder.toString();
-	}
-
-	public String getAssignedVariable() {
-		return variable;
 	}
 }

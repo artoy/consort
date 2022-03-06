@@ -3,13 +3,16 @@ package edu.kyoto.fos.regnant.myTranslation;
 import edu.kyoto.fos.regnant.cfg.BasicBlock;
 import edu.kyoto.fos.regnant.myTranslation.Service.TranslateStmtService;
 import edu.kyoto.fos.regnant.myTranslation.translatedExpr.IntConst;
+import edu.kyoto.fos.regnant.myTranslation.translatedExpr.Other;
 import edu.kyoto.fos.regnant.myTranslation.translatedStmt.*;
+import soot.Local;
+import soot.util.Chain;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static fj.function.Strings.contains;
 
 // ConSORT プログラムに変換された基本ブロックを表すためのクラス
 public class TranslatedBasicBlock {
@@ -17,13 +20,13 @@ public class TranslatedBasicBlock {
 	private final String name;
 	private final int id;
 	private final boolean headOfFunction;
-	private List<TranslatedUnit> translatedBasicBlock = new ArrayList<>();
+	private final List<TranslatedUnit> translatedBasicBlock = new ArrayList<>();
 	private final List<String> parameters = new ArrayList<>();
-	private final List<String> bound = new ArrayList<>();
-	private final List<String> assigned = new ArrayList<>();
+	private final List<String> bounds = new ArrayList<>();
 	private final List<BasicBlock> nextBasicBlocks;
+	private static int arrayID = 0;
 
-	public TranslatedBasicBlock(String name, BasicBlock basicBlock, boolean headOfFunction, List<BasicBlock> nextBasicBlocks) {
+	public TranslatedBasicBlock(String name, BasicBlock basicBlock, boolean headOfFunction, List<BasicBlock> nextBasicBlocks, Chain<Local> locals) {
 		TranslateStmtService service = new TranslateStmtService();
 
 		this.name = name;
@@ -31,26 +34,38 @@ public class TranslatedBasicBlock {
 		this.headOfFunction = headOfFunction;
 		this.nextBasicBlocks = nextBasicBlocks;
 
+		// 初めの基本ブロックで全ての変数を初期化
+		if (headOfFunction) {
+			Iterator<Local> paras = locals.iterator();
+			Local p;
+
+			while (paras.hasNext()) {
+				p = paras.next();
+
+				// int, byte, boolean は 0, int[] は長さ0の配列で初期化
+				if(Objects.equals(p.getType().toString(), "int") || Objects.equals(p.getType().toString(), "byte") || Objects.equals(p.getType().toString(), "boolean") || Objects.equals(p.getType().toString(), "java.lang.AssertionError")) {
+					translatedBasicBlock.add(new NewRef(p.getName(), new IntConst("0")));
+				} else if (Objects.equals(p.getType().toString(), "int[]") && !p.getName().contains("_tmp_")) {
+					String tmp_var = "reg_tmp_arr" + arrayID;
+					arrayID++;
+
+					translatedBasicBlock.add(new NewArray(tmp_var, "0"));
+					// 変数を代入する際は必ず dereference するようにしているので Others を代入するようにしている（流石に変えるべき）
+					translatedBasicBlock.add(new NewRef(p.getName(), new Other(tmp_var)));
+				}
+
+				// locals を bounds に追加
+				bounds.add(p.getName());
+			}
+ 		}
+
 		for (int i = 0; i < basicBlock.units.size(); i++) {
 			TranslatedUnit translatedUnit = service.translate(basicBlock.units.get(i), headOfFunction, nextBasicBlocks, name);
 
 			// もし変換後の unit が Argument だった場合, 関数の引数になる変数があるので, それを arguments フィールドに入れる
 			if (translatedUnit instanceof Argument) parameters.add(((Argument) translatedUnit).getArgumentVariable());
-			// もし変換後の unit が NewVariable か NewPrimitiveVariable だった場合, 基本ブロックの引数になる変数があるので, それを bound フィールドに入れる
-			if (translatedUnit instanceof NewRef) bound.add(((NewRef) translatedUnit).getBoundVariable());
-			if (translatedUnit instanceof NewPrimitiveVariable)
-				bound.add(((NewPrimitiveVariable) translatedUnit).getBoundVariable());
-			// もし変換後の unit が AssignToVariable だった場合, 最初の基本ブロックにない変数定義になりうる
-			if (translatedUnit instanceof AssignToVariable)
-				assigned.add(((AssignToVariable) translatedUnit).getAssignedVariable());
 
 			translatedBasicBlock.add(translatedUnit);
-
-			// assert は必ず失敗するようにしているので assert の先の命令を無視して return 文に変換するs
-//			if (translatedUnit instanceof AssertFail) {
-//				translatedBasicBlock.add(new ReturnVoid());
-//				break;
-//			}
 		}
 	}
 
@@ -60,13 +75,8 @@ public class TranslatedBasicBlock {
 	}
 
 	// bound を返すメソッド
-	public List<String> getBound() {
-		return bound;
-	}
-
-	// assigned を返すメソッド
-	public List<String> getAssigned() {
-		return assigned;
+	public List<String> getBounds() {
+		return bounds;
 	}
 
 	// 波括弧の左側を付けるためのメソッド
@@ -97,34 +107,32 @@ public class TranslatedBasicBlock {
 	}
 
 	// 基本ブロックを関数名と関数呼び出し付きで出力するメソッド
-	public String print(List<String> allArguments, List<String> allBound, List<String> allUndefined, HashMap<String, Integer> headIDs) {
+	public String print(List<String> allParameters, List<String> allBound, HashMap<String, Integer> headIDs) {
 
-		// 引数のための, allArguments と allBound, allUndefined を合わせたリスト
-		List<String> restArguments = Stream.concat(Stream.concat(allArguments.stream(), allBound.stream()), allUndefined.stream())
-				.collect(Collectors.toList());
+		// 引数のための, allParameters と allBound を合わせたリスト
+		List<String> Arguments = Stream.concat(allParameters.stream(), allBound.stream()).collect(Collectors.toList());
 
+		// TODO: パラメータは新しい変数にする
 		// 引数部分の作成. 初めの基本ブロックはパラメータのみ, 以降の基本ブロックはパラメータと宣言された変数を引数にとる
-		String parametersString = (headOfFunction ? allArguments : restArguments).stream().collect(Collectors.joining(", "));
+		String parametersString = (headOfFunction ? allParameters : Arguments).stream().collect(Collectors.joining(", "));
 
 		// 関数の中身の作成. ただし右の波括弧は末尾の関数呼び出しの後に入れたいので最後に回している
 		boolean prevSequence = true;
 		int indentLevel = 1;
 		StringBuilder basicBlocksBuilder = new StringBuilder();
 		for (TranslatedUnit translatedUnit : translatedBasicBlock) {
-			if (!translatedUnit.istTranslatedUnitEmpty()) {
-				if (translatedUnit.isSequencing() && !prevSequence) {
-					indentLevel++;
+			if (translatedUnit.isSequencing() && !prevSequence) {
+				indentLevel++;
 
-					basicBlocksBuilder
-							.append(printLeftBraces(indentLevel - 1))
-							.append("\n")
-							.append(translatedUnit.printWithIndent(indentLevel, restArguments, headIDs))
-							.append("\n");
-				} else {
-					basicBlocksBuilder
-							.append(translatedUnit.printWithIndent(indentLevel, restArguments, headIDs))
-							.append("\n");
-				}
+				basicBlocksBuilder
+						.append(printLeftBraces(indentLevel - 1))
+						.append("\n")
+						.append(translatedUnit.printWithIndent(indentLevel, Arguments, headIDs))
+						.append("\n");
+			} else {
+				basicBlocksBuilder
+						.append(translatedUnit.printWithIndent(indentLevel, Arguments, headIDs))
+						.append("\n");
 			}
 
 			prevSequence = translatedUnit.isSequencing();
@@ -136,7 +144,7 @@ public class TranslatedBasicBlock {
 		StringBuilder nextBasicBlockBuilder = new StringBuilder();
 
 		// 次の基本ブロックの引数部分の作成
-		String callArgumentsString = restArguments.stream().collect(Collectors.joining(", "));
+		String callArgumentsString = Arguments.stream().collect(Collectors.joining(", "));
 
 		if (!(getTail() instanceof If || getTail() instanceof Goto || nextBasicBlocks.size() == 0)) {
 			nextBasicBlockBuilder.append("  ".repeat(Math.max(0, indentLevel)));
@@ -169,13 +177,5 @@ public class TranslatedBasicBlock {
 				.append("}\n");
 
 		return builder.toString();
-	}
-
-	// 最初の基本ブロック以外で変数が定義された場合に使う、変数定義を追加するためのメソッド (最初の基本ブロック用)
-	public void addDefines(List<String> allUndefined) {
-		assert (headOfFunction);
-
-		translatedBasicBlock = Stream.concat(allUndefined.stream().map(v -> new NewRef(v, new IntConst("0"))), translatedBasicBlock.stream())
-				.collect(Collectors.toList());
 	}
 }

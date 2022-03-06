@@ -11,26 +11,33 @@ import java.util.List;
 // 変換後は式としては残らない
 public class Argument implements TranslatedUnit {
 	// argumentVariable は引数の変数名を表す
-	private final Value argumentVariable;
+	private final String variable;
+	private final String parameter;
+	private static int id = 0;
 
 	public Argument(JIdentityStmt unit) {
-		this.argumentVariable = unit.getLeftOp();
+		this.variable = unit.getLeftOp().toString();
+		this.parameter = "reg_p_" + id;
+		id++;
 	}
 
 	public boolean isSequencing() {
-		return false;
-	}
-
-	public boolean istTranslatedUnitEmpty() {
 		return true;
 	}
 
 	public String print(List<String> arguments, HashMap<String, Integer> headIDs) {
-		return "";
+		StringBuilder builder = new StringBuilder();
+		builder
+				.append(variable)
+				.append(" := ")
+				.append(parameter)
+				.append(";");
+
+		return builder.toString();
 	}
 
 	// 引数を外に伝えるためのメソッド
 	public String getArgumentVariable() {
-		return argumentVariable.toString();
+		return parameter;
 	}
 }

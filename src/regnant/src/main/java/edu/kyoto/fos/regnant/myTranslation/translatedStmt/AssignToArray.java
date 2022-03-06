@@ -28,12 +28,9 @@ public class AssignToArray implements TranslatedUnit {
 		return true;
 	}
 
-	public boolean istTranslatedUnitEmpty() {
-		return false;
-	}
-
 	public String print(List<String> arguments, HashMap<String, Integer> headIDs) {
 		StringBuilder builder = new StringBuilder();
+		// TODO: ここで健全じゃなくなってる確率は高い. * を付ける？ それとも最初に変数を全て定義するのが悪い？
 		builder
 				.append(arrayName)
 				.append("[")

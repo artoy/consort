@@ -23,6 +23,7 @@ import soot.Transform;
 import soot.UnitPatchingChain;
 import soot.ValueBox;
 import soot.options.Options;
+import soot.util.Chain;
 import soot.util.queue.ChunkedQueue;
 import soot.util.queue.QueueReader;
 
@@ -134,8 +135,11 @@ public class Regnant extends Transform {
       Translate t = new Translate(simpl, cfg.getReconstructedGraph(), fi, bindAlloc, worklist, l, as, oimpl);
       toReturn.add(t);
 
+      // locals の取り出し
+      Chain<Local> locals = m.getActiveBody().getLocals();
+
       // translatedBody と headIDs に追加
-      TranslatedFunction translatedFunction = new TranslatedFunction(cfg, simpl.getMethod().getName());
+      TranslatedFunction translatedFunction = new TranslatedFunction(cfg, simpl.getMethod().getName(), locals);
       translatedBody.add(translatedFunction);
       headIDs.put(translatedFunction.getName(), translatedFunction.getHeadID());
     }
