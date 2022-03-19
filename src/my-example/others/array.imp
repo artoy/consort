@@ -1,0 +1,7 @@
+{
+    let x = mkarray 100 in {
+        x[0] <- 10;
+        let y = mkref x in 
+        assert((*y)[0] = 10)
+    }
+}

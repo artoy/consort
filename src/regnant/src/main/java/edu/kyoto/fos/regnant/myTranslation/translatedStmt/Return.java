@@ -24,6 +24,7 @@ public class Return implements TranslatedUnit {
 		return false;
 	}
 
+	// TODO: 型の情報がないと配列を返す時と int を返すときで dereference するかどうかが変わってしまう
 	public String print(List<String> arguments, HashMap<String, Integer> headIDs) {
 		StringBuilder builder = new StringBuilder();
 		builder

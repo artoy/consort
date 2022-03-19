@@ -45,13 +45,13 @@ public class TranslatedBasicBlock {
 				// int, byte, boolean は 0, int[] は長さ0の配列で初期化
 				if(Objects.equals(p.getType().toString(), "int") || Objects.equals(p.getType().toString(), "byte") || Objects.equals(p.getType().toString(), "boolean") || Objects.equals(p.getType().toString(), "java.lang.AssertionError")) {
 					translatedBasicBlock.add(new NewRef(p.getName(), new IntConst("0")));
-				} else if (Objects.equals(p.getType().toString(), "int[]") && !p.getName().contains("_tmp_")) {
-					String tmp_var = "reg_tmp_arr" + arrayID;
-					arrayID++;
-
-					translatedBasicBlock.add(new NewArray(tmp_var, "0"));
-					// 変数を代入する際は必ず dereference するようにしているので Others を代入するようにしている（流石に変えるべき）
-					translatedBasicBlock.add(new NewRef(p.getName(), new Other(tmp_var)));
+//				} else if (Objects.equals(p.getType().toString(), "int[]") && !p.getName().contains("_tmp_")) {
+//					String tmp_var = "reg_tmp_arr" + arrayID;
+//					arrayID++;
+//
+//					translatedBasicBlock.add(new NewArray(tmp_var, "0"));
+//					// 変数を代入する際は必ず dereference するようにしているので Others を代入するようにしている（流石に変えるべき）
+//					translatedBasicBlock.add(new NewRef(p.getName(), new Other(tmp_var)));
 				}
 
 				// locals を bounds に追加

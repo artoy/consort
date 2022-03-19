@@ -22,16 +22,18 @@ public class AssignArrayToV implements TranslatedUnit {
 	}
 
 	public boolean isSequencing() {
-		return true;
+		return false;
 	}
 
+	// TODO: 健全でない．初めの基本ブロック以外で配列が新しく定義された場合エラーが起きる．
 	public String print(List<String> arguments, HashMap<String, Integer> headIDs) {
 		StringBuilder builder = new StringBuilder();
 		builder
+				.append("let ")
 				.append(variable)
-				.append(" := ")
+				.append(" = ")
 				.append(value.print(false, headIDs))
-				.append(";");
+				.append(" in");
 
 		return builder.toString();
 	}

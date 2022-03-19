@@ -34,9 +34,11 @@ import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// Regnant のエントリーポイント
 public class Regnant extends Transform {
   private Regnant(final Regnant[] regnants) {
     super("wjtp.regnant", new SceneTransformer() {
+      // internal transform をオーバーライドすることで Soot にしてほしい操作を記述する
       @Override protected void internalTransform(final String phaseName, final Map<String, String> options) {
         regnants[0].internalTransform(phaseName, options);
       }
@@ -44,17 +46,21 @@ public class Regnant extends Transform {
     regnants[0] = this;
   }
 
+  // エントリーポイント
   public static void main(String[] args) {
+    // ここで Regnant の操作を Soot に登録している．今回は全体解析に基づく変換フェイズである wjtp に登録してある
     PackManager.v().getPack("wjtp").add(new Regnant());
     Options.v().set_verbose(true);
     Main.main(args);
   }
 
   private Regnant() {
+    // 新しい長さ1の Regnant 配列を作って Regnant(final Regnant[] regnants) を呼んでいる
     this(new Regnant[1]);
     setDeclaredOptions("enabled output flags model");
   }
 
+  // ここが Soot に登録した変換の起点になっている
   private void internalTransform(final String phaseName, Map<String, String> options) {
     SootMethod mainMethod = Scene.v().getMainMethod();
     removeArgVector(mainMethod);

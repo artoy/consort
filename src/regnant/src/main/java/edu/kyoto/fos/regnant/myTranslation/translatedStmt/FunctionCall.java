@@ -19,9 +19,9 @@ public class FunctionCall implements TranslatedUnit {
 		TranslateExprService service = new TranslateExprService();
 
 		// 今のところは InvokeStmt は JStaticInvokeExpr しか持たないと思っている
-		assert (unit.getInvokeExpr() instanceof JStaticInvokeExpr);
+//		assert (unit.getInvokeExpr() instanceof JStaticInvokeExpr);
 		this.func = service.translate(unit.getInvokeExpr());
-		assert (func instanceof StaticInvoke);
+//		assert (func instanceof StaticInvoke);
 	}
 
 	public boolean isSequencing() {

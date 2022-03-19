@@ -1,53 +1,66 @@
-regnant$sum_continue_main__loop_1(i0,i1,reg$control){
+regnant$find_n_main__loop_1(_tmp_r0,r1,b0,i3,z1,reg$control){
+  let _tmp_i1 = r1.length in 
   {
-    if (*i1) >= 10 then
+    if (*i3) >= _tmp_i1 then
       {
         reg$control := 1;
         return 0
       }
 
     else
+      let _tmp_i2 = r1[*i3] in 
       {
-        if (*i1) <= 5 then
+        if _tmp_i2 != b0 then
           {
-            i0 := (*i0) + (*i1);
+            i3 := (*i3) + 1;
+            return regnant$find_n_main__loop_1(_tmp_r0, r1, b0, i3, z1, reg$control)
+          }
+
+        else
+          {
             reg$control := 2;
-          }
-
-        else
-          {
-            i1 := (*i1) + 1;
-            return regnant$sum_continue_main__loop_1(i0, i1, reg$control)
+            return 0
           }
 ;
       }
 ;
-    return 0
   }
 
 }
-sum_continue_main(){
+find_n_main(){
   let reg$control = mkref 0 in 
-  let i0 = mkref 0 in 
-  let i1 = mkref 0 in 
+  let _tmp_r0 = mkarray 6 in 
   {
-    regnant$sum_continue_main__loop_1(i0, i1, reg$control);
-    if regnant$flag_1(*reg$control) then
-      {
-        if (*i0) = 15 then
-          ()
-        else
-          {
-            fail;
-          }
-;
-        return 0
-      }
+    _tmp_r0[0] <- 0;
+    _tmp_r0[1] <- 9;
+    _tmp_r0[2] <- 3;
+    _tmp_r0[3] <- 4;
+    _tmp_r0[4] <- 15;
+    _tmp_r0[5] <- 16;
+    let r1 = _tmp_r0 in 
+    let b0 = 15 in 
+    let i3 = mkref 0 in 
+    let z1 = mkref 0 in 
+    {
+      regnant$find_n_main__loop_1(_tmp_r0, r1, b0, i3, z1, reg$control);
+      if regnant$flag_1(*reg$control) then
+        {
+          z1 := 1;
+        }
 
-    else
-      ();
+      else
+        ();
+      if (*z1) = 1 then
+        ()
+      else
+        {
+          fail;
+        }
+;
+      return 0
+    }
   }
 
 }
 
-{ sum_continue_main() }
+{ find_n_main() }

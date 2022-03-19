@@ -31,6 +31,7 @@ public class AssignToArray implements TranslatedUnit {
 	public String print(List<String> arguments, HashMap<String, Integer> headIDs) {
 		StringBuilder builder = new StringBuilder();
 		// TODO: ここで健全じゃなくなってる確率は高い. * を付ける？ それとも最初に変数を全て定義するのが悪い？
+		// 今のところ配列の中の値を再代入しない限り健全.
 		builder
 				.append(arrayName)
 				.append("[")
