@@ -29,10 +29,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// 変換に関して共通して使うものがまとめられている気がする
+// 命令列（変換後の関数？）を表すクラス
 public class InstructionStream implements Printable  {
 
   private final String tag;
+
+  // この関数の中で呼び出される関数の情報？
   public List<P3<String, List<String>, InstructionStream>> sideFunctions = new ArrayList<>();
 
   public InstructionStream(final String tag) {
@@ -53,12 +55,13 @@ public class InstructionStream implements Printable  {
     this.addBind(new LetBind(name, rhs, ref));
   }
 
+  // 関数単位で printAt するメソッド
   public void printAt(final int level, final StringBuilder sb) {
     assert this.isTerminal() : sb.toString() + " " + this.tag;
     printLoop(level, sb, this.stateStack.iterator());
   }
 
-  // イテレータで取ってきたものを次々printAtするメソッド
+  // イテレータで取ってきたものを次々 printAt（命令単位）するメソッド
   private void printLoop(final int level, final StringBuilder sb, final Iterator<StreamState> iterator) {
     if(!iterator.hasNext()) {
       this.termNode.printAt(level, sb);
@@ -243,6 +246,7 @@ public class InstructionStream implements Printable  {
     }
   }
 
+  // add... で変換後の命令を追加している
   private void addEffect(Effect b) {
     assert !this.isTerminal() : System.identityHashCode(this);
     this.state = this.state.addEffect(b, this.stateStack);
@@ -381,7 +385,7 @@ public class InstructionStream implements Printable  {
     }
   }
 
-  // StringBuilder メソッドは
+  //
   public StringBuilder dumpAs(String name, List<String> locals) {
     StringBuilder sb = new StringBuilder();
     sb.append(name).append(locals.stream().collect(Collectors.joining(",", "(", ")")));

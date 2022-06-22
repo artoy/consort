@@ -125,6 +125,7 @@ public class Translate {
     this.alloc = alloc;
     this.worklist = worklist;
     this.layout = sl;
+    // オブジェクトモデルの作成に StorgageLayout を使っている
     this.objectModel = om.make(layout);
     this.lifter = new ValueLifter(worklist, layout, objectModel);
     this.as = as;
@@ -146,7 +147,7 @@ public class Translate {
     this.stream.close();
   }
 
-  // print は
+  // print はメソッドごとに Regnant の抽象構文木を StringBuilder に変換するメソッド
   public StringBuilder print() {
     StringBuilder sb = new StringBuilder();
     this.stream.sideFunctions.forEach(p -> {
@@ -529,8 +530,9 @@ public class Translate {
     }
   }
 
-  // jimpleの命令を受け取って変換するメソッド
-  private void encodeInstruction(final InstructionStream str, final Unit unit, // strは書き換える先、unitはjimple
+  // Jimple の Stmt を受け取って、ConSORT 言語における命令を受け取って変換するメソッド
+  // str は書き換える先、unit は jimple
+  private void encodeInstruction(final InstructionStream str, final Unit unit,
       final Set<Local> needDefine,
       fj.data.TreeMap<Local, Binding> env) {
     assert !(unit instanceof IfStmt);

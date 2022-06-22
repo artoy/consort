@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// 変換後の式を扱うクラス
 public abstract class ImpExpr implements ProgFragment {
   public static ImpExpr controlFlag(final List<Integer> collect) {
     String genName = FlagTranslation.allocate(collect);

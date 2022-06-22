@@ -38,7 +38,7 @@ find_n_main(){
     _tmp_r0[4] <- 15;
     _tmp_r0[5] <- 16;
     let r1 = _tmp_r0 in 
-    let b0 = 15 in 
+    let b0 = 4 in 
     let i3 = mkref 0 in 
     let z1 = mkref 0 in 
     {

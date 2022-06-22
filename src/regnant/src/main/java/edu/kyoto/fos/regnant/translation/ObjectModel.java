@@ -12,15 +12,19 @@ import java.util.function.Function;
 
 public interface ObjectModel {
   enum Impl {
+    // これを取り出すと new が呼ばれる？
     FUNCTIONAL(FunctionalTupleModel::new),
     MUTABLE(MutableTupleModel::new);
 
     private final Function<StorageLayout, ObjectModel> fact;
 
+    // やってることは実質 DI
+    // これによってどっちのオブジェクトモデルを採用するか、どのようにしてオブジェクトモデルを作成するかが決められる（その方法が factory）
     Impl(Function<StorageLayout, ObjectModel> factory) {
       this.fact = factory;
     }
 
+    // StorageLayout からオブジェクトを表すタプルを作成するメソッド
     public ObjectModel make(StorageLayout sl) {
       return fact.apply(sl);
     }

@@ -23,6 +23,8 @@ import java.util.LinkedList;
 
   Reading is also non-trivial: the reference must be projected out, dereferenced, and then aliased back in.
  */
+
+// オブジェクトを表すタプル
 public class MutableTupleModel implements ObjectModel {
   private final StorageLayout layout;
 

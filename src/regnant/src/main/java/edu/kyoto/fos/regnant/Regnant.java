@@ -34,7 +34,6 @@ import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// Regnant のエントリーポイント
 public class Regnant extends Transform {
   private Regnant(final Regnant[] regnants) {
     super("wjtp.regnant", new SceneTransformer() {
@@ -54,6 +53,7 @@ public class Regnant extends Transform {
     Main.main(args);
   }
 
+  // なぜこんなことをしているのかは分からない
   private Regnant() {
     // 新しい長さ1の Regnant 配列を作って Regnant(final Regnant[] regnants) を呼んでいる
     this(new Regnant[1]);
@@ -61,23 +61,32 @@ public class Regnant extends Transform {
   }
 
   // ここが Soot に登録した変換の起点になっている
+  // Jimple から ConSORT 言語に変換し、出力する
   private void internalTransform(final String phaseName, Map<String, String> options) {
     SootMethod mainMethod = Scene.v().getMainMethod();
     removeArgVector(mainMethod);
     FieldAliasing as = new FieldAliasing();
     for(SootClass sc : Scene.v().getClasses()) {
+      // TODO: isExcluded とは？
       if(Scene.v().isExcluded(sc)) {
         continue;
       }
       as.processClass(sc);
     }
+    // ここで依存性の注入を行っている
+    // valueOf は列挙型で宣言された値を呼び出すメソッド
+    // getOrDefault は key に紐づいた value があればそれを、なければ defaultValue を返す
     Impl oimpl = ObjectModel.Impl.valueOf(options.getOrDefault("model", "mutable").toUpperCase());
+    // ここで Jimple から ConSORT 言語に変換している
     List<Translate> output = this.transform(mainMethod, as, oimpl);
+    // ここで変換後のプログラムを出力している
     try(PrintStream pw = new PrintStream(new FileOutputStream(new File(options.get("output"))))) {
       for(Translate t : output) {
+        // 変換後の関数を出力
         t.printOn(pw);
       }
       pw.println();
+      // エントリポイントの出力
       pw.printf("{ %s() }\n", Translate.getMangledName(mainMethod));
     } catch (IOException ignored) {
     }
@@ -103,17 +112,20 @@ public class Regnant extends Transform {
     main.setParameterTypes(List.of());
   }
 
+  // Jimple から ConSORT 言語への変換の準備（？）
   private List<Translate> transform(final SootMethod m, final FieldAliasing as, final Impl oimpl) {
     ChunkedQueue<SootMethod> worklist = new ChunkedQueue<>();
     QueueReader<SootMethod> reader = worklist.reader();
+    // worklist に入っているのは main メソッド
     worklist.add(m);
     HashSet<SootMethod> visited = new HashSet<>();
     return this.work(reader, worklist, visited, as, oimpl);
   }
 
-  // ここで Java プログラムを jimple に変換して Translate メソッドに渡してそう
+  // Jimple から ConSORT 言語への変換
   private List<Translate> work(final QueueReader<SootMethod> reader, final ChunkedQueue<SootMethod> worklist, final HashSet<SootMethod> visited, final FieldAliasing as,
       final Impl oimpl) {
+    // StorageLayout は継承関係等を表すオブジェクト
     StorageLayout l = new StorageLayout(Scene.v().getPointsToAnalysis());
     List<Translate> toReturn = new ArrayList<>();
 
@@ -121,17 +133,22 @@ public class Regnant extends Transform {
     List<TranslatedFunction> translatedBody = new ArrayList<>();
     HashMap<String, Integer> headIDs = new HashMap<>();
 
+    // メソッドごとに Jimple から ConSORT 言語への変換 を行う
     while(reader.hasNext()) {
       SootMethod m = reader.next();
       if(!visited.add(m)) {
         continue;
       }
       System.out.println("Running regnant transformation on: " + m.getSignature());
+      // TODO: アクティブボディとは？
       m.retrieveActiveBody();
+      // Jimple の前処理の変換（assert文の nop と if 文への分解など）
       Body simpl = RewriteChain.rewrite(m.getActiveBody());
       System.out.println("Simplified: ");
       System.out.println(simpl);
+      // CFG への変換
       CFGReconstructor cfg = new CFGReconstructor(simpl);
+      // CFG のダンプ
       // System.out.println("-----dump----->");
       // System.out.println(cfg.dump());
       // System.out.println("<-----dump-----");

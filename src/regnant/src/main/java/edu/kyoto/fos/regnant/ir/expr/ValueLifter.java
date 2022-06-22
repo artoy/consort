@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import static edu.kyoto.fos.regnant.ir.expr.ImpExpr.call;
 
+// 式の変換を扱うクラス
 public class ValueLifter {
   private final StorageLayout layout;
   private ObjectModel om;

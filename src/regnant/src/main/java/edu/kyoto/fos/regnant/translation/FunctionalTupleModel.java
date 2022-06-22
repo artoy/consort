@@ -23,6 +23,8 @@ import java.util.List;
 
   Updates are simple projections out of a tuple field.
  */
+
+// オブジェクトを表すタプル
 public class FunctionalTupleModel implements ObjectModel {
   private StorageLayout layout;
 

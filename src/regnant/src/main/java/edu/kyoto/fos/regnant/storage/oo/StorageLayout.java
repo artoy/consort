@@ -22,7 +22,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+// クラスがどのようにフィールドを持てば良いかを求めるクラス
+// メソッドごとに UnionFind を作成してオブジェクトのタプルの形を決定する
 public class StorageLayout {
+  // オブジェクトを表すタプルの形を保持する unionfind 木
   private UnionFind<SootClass> uf = new UnionFind<>();
 
   public StorageLayout(PointsToAnalysis pta) {
@@ -32,7 +35,9 @@ public class StorageLayout {
   private void analyze(final PointsToAnalysis pta) {
     assert pta instanceof PAG;
     PAG pag = (PAG) pta;
+    // オブジェクトを union find でまとめる
     unifyRepr(pag.allocSources().stream().flatMap(n -> n.getAllFieldRefs().stream()));
+    // TODO: simpleInvSources とは？
     unifyRepr(pag.simpleInvSources().stream());
 
     uf.universe().forEach(sc -> getTransitiveFields(sc).forEach(sf -> {
@@ -86,8 +91,10 @@ public class StorageLayout {
     metaClasses.computeIfAbsent(data, ign -> new HashSet<>()).add(sf);
   }
 
+  // クラスを union find でまとめる
   private void unifyRepr(final Stream<? extends soot.jimple.spark.pag.Node> nodeStream) {
     nodeStream.forEach(adf -> {
+      // クラス名が Translate.ALIASING_CLASS か java.lang.Object の LocalVarNode は除外
       if(adf instanceof LocalVarNode) {
         LocalVarNode vn = (LocalVarNode) adf;
         if(vn.isInterProcTarget() && vn.getMethod().getDeclaringClass().getName().equals(Translate.ALIASING_CLASS)) {
@@ -100,8 +107,11 @@ public class StorageLayout {
           return;
         }
       }
+      // ノードの指しうるノードの型の集合になっている。これで継承関係とかが分かりそう
       Set<Type> types = adf.getP2Set().possibleTypes();
-      Optional<SootClass> n = types.stream().filter(RefType.class::isInstance).map(RefType.class::cast).map(RefType::getSootClass).map(uf::find).reduce(uf::union).map(Node::getData);
+      // 同じクラスを指しうる変数を同値類として unionfind を構築している
+      // 1つの変数に対して、指しうるクラスを含んでいる木を全て union させる
+      types.stream().filter(RefType.class::isInstance).map(RefType.class::cast).map(RefType::getSootClass).map(uf::find).reduce(uf::union);
     });
   }
 

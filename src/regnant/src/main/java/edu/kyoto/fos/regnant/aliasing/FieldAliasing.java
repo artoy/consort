@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+// ailas 文の挿入に用いられるクラス
 public class FieldAliasing {
   private Map<SootField,List<List<SootField>>> autoAlias = new HashMap<>();
   private Map<SootField, P2<SootField, SootField>> reverseAlias = new HashMap<>();
@@ -45,6 +46,7 @@ public class FieldAliasing {
     return toReturn;
   }
 
+  // クラスのフィールドに関する alias 文の挿入のための情報
   public void processClass(SootClass c) {
     c.getFields().forEach(f -> {
       f.getTags().stream()
