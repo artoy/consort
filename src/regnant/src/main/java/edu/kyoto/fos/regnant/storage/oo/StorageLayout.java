@@ -115,6 +115,7 @@ public class StorageLayout {
     });
   }
 
+  // Soot におけるクラスから、それがどの union find の同地類に属するかを求めるメソッド
   public List<SootField> getMetaLayout(SootClass kls) {
     SootClass meta = uf.find(kls).getData();
     assert metaLayout.containsKey(meta);

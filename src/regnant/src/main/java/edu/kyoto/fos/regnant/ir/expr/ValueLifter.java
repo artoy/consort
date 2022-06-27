@@ -71,14 +71,18 @@ public class ValueLifter {
       List<ImpExpr> args = invokeExpr.getArgs().stream().map(v -> lift(v, env)).collect(Collectors.toList());
       return call(callee, args);
     } else if(op instanceof NewExpr) {
+      // オブジェクトを新しく作る場合
       // hoo boy
       NewExpr alloc = (NewExpr) op;
       SootClass alloced = alloc.getBaseType().getSootClass();
       // we can use Soot's numbering scheme
       int tag = alloced.getNumber();
       List<SootField> f = layout.getMetaLayout(alloced);
+      // union find でまとめたクラスのフィールドをまとめて1つのタプルにしている（ように見える）
       List<ImpExpr> flds = Stream.concat(
           // runtime tag
+          // フィールドのはじめの識別子の部分
+          // この番号は Soot におけるクラスに依存するから、実質そのタプルがどのクラスであるかを識別できる。
           Stream.of(IntLiteral.v(tag)),
           // the initial, default values
           f.stream().map(sf -> om.allocFieldOfType(sf.getType()))).collect(Collectors.toList());
