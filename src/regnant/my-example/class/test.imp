@@ -1,0 +1,6 @@
+{
+    let r = mkref (755, mkref 0) in
+    {
+        r := (555, mkref 0, mkref 0)
+    }
+}

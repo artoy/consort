@@ -109,6 +109,7 @@ public class Translate {
   private final FlagInstrumentation flg;
   private final Body b;
   private final LetBindAllocator alloc;
+  // stream は命令列を表している
   private final InstructionStream stream;
   private final ChunkedQueue<SootMethod> worklist;
   private final StorageLayout layout;
@@ -655,6 +656,7 @@ public class Translate {
     str.addBlock(i);
   }
 
+  // stmt が Invoke だった時に呼ばれる、関数呼び出しに変換する関数
   private LocalContents translateCall(Unit ctxt, InstructionStream str, InvokeExpr expr, final TreeMap<Local, Binding> env) {
     if(isRegnantIntrinsic(expr)) {
       // short circuit

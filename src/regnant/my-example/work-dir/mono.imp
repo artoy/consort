@@ -1,0 +1,54 @@
+Classes_main(){
+  let _tmp_r0 = mkref (756, mkref 0, mkref 0) in 
+  {
+    Point_$init$(_tmp_r0, 3);
+    let r3 = _tmp_r0 in 
+    let _tmp_r1 = mkref (755, mkref 0, mkref 0) in 
+    {
+      DoublePoint_$init$(_tmp_r1, 5, 10);
+      let r4 = _tmp_r1 in 
+      return 0
+    }
+  }
+
+}
+Point_$init$(reg$this_in,regnant$in_i0){
+  let r0 = reg$this_in in 
+  let i0 = regnant$in_i0 in 
+  {
+    {
+      let (_, _, reg$field_7) = *r0 in 
+      {
+        reg$field_7 := i0;
+        alias(reg$field_7 = ((*r0).2));
+      }
+
+    }
+;
+    alias(r0 = reg$this_in);
+    return 0
+  }
+
+}
+DoublePoint_$init$(reg$this_in,regnant$in_i0,regnant$in_i1){
+  let r0 = reg$this_in in 
+  let i0 = regnant$in_i0 in 
+  let i1 = regnant$in_i1 in 
+  {
+    Point_$init$(r0, i0);
+    {
+      let (_, reg$field_9, _) = *r0 in 
+      {
+        reg$field_9 := i1;
+        alias(reg$field_9 = ((*r0).1));
+      }
+
+    }
+;
+    alias(r0 = reg$this_in);
+    return 0
+  }
+
+}
+
+{ Classes_main() }

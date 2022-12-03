@@ -1,0 +1,75 @@
+Inheritance_main(){
+  let _tmp_r0 = mkref (756, mkref 0, mkref 0, mkref 0) in 
+  {
+    O_$init$(_tmp_r0, 1);
+    let r1 = _tmp_r0 in 
+    let _tmp_r2 = mkref (755, mkref 0, mkref 0, mkref 0) in 
+    {
+      O2_$init$(_tmp_r2, 2, 3);
+      let r3 = _tmp_r2 in 
+      let i0 = O_getA(r3) in 
+      return 0
+    }
+  }
+
+}
+O_$init$(reg$this_in,regnant$in_i0){
+  let r0 = reg$this_in in 
+  let i0 = regnant$in_i0 in 
+  {
+    {
+      let (_, _, _, reg$field_8) = *r0 in 
+      {
+        reg$field_8 := i0;
+        alias(reg$field_8 = ((*r0).3));
+      }
+
+    }
+;
+    alias(r0 = reg$this_in);
+    return 0
+  }
+
+}
+O2_$init$(reg$this_in,regnant$in_i0,regnant$in_i1){
+  let r0 = reg$this_in in 
+  let i0 = regnant$in_i0 in 
+  let i1 = regnant$in_i1 in 
+  {
+    O_$init$(r0, i0);
+    {
+      let (_, reg$field_10, _, _) = *r0 in 
+      {
+        reg$field_10 := 1;
+        alias(reg$field_10 = ((*r0).1));
+      }
+
+    }
+;
+    {
+      let (_, _, reg$field_11, _) = *r0 in 
+      {
+        reg$field_11 := i1;
+        alias(reg$field_11 = ((*r0).2));
+      }
+
+    }
+;
+    alias(r0 = reg$this_in);
+    return 0
+  }
+
+}
+O_getA(reg$this_in){
+  let r0 = reg$this_in in 
+  let (_, _, _, reg$field_12) = *r0 in 
+  let _tmp_i0 = *reg$field_12 in 
+  {
+    alias(reg$field_12 = ((*r0).3));
+    alias(r0 = reg$this_in);
+    return _tmp_i0
+  }
+
+}
+
+{ Inheritance_main() }

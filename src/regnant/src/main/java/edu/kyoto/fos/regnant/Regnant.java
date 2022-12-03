@@ -18,6 +18,7 @@ import soot.PackManager;
 import soot.Scene;
 import soot.SceneTransformer;
 import soot.SootClass;
+import soot.SootField;
 import soot.SootMethod;
 import soot.Transform;
 import soot.UnitPatchingChain;
@@ -67,6 +68,9 @@ public class Regnant extends Transform {
     removeArgVector(mainMethod);
     FieldAliasing as = new FieldAliasing();
     for(SootClass sc : Scene.v().getClasses()) {
+      // 各クラスのインスタンス変数を主力
+      // System.out.println(sc.getFields().toString());
+
       // TODO: isExcluded とは？
       if(Scene.v().isExcluded(sc)) {
         continue;

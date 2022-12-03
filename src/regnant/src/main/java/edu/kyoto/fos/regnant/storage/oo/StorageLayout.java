@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // クラスがどのようにフィールドを持てば良いかを求めるクラス
-// メソッドごとに UnionFind を作成してオブジェクトのタプルの形を決定する
+// コード全体の UnionFind を作成してオブジェクトのタプルの形を決定する
 public class StorageLayout {
   // オブジェクトを表すタプルの形を保持する unionfind 木
   private UnionFind<SootClass> uf = new UnionFind<>();
